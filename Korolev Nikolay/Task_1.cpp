@@ -17,15 +17,12 @@ long int bob_month_pay = 15000;
 double calculateLoanPayment(const double loan_payment, const double loan_rate, int loan_years)
 { 
 	double month_rate = loan_rate / 12 / 100;
-
 	return loan_years * (month_rate * pow(1 + month_rate, month)) / (pow(1 + month_rate, month) - 1);
 }
 
 void linking_to_months()
 {
 	alice_initial_capital = 0;
-
-	
 	for (int i = 1; i <= month; i++) 
 	{
 		bob_initial_capital *= 1+(deposit_percent/100);
@@ -36,8 +33,6 @@ void linking_to_months()
 		alice_initial_capital -= alice_month_pay;
 		alice_initial_capital -= calculateLoanPayment((flat_price-alice_initial_capital), loan_percent , years);
 		
-
-
 		if (i % 12 == 0) 
 		{
 			printf("Year = %d\n", i / 12);
@@ -51,7 +46,5 @@ void linking_to_months()
 
 int main()
 {
-	
-	linking_to_months();
-	
+linking_to_months();
 }
