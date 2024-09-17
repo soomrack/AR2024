@@ -14,7 +14,7 @@ long int alice_month_pay = 30000;
 long int bob_month_pay = 15000;
 
 
-double calculateLoanPayment(const double loan_payment, const double loan_rate, int loan_years)
+double calculate_loan_payment(const double loan_payment, const double loan_rate, int loan_years)
 { 
 	double month_rate = loan_rate / 12 / 100;
 	return loan_years * (month_rate * pow(1 + month_rate, month)) / (pow(1 + month_rate, month) - 1);
@@ -31,7 +31,7 @@ void linking_to_months()
 
 		alice_initial_capital += alice_salary;
 		alice_initial_capital -= alice_month_pay;
-		alice_initial_capital -= calculateLoanPayment((flat_price-alice_initial_capital), loan_percent , years);
+		alice_initial_capital -= calculate_loan_payment((flat_price-alice_initial_capital), loan_percent , years);
 		
 		if (i % 12 == 0) 
 		{
