@@ -16,9 +16,11 @@ int main(){
     int month = 9 ;
     float infl = 9.0;
     float dep = 20.0;
-    while( !(year = 2054 && month == 10 )){
-
+    while( year != 2054) {
         month ++;
+        if (year == 2054 && month == 10){
+            break;
+        }
         if (month == 13){
             month = 1; 
             year ++;
@@ -50,13 +52,3 @@ int main(){
     return 0;
     
 }
-
-
-
-
-
-
-
-
-
-
