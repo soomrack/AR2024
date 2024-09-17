@@ -13,7 +13,6 @@ long int month = years * 12;
 long int alice_month_pay = 30000;
 long int bob_month_pay = 15000;
 
-
 double calculate_loan_payment(const double loan_payment, const double loan_rate, int loan_years)
 { 
 	double month_rate = loan_rate / 12 / 100;
