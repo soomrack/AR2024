@@ -1,0 +1,16 @@
+#include <stdio.h>
+void main(){
+    typedef long long int Money;
+	Money expenditure = 400+ 28500 + 6000 + 3500;
+	long double inflation = 0.082;
+    Money rent = 40000;
+	Money monthly_payment = 224567;
+	Money salary = 300000;
+	Money alice_credit = 11876000;
+	Money apartment_price = 13000000;
+	int month_counter = 1;
+	int end_loop = 0;
+    struct Depasit{
+        Money account;
+        double interest;
+    };
