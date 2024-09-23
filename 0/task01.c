@@ -2,6 +2,13 @@
 
 typedef long long int Money;  // RUR
 
+
+struct Cat{
+    Money food;
+    int is_alive;
+};
+
+
 struct Mortgage {
     double rate;
     Money credit;
@@ -16,6 +23,7 @@ struct Person {
     Money food;
     Money expences;
     struct Mortgage mortgage;
+    struct Cat cat;
 };
 
 
@@ -56,6 +64,28 @@ void alice_init()
     alice.mortgage.rate = 0.17;
     alice.mortgage.month_pay = 100 * 1000;  //
     alice.account -= alice.mortgage.platez;
+
+    alice.cat.food = 5000;
+    alice.cat.is_alive = 0;
+}
+
+
+void alice_cat(const int month, const int year)
+{
+    if ((month == 12) && (year==2026)) {
+        alice.account -= 30000;
+        alice.cat.is_alive = 1;
+    }
+    if ((year == 2043) && (month == 3)) {
+        alice.cat.is_alive = 0;
+        alice.account -= 3000;
+    }
+    if (month == 1){
+        alice.cat.food *= 1.1;
+    }
+    if (alice.cat.is_alive == 1){
+        alice.account -= alice.cat.food ;
+    }
 }
 
 
@@ -77,6 +107,8 @@ void alice_salary(const int month, const int year)
 }
 
 
+
+
 void simulation()
 {
     int month = 9;
@@ -88,6 +120,7 @@ void simulation()
         alice_mortgage();
         alice_food(month);
         alice_expences(month );  // одежда, личные вещи
+        alice_cat(month, year);
         // alice_car();
         // alice_vacation();
 
