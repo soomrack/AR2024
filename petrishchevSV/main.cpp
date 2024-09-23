@@ -45,7 +45,7 @@ int bob,al;
 al = stratAlice(0,1.09,150000,200000,1.09,50000,30,13e6);
 
 
-bob = stratBOB(1e6, 1.2, 1.09,30000,200000,1.09,50000,30);
+bob = stratBOB(1e6, 1.15, 1.09,30000,200000,1.09,50000,30);
 printf("\nAlice ""%i ", al );
 printf("\nBob ""%i ", bob );
 //костыль для оценки стратегий
@@ -53,6 +53,13 @@ float s = bob/al;
 float b0b = bob;
 float all = al;
 if (__min(all,b0b)/__max(all,b0b)>0.95) printf("\nboth of these strategics are good");
+else
+{
+if (all>b0b) printf("\nAlice strategic is better");
+else printf("\nBob strategic is better");
 
 }
+}
+
+
 
