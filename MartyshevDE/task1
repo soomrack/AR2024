@@ -13,13 +13,16 @@
 //  откладываение денег в банк под депозит 20%
 //inflation- 9%
 
+//Сделать индексацию зарплаты (увелечение)
+
+
 int main() {
 //Начало эксперемента:
     int year = 2024;
     int month = 9;
 //Общие пременные:
     int years = 30;
-    float infl = 9;
+    float infl = 0.09;
     int dom = 13e6; //Цена дома
     float years_pr = 17; //Годовой процент
     float deposit = 20; //процент депозита
@@ -37,16 +40,21 @@ int main() {
     int Bob_pay = 15e4; //Ежемесячные платежи
     int Bob_status = 0; //Денежное состояние
     float Bob_money = 0; //Оставшиеся деньги
+    float Bob_vklad = 0; //Вклад в банк
 
     while (year != 2054){
         month ++;
         if (year == 2054 && month == 9) {
             break;
         {
-            //Money status
+        //Money status
             //Alice
-            
-            
+            Alice_money += (Alice_zp - Alice_pay - Alice_r);
+            Alice_status += (Alice_money + dom);
+            //Bob
+            Bob_vklad *= ((deposit/12)*0.01+1);
+            Bob_money += (Bob_zp - Bob_pay - Bob_r);
+            Bob_status += (Bob_vklad + Bob_money);
         }
         
         }
@@ -54,12 +62,30 @@ int main() {
         if (month == 13){
             month = 1;
             year ++;
+            //General
+            dom *= 1.09;
             //ALICE
+            Alice_zp *= 1.09;
+            Alice_r *= 1.09;
+            //Bob
+            Bob_zp *= 1.09;
+            Bob_r *= 1.09;
 
             
         }
     }
 
-    
+    if (Bob_status==Alice_status){
+        printf ("Alice and Bob have the same money status\n");
+    }
+
+    if (Alice_status > Bob_status){
+        printf ("Alice has more money than Bob on %f\n",Alice_status - Bob_status);
+    }
+    if (Alice_status < Bob_status){
+        printf ("Bob has more money than Alice on %f\n", Bob_status - Alice_status);
+    }
+    printf ("Money status Alice: %f\n", Alice_status);
+    printf ("Money status Bob: %f\n",Bob_status);
 return 0;
 }
