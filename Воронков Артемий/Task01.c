@@ -6,8 +6,8 @@
     typedef long long int Money;
     typedef int Time;
     typedef int Percent;
-    Time year = 2024;
-    Time month = 9;
+
+Money deposit = 1000 * 1000;
     struct Person{
          Money food;
          Money clothes;
@@ -50,9 +50,6 @@ void count_Alice()
         Alice.clothes *= 1.2;
         Alice.food *= 1.2;
         Alice.other_expenses *= 1.2;
-
-
-
         }
     }
 }
@@ -61,28 +58,32 @@ void count_Bob()
 {
     Time year = 2024;
     Time month = 9;
+
     for (year=2024; year <= 2054; month++) {
+
     Bob.account += Bob.salary - Bob.clothes - Bob.food - Bob.other_expenses - Bob.payment;
     if(month % 12 == 0){
-            // printf("%lld  %lld\n ",Bob.account, year);
+        deposit *= (1.23 - 0.2); // printf("%lld  %lld\n ",Bob.account, year);
         month =1;
         year++;
         Bob.salary *= 1.2;
         Bob.clothes *= 1.2;
         Bob.food *= 1.2;
         Bob.other_expenses *= 1.2;
+       // printf("%lld \n" , deposit );
         }
-}}
+    }
+}
 void print()
 {
     setlocale(LC_ALL, "Russian");
     if(Alice.account + 14000000 > Bob.account)
         {
-    printf("%lld al на столько больше денег у Alice \n ",(Alice.account + 14000000) - Bob.account );
+    printf("%lld al на столько больше денег у Alice \n ",(Alice.account + 14000000) - (Bob.account + deposit) );
         }
     else
         {
-         printf("%lld  на столько больше денег у Bob \n ",Bob.account - (Alice.account + 14000000) );
+         printf("%lld  на столько больше денег у Bob \n ",(Bob.account + deposit ) - (Alice.account + 14000000) );
     }
 }
     int main()
