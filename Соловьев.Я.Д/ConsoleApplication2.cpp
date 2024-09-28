@@ -1,39 +1,87 @@
-﻿// ConsoleApplication2.cpp : Этот файл содержит функцию "main". Здесь начинается и заканчивается выполнение программы.
-//
+#include<stdio.h>
+#include<math.h>
 
+double home_month1;
+long long int home = 14000000;
+double alice_ostatok;
+double sum_pay;
+int procent = 16;
+int sum_start;
+int trata = 100000;
+int salary = 200000;
+int near_full_ostatok_bob;
+int money = 1000000;
 
-// Запуск программы: CTRL+F5 или меню "Отладка" > "Запуск без отладки"
-// Отладка программы: F5 или меню "Отладка" > "Запустить отладку"
+	void home_month_pay() {
+		int year1 = 30;
+		int month1 = 12;
+		int pay1 = 1000000;
+		int procent1 = 17;
+		home_month1 = (home * procent1 / 100 * year1 - pay1) / year1 / month1;
+	}
+	
+	void alice_ostatok1() {
+		int alice_fullsalary = 300000;
+		int alice_trata = 50000;
+		 alice_ostatok = alice_fullsalary - alice_trata - home_month1;
+	}
+	
+	void pay_bob2() {
+		 sum_pay = (salary - trata) * procent / 100 / 12;
+	}
 
-// Советы по началу работы 
-//   1. В окне обозревателя решений можно добавлять файлы и управлять ими.
-//   2. В окне Team Explorer можно подключиться к системе управления версиями.
-//   3. В окне "Выходные данные" можно просматривать выходные данные сборки и другие сообщения.
-//   4. В окне "Список ошибок" можно просматривать ошибки.
-//   5. Последовательно выберите пункты меню "Проект" > "Добавить новый элемент", чтобы создать файлы кода, или "Проект" > "Добавить существующий элемент", чтобы добавить в проект существующие файлы кода.
-//   6. Чтобы снова открыть этот проект позже, выберите пункты меню "Файл" > "Открыть" > "Проект" и выберите SLN-файл.
-#include <iostream>
+	void sum_pay_bob1() {
+		int money = 1000000;
+		 sum_start = money * procent / 100 / 12;
+	}
+	
+	void simulation(){
+	int month = 9;
+	int year = 2024;
+	while (!((month == 9) && (year == 2024 + 30))) {
+		month++;
+		int n = 1;
+		n++;
+		sum_pay * n; 
+		sum_pay += sum_pay;
+		sum_start += sum_start;
+	     near_full_ostatok_bob = salary - trata + salary - trata;
+		alice_ostatok += alice_ostatok;
+		sum_start += sum_start;
+	}
 
-int main()
-{
-    
-    int a = 1000000;
-    int year = 30;
-    int flat = 14000000;
-    double x;
-    int month = 12;
-    int procent = 17;
+		if (month == 13) {
+			month = 1;
+			year++;
+		}
+	}
 
-    x = ((static_cast<double>(flat)) * year * procent / 100 - a) / 12/30; //ЕЖЕМЕСЯЧНЫЙ ПЛАТЕЖ
+	static void  end()
+	{
+		 double full_money_bob = near_full_ostatok_bob + sum_pay + sum_start+money;
+	 double full_money_alice = alice_ostatok + home;
+		if (full_money_bob > full_money_alice)
+		{
+			printf("Bob richer Alice");
+		}
+		else if (full_money_bob < full_money_alice)
+		{
+			printf("Alice richer bob");
 
-    std::cout<< x<< "\n";
+		}
 
-     int pay = 300000;
-     int ostatok = pay - x - 50000;
-     std::cout << ostatok<<"\n";
-     int capytal1 = ostatok * month * year + flat;
-     std::cout << capytal1;
-     int 
+	}
+
+	int main(){
+		home_month_pay();
+		alice_ostatok1();
+		pay_bob2();
+		sum_pay_bob1();
+		simulation();
+		end();
+		
+	}
+	
 
 
 
