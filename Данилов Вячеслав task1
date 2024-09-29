@@ -2,7 +2,6 @@
 #include <locale>
 
 int main() {
-    // Set locale to Russian
     std::locale::global(std::locale("ru_RU.UTF-8"));
 
     long long int Count_Bob, Count_Alice, month, year, expenses_Alice, expenses_Bob, salary, payment, inflation, deposit, allowance, rate, mlnA, tysA, mlnB, tysB, A, B, C, D;
