@@ -1,56 +1,62 @@
 #include <iostream>
-#include <locale>
+#include <cmath>
+
+using namespace std;
+
+// Вводные для Alice
+long int startcap_Alice = 1000000;
+long int vznos_ipoteka = 1000000;
+float stavka_ipoteka = 1.22;
+long int another_trati_Alice = 35000;
+long int kvartira_Alice = 8000000;
+long int zp_Alice = 200000;
+float account_Alice = 0;
+
+// Время и исходные данные
+float month_year = 9;
+int year = 2024;
+float inflation = 1.09;
+
+// Вводные для Bob
+long int kvartira_Bob = 25000;
+long int another_trati_Bob = 30000;
+long int zp_Bob = 200000;
+long int vklad_Bob = 1000000;
+float stavka_vklad = 1.20;
+float account_Bob = 0;
+
+// Function to increment the year if month exceeds 12
+void next_year() {
+    if (month_year == 13) {
+        year++;
+        month_year = 1;
+    }
+}
+
+// Function to simulate monthly payments for Alice
+void pay_month_Alice() {
+    while (year <= 2054) {
+        account_Alice += zp_Alice;
+        account_Alice -= another_trati_Alice + vznos_ipoteka;
+        month_year++;
+        next_year();
+    }
+}
+
+// Function to apply inflation adjustments for Alice
+void inflation_Alice() {
+    zp_Alice = static_cast<long int>(zp_Alice * 1.07);
+    another_trati_Alice = static_cast<long int>(another_trati_Alice * 1.09);
+    kvartira_Alice = static_cast<long int>(kvartira_Alice * 1.08);
+}
 
 int main() {
-    std::locale::global(std::locale("ru_RU.UTF-8"));
+    // Example usage of the functions
+    pay_month_Alice();
+    inflation_Alice();
 
-    long long int Count_Bob, Count_Alice, month, year, expenses_Alice, expenses_Bob, salary, payment, inflation, deposit, allowance, rate, mlnA, tysA, mlnB, tysB, A, B, C, D;
-    Count_Bob = 0;
-    Count_Alice = 0;
-    payment = 185337; // платёж по ипотеке 185 337
-    salary = 300000;
-    month = 9;
-    year = 2024;
-    inflation = 9;
-    expenses_Alice = 65000; // итого 65/мес для эл
-    expenses_Bob = 90000; // итого 90/мес для бб
-    deposit = 1000000;
-    allowance = 9;
-    rate = 20;
-
-    std::cout << "Alice:                Bob:" << std::endl;
-    for (month = 9; year <= 2054; month++) {
-        Count_Alice = Count_Alice + salary - expenses_Alice - payment;
-        Count_Bob = Count_Bob + salary - expenses_Bob;
-        B = Count_Bob;
-        A = Count_Alice;
-
-        if (month == 9 && year == 2054) {
-            C = Count_Bob - Count_Alice;
-            D = Count_Alice - Count_Bob;
-
-            while (C / 1000 > 1) {
-                mlnB = C / 1000000;
-                C = C % 1000000;
-                tysB = C / 1000;
-                C = C % 1000;
-            }
-            while (D / 1000 > 1) {
-                mlnA = D / 1000000;
-                D = D % 1000000;
-                tysA = D / 1000;
-                D = D % 1000;
-            }
-
-            if (D > C) {
-                std::cout << "Alice, с разницей =  " << mlnA << "млн " << tysA << "тыс " << D << "руб" << std::endl;
-            } else {
-                std::cout << "Bob, с разницей = " << mlnB << "млн " << tysB << "тыс " << C << "руб" << std::endl;
-            }
-
-            return 0;
-        }
-    }
+    // Output the final account balance for Alice
+    cout << "Остаток у Alice " << account_Alice << endl;
 
     return 0;
 }
