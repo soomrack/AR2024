@@ -1,16 +1,57 @@
-#include <stdio.h>
-void main(){
-    typedef long long int Money;
-	Money expenditure = 400+ 28500 + 6000 + 3500;
-	long double inflation = 0.082;
-    Money rent = 40000;
-	Money monthly_payment = 224567;
-	Money salary = 300000;
-	Money alice_credit = 11876000;
-	Money apartment_price = 13000000;
-	int month_counter = 1;
-	int end_loop = 0;
-    struct Depasit{
-        Money account;
-        double interest;
-    };
+#include <iostream>
+#include <locale>
+
+int main() {
+    // Set locale to Russian
+    std::locale::global(std::locale("ru_RU.UTF-8"));
+
+    long long int Count_Bob, Count_Alice, month, year, expenses_Alice, expenses_Bob, salary, payment, inflation, deposit, allowance, rate, mlnA, tysA, mlnB, tysB, A, B, C, D;
+    Count_Bob = 0;
+    Count_Alice = 0;
+    payment = 185337; // платёж по ипотеке 185 337
+    salary = 300000;
+    month = 9;
+    year = 2024;
+    inflation = 9;
+    expenses_Alice = 65000; // итого 65/мес для эл
+    expenses_Bob = 90000; // итого 90/мес для бб
+    deposit = 1000000;
+    allowance = 9;
+    rate = 20;
+
+    std::cout << "Alice:                Bob:" << std::endl;
+    for (month = 9; year <= 2054; month++) {
+        Count_Alice = Count_Alice + salary - expenses_Alice - payment;
+        Count_Bob = Count_Bob + salary - expenses_Bob;
+        B = Count_Bob;
+        A = Count_Alice;
+
+        if (month == 9 && year == 2054) {
+            C = Count_Bob - Count_Alice;
+            D = Count_Alice - Count_Bob;
+
+            while (C / 1000 > 1) {
+                mlnB = C / 1000000;
+                C = C % 1000000;
+                tysB = C / 1000;
+                C = C % 1000;
+            }
+            while (D / 1000 > 1) {
+                mlnA = D / 1000000;
+                D = D % 1000000;
+                tysA = D / 1000;
+                D = D % 1000;
+            }
+
+            if (D > C) {
+                std::cout << "Alice, с разницей =  " << mlnA << "млн " << tysA << "тыс " << D << "руб" << std::endl;
+            } else {
+                std::cout << "Bob, с разницей = " << mlnB << "млн " << tysB << "тыс " << C << "руб" << std::endl;
+            }
+
+            return 0;
+        }
+    }
+
+    return 0;
+}
