@@ -23,7 +23,6 @@ struct Person{
     Money kvartira;
     Money expenses;
     Money vacation_account;
-    Money ostatok;
     Money vacation_cost;
     struct Mortgage mortgage;
     struct Bank_deposit deposit;
@@ -118,15 +117,8 @@ void bob_kvartira(const int month, const int year)
 }
 
 
-void bob_ostatok(const int month)
-{
-    bob.ostatok = bob.salary - bob.expenses - bob.kvartira;
-}
-
-
 void bob_bank(const int month, const int year)
 {
-    //printf("Bob account = %lld \n", bob.deposit.deposit_account);
     bob.deposit.deposit_account *= ((bob.deposit.rate / 12) + 1);
     bob.deposit.deposit_account += bob.account;
     bob.account = 0;
@@ -178,9 +170,9 @@ void simulation()
         bob_salary(month, year);
         bob_expenses(month,year);
         bob_kvartira(month,year);
-        //bob_ostatok(month);
-        bob_bank(month,year);
         bob_vacation(month);
+        bob_bank(month,year);
+        
             
 
         month++;
