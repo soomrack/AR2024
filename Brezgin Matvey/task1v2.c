@@ -1,10 +1,9 @@
 #include<stdio.h>
 
-typedef long long int Money; //Rub
+typedef long long int Money;  // Rub
 
 
-struct Mortgage 
-{
+struct Mortgage {
     double rate;
     Money credit;
     Money platez;
@@ -12,23 +11,19 @@ struct Mortgage
 };
 
 
-struct Bank_deposit
-{
+struct Bank_deposit{
     double rate;
     Money deposit_account;
-    Money month_add; //сколько может дополнить ежемесячно
-
 };
 
 
-struct Person
-{
+struct Person{
     Money salary;
     Money account;
     Money kvartira;
     Money expenses;
     Money vacation;
-
+    Money ostatok;
     struct Mortgage mortgage;
     struct Bank_deposit deposit;
 };
@@ -37,19 +32,24 @@ struct Person
 struct Person bob;
 struct Person alice;
 
-//Alice
-void alice_salary(const int month, const int year){
+
+// Alice
+void alice_salary(const int month, const int year)
+{
     if (month == 1){
         alice.salary *=1.07;
     }
     alice.account += alice.salary;
 }
 
-void alice_mortgage(){
+
+void alice_mortgage()
+{
     alice.account -= alice.mortgage.month_pay;
 }
 
-void alice_expenses(const int month )
+
+void alice_expenses(const int month)
 {
     if (month == 1) {
         alice.expenses *= 1.1;
@@ -89,12 +89,12 @@ void alice_print()
 
 
 
-//Bob
+// Bob
 void bob_salary(const int month, const int year)
 {
     
-    if (month == 1){
-        bob.salary*=1.07;
+    if (month == 1) {
+        bob.salary *= 1.07;
     }
 }
 
@@ -103,7 +103,7 @@ void bob_expenses(const int month, const int year)
 {
 
     if (month == 1){
-        bob.expenses*=1.09;
+        bob.expenses *= 1.09;
     }
 }
 
@@ -111,23 +111,28 @@ void bob_expenses(const int month, const int year)
 void bob_kvartira(const int month, const int year)
 {
     if (month == 1){
-        bob.kvartira*=1.09;
+        bob.kvartira *= 1.09;
     }
+}
+
+
+void bob_ostatok(const int month)
+{
+    bob.ostatok = bob.salary - bob.expenses - bob.kvartira;
 }
 
 
 void bob_bank(const int month, const int year)
 {
     //printf("Bob account = %lld \n", bob.deposit.deposit_account);
-    bob.deposit.deposit_account *= ((bob.deposit.rate/12) + 1);
-    bob.deposit.month_add = bob.salary - bob.kvartira - bob.expenses;
-    bob.deposit.deposit_account += (bob.deposit.month_add/2);
+    bob.deposit.deposit_account *= ((bob.deposit.rate / 12) + 1);
+    bob.deposit.deposit_account += (bob.ostatok / 2);
 }
 
 
 void bob_vacation(const int month) 
 {
-    bob.vacation += (bob.deposit.month_add/2);
+    bob.vacation += (bob.ostatok / 2);
     if (month == 9) {
         bob.vacation = 0;
     }
@@ -136,7 +141,7 @@ void bob_vacation(const int month)
 
 void bob_init(){
     bob.salary = 200000;
-    bob.deposit.deposit_account= 1000000;
+    bob.deposit.deposit_account = 1000000;
     bob.kvartira = 100000;
     bob.expenses = 50000;
     bob.deposit.rate = 0.12;
@@ -155,7 +160,7 @@ void simulation()
     int month = 1;
     int year = 2024;
 
-    while( !((month==1) && (year == 2024+30 ))){
+    while( !((month == 1) && (year == 2024+30 ))){
 
             alice_salary(month, year);
             alice_mortgage();
@@ -165,11 +170,13 @@ void simulation()
             bob_salary(month, year);
             bob_expenses(month,year);
             bob_kvartira(month,year);
+            bob_ostatok(month);
             bob_bank(month,year);
             bob_vacation(month);
+            
 
         month++;
-        if (month == 13){
+        if (month == 13) {
             month = 1;
             year++;
         }
