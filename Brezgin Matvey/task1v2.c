@@ -24,6 +24,7 @@ struct Person{
     Money expenses;
     Money vacation_account;
     Money ostatok;
+    Money vacation_cost;
     struct Mortgage mortgage;
     struct Bank_deposit deposit;
 };
@@ -37,7 +38,7 @@ struct Person alice;
 void alice_salary(const int month, const int year)
 {
     if (month == 1){
-        alice.salary *=1.07;
+        alice.salary *= 1.07;
     }
     alice.account += alice.salary;
 }
@@ -134,11 +135,14 @@ void bob_bank(const int month, const int year)
 
 void bob_vacation(const int month) 
 {
-    bob.vacation_account += 40000;
+    bob.vacation_account += bob.vacation_cost;
+    bob.account -= bob.vacation_cost;
     if (month == 9) {
         bob.vacation_account = 0;
     }
-    bob.account -= 40000;
+    if (month == 1) {
+        bob.vacation_cost *= 1.09;
+    }
 }
 
 
@@ -149,6 +153,7 @@ void bob_init(){
     bob.expenses = 60000;
     bob.deposit.rate = 0.12;
     bob.vacation_account = 0;
+    bob.vacation_cost = 40000;
 }
 
 
