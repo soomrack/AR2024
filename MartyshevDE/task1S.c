@@ -171,3 +171,5 @@ int main()
     Bob_print();
     return 1;
 }
+
+Да
