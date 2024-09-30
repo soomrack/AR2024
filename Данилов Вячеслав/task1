@@ -1,9 +1,7 @@
-#include <iostream>
-#include <cmath>
+#include <stdio.h>
+#include <math.h>
 
-using namespace std;
-
-// Вводные для Alice
+// Global variables
 long int startcap_Alice = 1000000;
 long int vznos_ipoteka = 1000000;
 float stavka_ipoteka = 1.22;
@@ -12,12 +10,10 @@ long int kvartira_Alice = 8000000;
 long int zp_Alice = 200000;
 float account_Alice = 0;
 
-// Время и исходные данные
 float month_year = 9;
 int year = 2024;
 float inflation = 1.09;
 
-// Вводные для Bob
 long int kvartira_Bob = 25000;
 long int another_trati_Bob = 30000;
 long int zp_Bob = 200000;
@@ -25,7 +21,36 @@ long int vklad_Bob = 1000000;
 float stavka_vklad = 1.20;
 float account_Bob = 0;
 
-// Function to increment the year if month exceeds 12
+// Function prototypes
+void next_year();
+void pay_month_Alice();
+void inflation_Alice();
+void pay_month_Bob();
+void inflation_Bob();
+
+int main() {
+    // Initialize Alice's account
+    account_Alice = startcap_Alice;
+
+    // Main simulation loop
+    while (year <= 2054) {
+        pay_month_Alice();
+        pay_month_Bob();
+        
+        if (month_year == 1) {
+            inflation_Alice();
+            inflation_Bob();
+        }
+    }
+
+    // Print final results
+    printf("Final year: %d\n", year - 1);
+    printf("Alice's final account balance: %.2f\n", account_Alice);
+    printf("Bob's final account balance: %.2f\n", account_Bob);
+
+    return 0;
+}
+
 void next_year() {
     if (month_year == 13) {
         year++;
@@ -33,30 +58,31 @@ void next_year() {
     }
 }
 
-// Function to simulate monthly payments for Alice
 void pay_month_Alice() {
-    while (year <= 2054) {
-        account_Alice += zp_Alice;
-        account_Alice -= another_trati_Alice + vznos_ipoteka;
-        month_year++;
-        next_year();
-    }
+    account_Alice += zp_Alice;
+    account_Alice -= another_trati_Alice + vznos_ipoteka;
+    month_year++;
+    next_year();
 }
 
-// Function to apply inflation adjustments for Alice
 void inflation_Alice() {
-    zp_Alice = static_cast<long int>(zp_Alice * 1.07);
-    another_trati_Alice = static_cast<long int>(another_trati_Alice * 1.09);
-    kvartira_Alice = static_cast<long int>(kvartira_Alice * 1.08);
+    zp_Alice *= 1.07;
+    another_trati_Alice *= 1.09;
+    kvartira_Alice *= 1.08;
 }
 
-int main() {
-    // Example usage of the functions
-    pay_month_Alice();
-    inflation_Alice();
+void pay_month_Bob() {
+    account_Bob += zp_Bob;
+    account_Bob -= another_trati_Bob;
+    account_Bob -= kvartira_Bob;
+    
+    // Apply interest to Bob's deposit
+    vklad_Bob *= stavka_vklad;
+    account_Bob += vklad_Bob;
+}
 
-    // Output the final account balance for Alice
-    cout << "Остаток у Alice " << account_Alice << endl;
-
-    return 0;
+void inflation_Bob() {
+    zp_Bob *= inflation;
+    another_trati_Bob *= inflation;
+    kvartira_Bob *= inflation;
 }
