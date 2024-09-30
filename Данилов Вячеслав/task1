@@ -2,7 +2,7 @@
 
 typedef long long int Money;
 
-struct Mortgage
+struct CRE
 {
     double rate;
     Money credit;
@@ -24,8 +24,9 @@ struct Individual
     Money rashod;
     Money status;
     Money kvartira;
-    Money rubles; 
-    struct Mortgage mortgage;
+    Money rubles;
+
+    struct CRE cre;
     struct Bank bank;
 };
 
@@ -37,22 +38,21 @@ struct Individual Bob;
 void Alice_money()
 {
     Alice.status = 0;
-    Alice.zarplata = 3e5;
-    Alice.rashod = 4e4;
+    Alice.zarplata = 300*1000;
+    Alice.rashod = 40*1000;
     Alice.rubles = 0;
 
-    Alice.mortgage.rate = 0.17;
-    Alice.mortgage.credit = 13e6;
-    Alice.mortgage.month_pay = 15e4;
+    Alice.cre.rate = 0.17;
+    Alice.cre.credit = 13*10000;
+    Alice.cre.month_pay = 15*10000;
 }
 
 
-void Alice_mortgage()
+void Alice_cre()
 {
-    Alice.status -= Alice.mortgage.month_pay;
+    Alice.status -= Alice.cre.month_pay;
 }
 
-\\учет инфляции
 void Alice_zarplata(const int month, const int year)
 {
     if(month == 12) {
@@ -64,31 +64,16 @@ void Alice_zarplata(const int month, const int year)
     Alice.status += Alice.zarplata;
 }
 
-
-void Alice_print()
-{
-    if (Alice.status > Bob.status) {
-        printf ("Alice has more money than Bob on %lld\n", Alice.status - Bob.status);
-    }
-
-    if (Alice.status < Bob.status) {
-        printf ("Bob has more money than Alice on %lld\n", Bob.status - Alice.status);
-    }
-
-    printf ("Alice capital = %lld \n", Alice.status);
-}
-
 \\структура боба
 void Bob_money()
 {
     Bob.status = 0;
-    Bob.zarplata = 3e5;
-    Bob.rashod = 4e4;
-    Bob.kvartira = 3e4; 
+    Bob.zarplata = 30*10000;
+    Bob.rashod = 40*1000;
+    Bob.kvartira = 30*1000; 
     Bob.rubles = 0;
-    Bob.bank.month_pay = 12e4;
+    Bob.bank.month_pay = 12*10000;
 }
-
 
 void Bob_zarplata(const int month, const int year)
 {
@@ -117,20 +102,22 @@ void Bob_bank(int deposit)
     }
 }
 
-
-void Bob_kvartira(int year)
-{
-    year = 2024;
-    if (year== 2034 || year == 2044 || year == 2054) {
-        Bob.kvartira += 5000;
-    }
-}
-
-
 void Bob_print()
 {
     printf ("Bob capital = %lld \n", Bob.status);
 
+}
+void Alice_print()
+{
+    if (Alice.status > Bob.status) {
+        printf ("Alice has more money than Bob on %lld\n", Alice.status - Bob.status);
+    }
+
+    if (Alice.status < Bob.status) {
+        printf ("Bob has more money than Alice on %lld\n", Bob.status - Alice.status);
+    }
+
+    printf ("Alice capital = %lld \n", Alice.status);
 }
 
 
@@ -142,7 +129,7 @@ void simulation()
     while( !((month == 9) && (year == 2054)) ) {
         
         Alice_zarplata(month, year);
-        Alice_mortgage();
+        Alice_cre();
         
         Bob_zarplata(month, year);
         Bob_kvartira(year);
@@ -154,7 +141,6 @@ void simulation()
         }
     }
 }
-
 
 int main()
 {
