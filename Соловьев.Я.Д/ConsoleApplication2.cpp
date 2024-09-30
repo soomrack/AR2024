@@ -44,10 +44,8 @@ void simulation() {
 	while (!((month == 9) && (year == 2024 + 30) &&(n==29*12+3))) {
 		month++;
 		n++;
-		int sum_pay_not_all;
-		sum_pay_not_all = sum_pay * n;
-		sum_pay_all = sum_pay_not_all + sum_pay * (n - 1);
-		
+		sum_pay_all = sum_pay * n;
+		sum_pay_all += sum_pay_all;
 
 	
 		 
