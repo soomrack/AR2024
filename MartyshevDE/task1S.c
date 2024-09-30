@@ -39,13 +39,13 @@ struct Individual Bob;
 void Alice_money()
 {
     Alice.status = 0;
-    Alice.zarplata = 2e5;
-    Alice.rashod = 5e4;
+    Alice.zarplata = 200*1000;
+    Alice.rashod = 50*1000;
     Alice.rubles = 0;
 
     Alice.mortgage.rate = 0.17;
-    Alice.mortgage.credit = 13e6;
-    Alice.mortgage.month_pay = 15e4;
+    Alice.mortgage.credit = 13*1000*1000;
+    Alice.mortgage.month_pay = 150*1000;
 }
 
 
@@ -84,11 +84,11 @@ void Alice_print()
 void Bob_money()
 {
     Bob.status = 0;
-    Bob.zarplata = 2e5;
-    Bob.rashod = 5e4;
-    Bob.kvartira = 3e4; 
+    Bob.zarplata = 200*1000;
+    Bob.rashod = 50*1000;
+    Bob.kvartira = 30*1000; 
     Bob.rubles = 0;
-    Bob.bank.month_pay = 12e4;
+    Bob.bank.month_pay = 120*1000;
 }
 
 
