@@ -90,6 +90,7 @@ void alise_deposite()
 	alice.deposit *= alice.deposit_procent;
 }
 
+
 void bob_init()
 {
 	bob.salary = 200 * 1000;
@@ -139,6 +140,7 @@ void bob_deposite()
 	bob.deposit -= bob.rent;
 	bob.deposit *= bob.deposit_procent;
 }
+
 
 void simulation()
 {
