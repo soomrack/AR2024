@@ -58,7 +58,6 @@ void alice_salary(const int month, const int year) {
     if (year == 2028 && month == 5) {
         Alice.salary = better_salary;
     }
-    printf("\n%lld", Alice.salary);
 }
 
 
