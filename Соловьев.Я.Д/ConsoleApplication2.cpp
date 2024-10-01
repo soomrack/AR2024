@@ -1,6 +1,6 @@
 #include<stdio.h>
 #include<math.h>
-#include<iostream>
+
 
 double home_month1;
 long long int home = 14000000;
@@ -13,6 +13,8 @@ int salary = 200000;
 int near_full_ostatok_bob;
 int money = 1000000;
 int sum_pay_all;
+int money = 1000000;
+
 
 void home_month_pay() {
 	int year1 = 30;
@@ -29,37 +31,28 @@ void alice_ostatok1() {
 }
 
 void pay_bob2() {
-	sum_pay = (salary - trata) * procent / 100 / 12;
-}
-
-void sum_pay_bob1() {
-	int money = 1000000;
-	sum_start = money * procent / 100 / 12;
+	sum_pay = (salary - trata);
 }
 
 void simulation() {
 	int month = 9;
 	int year = 2024;
 	int n = 0;
-	while (!((month == 9) && (year == 2024 + 30) && (n==29*12+3) )) {
+	while (!((month == 9) && (year == 2024 + 30))) {
 		month++;
-		n++;
-		
-		int sum_pay_not_all;
-		sum_pay_not_all = sum_pay * n;
-		sum_pay_all =sum_pay_not_all+sum_pay_all;
+		sum_pay += sum_pay;
+		sum_pay_all += sum_pay * procent / 100;
+		sum_start += money * procent / 100 / 12;
 
-	
-		 
 		sum_start += sum_start;
 		near_full_ostatok_bob = salary - trata + salary - trata;
 		alice_ostatok += alice_ostatok;
 		sum_start += sum_start;
-	}
 
-	if (month == 13) {
-		month = 1;
-		year++;
+		if (month == 13) {
+			month = 1;
+			year++;
+		}
 	}
 }
 
@@ -83,15 +76,12 @@ void simulation() {
 	home_month_pay();
 	alice_ostatok1();
 	pay_bob2();
-	sum_pay_bob1();
 	simulation();
 	end();
 
 	
 	
 }
-	
-
 
 
 
