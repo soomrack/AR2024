@@ -31,14 +31,16 @@ struct Car{
     Money fuel;
     Money maintenance;
     Money tax;
-    Time age;};
+    Time age;
+    Money price;};
 
 
 struct Car Audi ={
     .fuel = 12 * 1000,
     .maintenance = 12 * 1000,
     .tax = 2 * 1000,
-    .age = 0};
+    .age = 0,
+    .price = 4000 * 1000};
 
 
 struct Animal Cat ={
@@ -100,12 +102,9 @@ void Alice_cat(Time const year, Time const month){
         Alice.account -= Cat.feed;
         Alice.account -= Cat.vet;
         Cat.age ++;
-        if(Cat.age == 15) {cat = false;}
+        if(Cat.age == 15 * 12) {cat = false;}
         }
 }
-
-
-
 
 
 void Alice_salary(Time const year, Time const month){
@@ -172,7 +171,8 @@ void Bob_other_expenses(Time const year, const month){
 void Bob_car(Time const year, Time const month){
 
     if (year == 2031 && month == 1){
-        car = true;}
+        car = true;
+        Bob.account -= Audi.price;}
 
     while (car == true){
             int a=0;
@@ -180,7 +180,8 @@ void Bob_car(Time const year, Time const month){
         Bob.account = Bob.account - Audi.maintenance;
         Bob.account = Bob.account - Audi.tax;
         Audi.age ++;
-        if(Audi.age == 7) {car = false;}}
+        if(Audi.age == 7 * 12) {car = false;
+        Bob.account += Audi.price * 0.95;}}
 }
 
 
