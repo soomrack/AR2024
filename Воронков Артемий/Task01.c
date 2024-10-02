@@ -3,13 +3,12 @@
 #include <stdbool.h>
 
 typedef long long int Money;//RUB
-
+Money deposite = 1000000;
 
 typedef int Time;
-    Time year = 2024;
-    Time month = 9;
+Time year = 2024;
+Time month = 9;
 
-    Money deposite = 1000000;
 bool cat, car;
 
 struct Person{
@@ -18,13 +17,15 @@ struct Person{
     Money other_expenses;
     Money payment;
     Money salary;
-    Money account;};
+    Money account;
+};
 
 
 struct Animal{
     Money feed;
     Money vet;
-    Time age;};
+    Time age;
+};
 
 
 struct Car{
@@ -32,7 +33,8 @@ struct Car{
     Money maintenance;
     Money tax;
     Time age;
-    Money price;};
+    Money price;
+};
 
 
 struct Car Audi ={
@@ -40,13 +42,15 @@ struct Car Audi ={
     .maintenance = 12 * 1000,
     .tax = 2 * 1000,
     .age = 0,
-    .price = 4000 * 1000};
+    .price = 4000 * 1000
+};
 
 
 struct Animal Cat ={
     .feed = 7 * 1000,
     .vet = 5 * 1000,
-    .age = 0};
+    .age = 0
+};
 
 
 struct Person Bob ={
@@ -55,7 +59,8 @@ struct Person Bob ={
     .other_expenses = 30 * 1000 ,
     .payment = 30 * 1000,
     .salary = 300 * 1000 ,
-    .account = 0};
+    .account = 0
+};
 
 
 struct Person Alice =
@@ -65,32 +70,8 @@ struct Person Alice =
     .other_expenses = 30 * 1000,
     .payment = 186 * 1000 ,
     .salary = 300 * 1000,
-    .account = 0};
-
-
-void simulation(){
-    while (year != 2054 || month != 9){
-            Alice_salary(year, month);
-            Alice_clothes(year, month);
-            Alice_food(year, month);
-            Alice_other_expenses(year, month);
-            Alice_payment();
-            Alice_cat(year, month);
-
-
-            Bob_salary(year, month);
-            Bob_clothes(year, month);
-            Bob_food(year, month);
-            Bob_other_expenses(year, month);
-            Bob_deposite();
-            Bob_car(year, month);
-
-            month++;
-
-
-            if (month == 13) {month = 1; year ++;}
-    }
-}
+    .account = 0
+};
 
 
 void Alice_cat(Time const year, Time const month){
@@ -181,13 +162,39 @@ void Bob_car(Time const year, Time const month){
         Bob.account = Bob.account - Audi.tax;
         Audi.age ++;
         if(Audi.age == 7 * 12) {car = false;
-        Bob.account += Audi.price * 0.95;}}
+        Bob.account += Audi.price * 0.95;}
+        }
 }
 
 
 void Bob_deposite(){
     if (month == 12){
     deposite *= 1.05;}
+}
+
+
+void simulation(){
+    while (year != 2054 || month != 9){
+            Alice_salary(year, month);
+            Alice_clothes(year, month);
+            Alice_food(year, month);
+            Alice_other_expenses(year, month);
+            Alice_payment();
+            Alice_cat(year, month);
+
+
+            Bob_salary(year, month);
+            Bob_clothes(year, month);
+            Bob_food(year, month);
+            Bob_other_expenses(year, month);
+            Bob_deposite();
+            Bob_car(year, month);
+
+            month++;
+
+
+            if (month == 13) {month = 1; year ++;}
+    }
 }
 
 
