@@ -78,7 +78,7 @@ void alice_other(const int month)
 void alice_init()
 {
     alice.account = 1000 * 1000;
-    alice.salary = 350 * 1000;
+    alice.salary = 800 * 1000;
     alice.food = 10 * 1000;
     alice.other = 70 * 1000;
 
@@ -289,9 +289,11 @@ void bob_print()
 int main()
 {
     alice_init();
+    bob_init();
 
     simulation();
 
     alice_print();
+    bob_print();
     return 1;
 }
