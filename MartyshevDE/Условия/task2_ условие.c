@@ -27,6 +27,6 @@ memset (data_A, size, 0);
 
 int main() {
     return 0;
-}
+} 
 
 //free (date);
