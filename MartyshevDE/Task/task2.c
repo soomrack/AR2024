@@ -10,4 +10,4 @@ struct Matrix {
 struct Matrix Matrix_allocate (size_t cols, size_t rows)
 {
     
-};
+}; 
