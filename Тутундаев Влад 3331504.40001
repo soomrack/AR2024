@@ -1,41 +1,103 @@
-include <stdio.h>
+#include <stdio.h>
 
-int main() {
-    float Alice_capital, Bob_capital, Alice_deposit, Bob_deposit, Alice_mortgage,pay, years, profit, Bob_rent, inflation,
-    deposit_month, deposit, apartment, mortgage;
-    mortgage = 17;
-    apartment = 13e6;
-    Alice_deposit = 0;
-    Bob_deposit = 0;
-    deposit = 20;
-    deposit_month = deposit/100/12;
-    Alice_capital = 1e6;
-    Bob_capital = 1e6;
-    Bob_rent = 3e4;
-    inflation = 1;
-    Alice_mortgage = apartment * (1 + mortgage/100);
-    profit  = 2e5;
-    years = 30;
-    Bob_deposit = Bob_capital;
-    Bob_capital = 0;
-    Alice_mortgage-= Alice_capital;
-    Alice_capital = 0;
-    pay = Alice_mortgage/(years* 12);
-    for( int i = 1; i <= years*12; ++i) {
-        if( i % 12 == 0) {
-            inflation += 0.08;
-            profit = profit/(inflation-0.08) * inflation;
-            Bob_rent = Bob_rent/(inflation-0.08) * inflation;
-            apartment = apartment/(inflation- 0.08) * inflation;
+typedef long long ll;
+
+ll inflation = 100;
+ll deposit_percentage = 20;
+ll month_deposit = deposit_percentage * 100/12;
+const ll years = 30;
+const int allmonth =  years*12+1;
+
+struct finance {
+    ll capital = 0;
+    ll salary = 0;
+    ll apartment = 0;
+    ll mortgage = 0;
+    ll rent = 0;
+    ll deposit = 0;
+    ll expenses = 0;
+};
+
+void Alice_data (struct finance * user) {
+    user->capital = 1e6;
+    user->expenses = 4e6;
+    user->salary = 2e5;
+    user->apartment = 13e6 - user->capital;
+    user->capital = 0;
+    user->mortgage = user->apartment/allmonth;
+}
+
+void Bob_data(struct finance * user) {
+    user->capital = 1e6;
+    user->salary = 2e5;
+    user->rent = 3e4;
+    user->expenses = 4e6;
+}
+
+void Change(struct finance ** user, struct finance changes[][allmonth], int a, int b) {
+    --b;
+    (**user).capital += changes[a][b].capital;
+    (**user).salary += changes[a][b].salary;
+    (**user).apartment += changes[a][b].apartment;
+    (**user).mortgage += changes[a][b].mortgage;
+    (**user).rent += changes[a][b].rent;
+    (**user).deposit += changes[a][b].deposit;
+    (**user).expenses += changes[a][b].expenses;
+}
+
+
+void Routine(struct finance Changes[][allmonth], struct finance * Bob, struct finance * Alice) {
+    for (int month = 0; month < allmonth; ++month) {
+
+        Change(&Alice, Changes, 0, month);
+        Change(&Bob, Changes, 1, month);
+
+        Bob->capital += Bob->salary;
+        Bob->capital -= Bob->expenses;
+        Bob->capital -= Bob->rent;
+        Bob->deposit += Bob->capital;
+        Bob->deposit *= month_deposit;
+        Bob->deposit /= 100;
+        Bob->capital = 0;
+
+        Alice->capital+= Alice->salary;
+        Alice->capital -= Alice->mortgage + Alice->expenses;
+        Alice-> deposit += Alice->capital;
+        Alice->deposit*=month_deposit;
+        Alice->deposit/=100;
+        Alice->capital = 0;
+
+        if( month % 12 == 0) {
+            inflation += 8;
+            Bob->salary= Bob->salary * inflation * 100 / (inflation-8);
+            Bob->salary/=inflation;
+            Alice->salary= Alice->salary * inflation * 100 * (inflation-8);
+            Alice->salary/=inflation;
+            Bob->rent = Bob->rent* inflation * 100 / (inflation-8);
+            Bob->rent/=100;
+            Alice->apartment = Alice->apartment* inflation * 100 /(inflation- 8);
+            Alice->apartment/=100;
+            Alice->expenses = Alice->expenses* inflation * 100 /(inflation- 8);
+            Alice->expenses/=100;
+            Bob->expenses = Bob->expenses* inflation * 100 /(inflation- 8);
+            Bob->expenses/=100;
         }
 
-        Bob_deposit*= 1 + deposit_month;
-        Alice_deposit*= 1+ deposit_month;
-        Bob_deposit+= profit - Bob_rent;
-        Alice_deposit+= profit - pay;
 
 
     }
-    if ( apartment + Alice_deposit >Bob_deposit) printf("Alice");
+}
+
+
+int main(){
+    finance Bob, Alice, Changes[2][allmonth];
+    Alice_data(&Alice);
+    Bob_data(&Bob);
+    /* если хотите изменить параметры героя, то выберите поле Changes, потом самого героя:
+     * Боб 1
+     * Алиса 2
+     * потом введите месяц, в котором у героя изменятся параметры*/
+    Routine(Changes, &Bob, &Alice);
+    if ( Alice.deposit + Alice.apartment > Bob.deposit) printf("Alice");
     else printf("Bob");
 }
