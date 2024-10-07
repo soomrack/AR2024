@@ -4,7 +4,7 @@
 typedef long long int Money;
 
 
-struct Mortgage
+struct Mmortgage
 {
     double rate;
     Money credit;
@@ -27,7 +27,8 @@ struct Individual
     Money status;
     Money kvartira;
     Money rubles; 
-    struct Mortgage mortgage;
+    struct Mm
+ortgage mortgage;
     struct Bank bank;
 };
 
