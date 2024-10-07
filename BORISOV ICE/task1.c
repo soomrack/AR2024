@@ -4,8 +4,7 @@
 typedef long long int Money;
 
 
-struct Mortgage
-{
+struct Mortgage {
     double rate;
     Money credit;
     Money pay;
@@ -13,15 +12,13 @@ struct Mortgage
 };
 
 
-struct Bank
-{
+struct Bank {
     Money vklad;
     Money month_pay;
 };
 
 
-struct Individual
-{
+struct Individual {
     Money zarplata;
     Money rashod;
     Money status;
@@ -33,11 +30,10 @@ struct Individual
 
 
 struct Individual Alice;
-struct Individual Bob;  
+struct Individual Robert;  
 
 
-void Alice_money()
-{
+void Alice_money() {
     Alice.status = 0;
     Alice.zarplata = 200*1000;
     Alice.rashod = 50*1000;
@@ -49,14 +45,12 @@ void Alice_money()
 }
 
 
-void Alice_mortgage()
-{
+void Alice_mortgage() {
     Alice.status -= Alice.mortgage.month_pay;
 }
 
 
-void Alice_zarplata(const int month, const int year)
-{
+void Alice_zarplata(const int month, const int year) {
     if(month == 12) {
         Alice.status += Alice.zarplata;
     }
@@ -67,68 +61,62 @@ void Alice_zarplata(const int month, const int year)
 }
 
 
-void Alice_print()
-{
-    if (Alice.status > Bob.status) {
-        printf ("Alice has more money than Bob on %lld\n", Alice.status - Bob.status);
+void Alice_print() {
+    if (Alice.status > Robert.status) {
+        printf ("Alice has more money than Robert on %lld\n", Alice.status - Robert.status);
     }
 
-    if (Alice.status < Bob.status) {
-        printf ("Bob has more money than Alice on %lld\n", Bob.status - Alice.status);
+    if (Alice.status < Robert.status) {
+        printf ("Robert has more money than Alice on %lld\n", Robert.status - Alice.status);
     }
 
     printf ("Alice capital = %lld \n", Alice.status);
 }
 
 
-void Bob_money()
-{
-    Bob.status = 0;
-    Bob.zarplata = 200*1000;
-    Bob.rashod = 50*1000;
-    Bob.kvartira = 30*1000; 
-    Bob.rubles = 0;
-    Bob.bank.month_pay = 120*1000;
+void Robert_money() {
+    Robert.status = 0;
+    Robert.zarplata = 200*1000;
+    Robert.rashod = 50*1000;
+    Robert.kvartira = 30*1000; 
+    Robert.rubles = 0;
+    Robert.bank.month_pay = 120*1000;
 }
 
 
-void Bob_zarplata(const int month, const int year)
-{
+void Robert_zarplata(const int month, const int year) {
     if(month == 12) {
-        Bob.status += Bob.zarplata;
+        Robert.status += Robert.zarplata;
     }
     if(month == 1) {
-        Bob.zarplata *= 1.09;
+        Robert.zarplata *= 1.09;
     }
-    Bob.status += Bob.zarplata;
+    Robert.status += Robert.zarplata;
 }
 
 
-void Bob_bank(int deposit)
-{
+void Robert_bank(int deposit) {
     int month = 9;
     int year = 2024;
 
     while( !((month == 9) && (year == 2054)) ) {
 
     deposit = 20; 
-    Bob.status -= Bob.bank.month_pay;
-    Bob.bank.vklad = ((deposit/12)*0.01+1);
-    Bob.rubles += (Bob.zarplata -Bob.bank.month_pay - Bob.rashod - Bob.kvartira);
-    Bob.status += (Bob.bank.vklad + Bob.rubles);
+    Robert.status -= Robert.bank.month_pay;
+    Robert.bank.vklad = ((deposit/12)*0.01+1);
+    Robert.rubles += (Robert.zarplata - Robert.bank.month_pay - Robert.rashod - Robert.kvartira);
+    Robert.status += (Robert.bank.vklad + Robert.rubles);
     }
 }
 
 
-void Bob_print()
-{
-    printf ("Bob capital = %lld \n", Bob.status);
+void Robert_print() {
+    printf ("Robert capital = %lld \n", Robert.status);
 
 }
 
 
-void simulation()
-{
+void simulation() {
     int month = 9;
     int year = 2024;
 
@@ -137,8 +125,8 @@ void simulation()
         Alice_zarplata(month, year);
         Alice_mortgage();
         
-        Bob_zarplata(month, year);
-        Bob_kvartira(year);
+        Robert_zarplata(month, year);
+        Robert_kvartira(year);
 
         month++;
         if(month == 13) {
@@ -150,16 +138,15 @@ void simulation()
 }
 
 
-int main()
-{
+int main() {
     Alice_money();
 
-    Bob_money();
+    Robert_money();
 
     simulation();
 
     Alice_print();
 
-    Bob_print();
+    Robert_print();
     return 1;
 }
