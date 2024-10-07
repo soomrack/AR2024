@@ -120,15 +120,6 @@ void Bob_bank(int deposit)
 }
 
 
-void Bob_kvartira(int year)
-{
-    year = 2024;
-    if (year== 2034 || year == 2044 || year == 2054) {
-        Bob.kvartira += 5000;
-    }
-}
-
-
 void Bob_print()
 {
     printf ("Bob capital = %lld \n", Bob.status);
