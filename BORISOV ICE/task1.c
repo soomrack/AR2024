@@ -23,7 +23,7 @@ struct Individual {
     Money rashod;
     Money status;
     Money kvartira;
-    Money rubles; 
+    Money rubless; 
     struct Mortgage mortgage;
     struct Bank bank;
 };
@@ -37,7 +37,7 @@ void Alice_money() {
     Alice.status = 0;
     Alice.zarplata = 200*1000;
     Alice.rashod = 50*1000;
-    Alice.rubles = 0;
+    Alice.rubless = 0;
 
     Alice.mortgage.rate = 0.17;
     Alice.mortgage.credit = 13*1000*1000;
@@ -79,7 +79,7 @@ void Robert_money() {
     Robert.zarplata = 200*1000;
     Robert.rashod = 50*1000;
     Robert.kvartira = 30*1000; 
-    Robert.rubles = 0;
+    Robert.rubless = 0;
     Robert.bank.month_pay = 120*1000;
 }
 
@@ -104,7 +104,7 @@ void Robert_bank(int deposit) {
     deposit = 20; 
     Robert.status -= Robert.bank.month_pay;
     Robert.bank.vklad = ((deposit/12)*0.01+1);
-    Robert.rubles += (Robert.zarplata - Robert.bank.month_pay - Robert.rashod - Robert.kvartira);
+    Robert.rubless += (Robert.zarplata - Robert.bank.month_pay - Robert.rashod - Robert.kvartira);
     Robert.status += (Robert.bank.vklad + Robert.rubles);
     }
 }
