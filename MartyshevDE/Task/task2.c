@@ -120,9 +120,9 @@ void Matrix_print (struct Matrix A) {
     }
 }
 
-// Основная функция
+
 int main() {
-    // Пример использования
+    // Границы матрицы
     struct Matrix A = Matrix_allocate(3, 3);
     struct Matrix B = Matrix_allocate(3, 3);
     
