@@ -33,6 +33,7 @@ struct Car
     money petrol;  // Бензин
     money insurance; // Страховка
     money maintenance; // Тех. обслуживание
+    int is_car;
 };
 
 
@@ -185,7 +186,7 @@ void bob_init()
     bob.other = 70 * 1000;
 
     bob.deposits.pct = 0.12;
-    bob.deposits.capital = 100 * 1000 + bob.deposits.deposits_month_refill;
+    bob.deposits.capital = 1000 * 1000 + bob.deposits.deposits_month_refill;
     bob.deposits.deposits_month_refill = (bob.deposits.capital * pow(1 + (bob.deposits.pct), 1)) - bob.deposits.capital;
 
     bob.robotics.courses = 5000;
@@ -201,6 +202,7 @@ void bob_car(const int month, const int year)
 {
     if ((month == 12) && (year == 2030))
     {
+        bob.car.is_car == 1
         bob.account -= 500 * 1000;
         bob.account -= bob.car.petrol;
         bob.account -= bob.car.insurance;
@@ -212,7 +214,10 @@ void bob_car(const int month, const int year)
         bob.account -= bob.car.insurance;
         bob.account -= bob.car.maintenance;
     }
-    bob.account -= bob.car.petrol;
+    if (bob.car.is_car == 1) 
+    {
+        bob.account -= bob.car.petrol;
+    }
 }
 
 void bob_robotics(const int month, const int year)
