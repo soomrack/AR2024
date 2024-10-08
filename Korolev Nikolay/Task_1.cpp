@@ -7,8 +7,8 @@ struct Cat{
     Money food;
 };
 
-struct Car
-{
+
+struct Car {
     Money benzin;
     Money remont;
 };
@@ -20,11 +20,12 @@ struct Mortgage {
     Money month_pay;
 };
 
-struct Arenda 
-{
+
+struct Arenda {
     Money price;
     Money month_pay;
 };
+
 
 struct Person {
     Money salary;
@@ -37,8 +38,10 @@ struct Person {
     struct Car car;
 };
 
+
 struct Person alice;
 struct Person bob;
+
 
 void alice_mortgage()
 {
@@ -50,7 +53,8 @@ int calculate_credit()
 {
     Money year = 30;
     Money month = year * 12;
-    return 30* (alice.mortgage.rate * pow(1 + alice.mortgage.rate, month)) / (pow(1 + alice.mortgage.rate, month) - 1);
+    return 30* (alice.mortgage.rate * pow(1 + alice.mortgage.rate, month))
+        / (pow(1 + alice.mortgage.rate, month) - 1);
 }
 
 
@@ -103,8 +107,10 @@ void bob_init()
 }
 
 
-void alice_cat_vet(const int month, const int year)
-{
+void alice_cat(const int month, const int year)
+{   
+    alice.account -= alice.cat.food;
+    
     if ((month == 12) && (year==2026)) {
         alice.account -= 30000;
     }
@@ -170,7 +176,7 @@ void simulation()
         alice_salary(month, year);
         alice_mortgage();
         alice_food(month);
-        alice_cat_vet(month, year);
+        alice_cat(month, year);
         
         bob_salary(month, year);
         bob_food(month);
