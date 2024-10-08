@@ -26,7 +26,7 @@ struct Person
     Money expenses;
     Money status;
     Money flat;
-    Money rubles; 
+    Money remains;
     struct Mortgage mortgage;
     struct Bank bank;
 };
@@ -41,7 +41,7 @@ void Alice_money()
     Alice.status = 0;
     Alice.salary = 200 * 1000;
     Alice.expenses = 50 * 1000;
-    Alice.rubles = 0;
+    Alice.remains = 0;
 
     Alice.mortgage.inter_rate = 0.20;
     Alice.mortgage.credit = 8000 * 1000;
@@ -57,13 +57,11 @@ void Alice_mortgage()
 
 void Alice_salary(const int month, const int year)
 {
-    if(month == 12) 
-    {
+    if(month == 12) {
         Alice.status += Alice.salary;
     }
 
-    if(month == 1) 
-    {
+    if(month == 1) {
         Alice.salary *= 1.08;
     }
 
@@ -90,19 +88,17 @@ void Bob_money()
     Bob.salary = 200 * 1000;
     Bob.expenses = 50 * 1000;
     Bob.flat = 30 * 1000; 
-    Bob.rubles = 0;
+    Bob.remains = 0;
     Bob.bank.month_pay = 120 * 1000;
 }
 
 
 void Bob_salary(const int month, const int year)
 {
-    if (month == 12) 
-    {
+    if (month == 12) {
         Bob.status += Bob.salary;
     }
-    if (month == 1) 
-    {
+    if (month == 1) {
         Bob.salary *= 1.08;
     }
 
@@ -112,25 +108,17 @@ void Bob_salary(const int month, const int year)
 
 void Bob_bank(int deposit)
 {
-    int month = 9;
-    int year = 2024;
-
-    while( !((month == 9) && (year == 2054)) ) {
-
-    deposit = 20; 
-    Bob.status -= Bob.bank.month_pay;
-    Bob.bank.vklad = (deposit/12)*0.01+1;
-    Bob.rubles += (Bob.salary - Bob.bank.month_pay - Bob.expenses - Bob.flat);
-    Bob.status += (Bob.bank.vklad + Bob.rubles);
-    }
+    Bob.bank.vklad += (Bob.status * deposit / 100);
+    Bob.bank.vklad += (Bob.bank.vklad * 0.01 / 12);
 }
+
 
 
 void Bob_flat(int year)
 {
     year = 2024;
     if (year == 2034 || year == 2044 || year == 2054) {
-        Bob.flat += 5000;
+        Bob.flat += 10000;
     }
 }
 
@@ -139,6 +127,22 @@ void Bob_print()
 {
     printf ("Bob capital = %lld\n", Bob.status);
 }
+
+
+void Bob_car(int year, int month)
+{   
+    if (year == 2031 && month == 3 && Bob.status == 15 * 1000 * 1000){
+        Bob.status -= 15 * 1000 * 1000;
+    }
+    else if(year >= 2031 && month > 3){
+        Bob.status -= 15 * 1000;
+    }
+    else if(month == 9){
+        Bob.status -= 50 * 1000;
+    }
+}
+
+
 
 
 void simulation()
@@ -153,10 +157,12 @@ void simulation()
         
         Bob_salary(month, year);
         Bob_flat(year);
+        Bob_bank(20);
+
+        Bob_car(year, month);
 
         month++;
-        if (month == 13) 
-        {
+        if (month == 13) {
             month = 1;
             year++;
         }
