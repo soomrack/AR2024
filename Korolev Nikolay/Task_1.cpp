@@ -5,6 +5,7 @@ typedef long long int Money;
 
 struct Cat{
     Money food;
+    bool cat_is_alive = true;
 };
 
 
@@ -109,17 +110,20 @@ void bob_init()
 
 void alice_cat(const int month, const int year)
 {   
+    if (alice.cat.cat_is_alive == true){
     alice.account -= alice.cat.food;
     
-    if ((month == 12) && (year==2026)) {
+        if ((month == 12) && (year==2026)) {
         alice.account -= 30000;
-    }
-    if ((month == 3) && (year == 2035)) {
+        }
+        if ((month == 3) && (year == 2035)) {
         alice.account -= 30000;
-    }
-     if ((month == 6) && (year == 2043)) {
+        }
+        if ((month == 6) && (year == 2043)) {
         alice.account -= 30000;
+        }
     }
+    
 }
 
 
