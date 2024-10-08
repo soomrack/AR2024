@@ -9,7 +9,10 @@ struct Person {
 	Money expence;
 	Money rent;
 	Money cost_house;
-	Money deposit;
+};
+
+struct Deposite {
+	Money deposite_account;
 	double deposit_procent;
 };
 
@@ -25,6 +28,8 @@ struct Mortgage {
 struct Person alice;
 struct Mortgage alice__mortgage;
 struct Person bob;
+struct Deposite alice__deposite;
+struct Deposite bob__deposite;
 
 
 void alice_init()
@@ -35,8 +40,8 @@ void alice_init()
 	alice.expence = 30 * 1000;
 	alice.cost_house = 14 * 1000 * 1000;
 
-	alice.deposit = 0;
-	alice.deposit_procent = 1.005;
+	alice__deposite.deposite_account = 0;
+	alice__deposite.deposit_procent = 1.01;
 
 	alice__mortgage.summa_credita = 14 * 1000 * 1000;
 	alice__mortgage.first_platez = 14 * 100 * 10;
@@ -46,6 +51,7 @@ void alice_init()
 	alice.account -= alice__mortgage.first_platez;
 }
 
+
 void alice_salary(const int month)
 {
     if (month == 1) {
@@ -53,6 +59,7 @@ void alice_salary(const int month)
 	}
     alice.account += alice.salary;
 }
+
 
 void alice_food(const int month)
 {
@@ -62,6 +69,7 @@ void alice_food(const int month)
 	alice.account -= alice.food;
 }
 
+
 void alice_expence(const int month)
 {
     if (month == 1) {
@@ -70,10 +78,12 @@ void alice_expence(const int month)
 	alice.account -= alice.expence;
 }
 
+
 void alice_mortgage()
 {
     alice.account -= alice__mortgage.platez_month;
 }
+
 
 void alice_cost_house(const int month)
 {
@@ -81,13 +91,13 @@ void alice_cost_house(const int month)
 	    alice.cost_house *= 1.06;
 	}
 }
-void alise_deposite() 
+
+
+void alice_deposite() 
 {
-	alice.deposit += alice.salary;
-	alice.deposit -= alice.food;
-	alice.deposit -= alice.expence;
-	alice.deposit -= alice__mortgage.platez_month;
-	alice.deposit *= alice.deposit_procent;
+	alice__deposite.deposite_account += alice.account;
+	alice__deposite.deposite_account *= alice__deposite.deposit_procent;
+	alice.account = 0;
 }
 
 
@@ -98,10 +108,11 @@ void bob_init()
 	bob.food = 30 * 1000;
 	bob.expence = 30 * 1000;
 	bob.rent = 30 * 1000;
-
-	bob.deposit = bob.account;
-	bob.deposit_procent = 1.005;
+	
+	bob__deposite.deposite_account = 0;
+	bob__deposite.deposit_procent = 1.01;
 }
+
 
 void bob_salary(const int month)
 {
@@ -111,6 +122,7 @@ void bob_salary(const int month)
 	bob.account += bob.salary;
 }
 
+
 void bob_food(const int month)
 {
     if (month == 1) {
@@ -118,6 +130,7 @@ void bob_food(const int month)
 	}
 	bob.account -= bob.food;
 }
+
 
 void bob_expence(const int month)
 {
@@ -127,18 +140,18 @@ void bob_expence(const int month)
 	bob.account -= bob.expence;
 }
 
+
 void bob_rent()
 {
 	bob.account -= bob.rent;
 }
 
+
 void bob_deposite()
 {
-	bob.deposit += bob.salary;
-	bob.deposit -= bob.food;
-	bob.deposit -= bob.expence;
-	bob.deposit -= bob.rent;
-	bob.deposit *= bob.deposit_procent;
+	bob__deposite.deposite_account += bob.account;
+	bob__deposite.deposite_account *= bob__deposite.deposit_procent;
+	bob.account = 0;
 }
 
 
@@ -153,7 +166,7 @@ void simulation()
 		alice_expence(month);
 		alice_cost_house(month);
 		alice_mortgage();
-		alise_deposite();
+		alice_deposite();
 		bob_salary(month);
 		bob_food(month);
 		bob_expence(month);
@@ -167,20 +180,22 @@ void simulation()
 		}
 	}
 	alice.account += alice.cost_house;
-	alice.account += alice.deposit;
-	bob.account += bob.deposit;
-
+	alice.account += alice__deposite.deposite_account;
+	bob.account += bob__deposite.deposite_account;
 }
+
 
 void alice_print()
 {
 	printf("Alice account = %lld \n", alice.account);
 }
 
+
 void bob_print()
 {
 	printf("Bob account = %lld \n", bob.account);
 }
+
 
 int main()
 {
