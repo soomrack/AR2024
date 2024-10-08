@@ -1,53 +1,77 @@
 #include<stdio.h>
 #include<math.h>
 
+typedef long long int Money;
 
-double home_month1;
-long long int home = 14000000;
-double alice_ostatok;
-double sum_pay;
-int procent = 16;
-int sum_start;
-int trata = 100000;
-int salary = 200000;
-int near_full_ostatok_bob;
-int money = 1000000;
-int sum_pay_all;
-int money = 1000000;
+struct Mortgage {
+	double rate=0.17;
+	Money credit;
+	Money platez;
+	Money month_pay;
+	int year = 30;
+	Money payment;
+	int month = 12;
+};
 
+struct Person {
+	Money salary;
+	Money ostatok;
+	Money expences;
+	struct Mortgage mortgage;
+	Money flat_cost;
+	Money savings;
+	double bank_rate;
+	Money profit;
+	Money profit_savings;
+	Money all_money;
+	
+};
+
+struct Person alice;  // mortgage
+struct Person bob;
 
 void home_month_pay() {
-	int year1 = 30;
-	int month1 = 12;
-	int pay1 = 1000000;
-	int procent1 = 17;
-	home_month1 = (home * procent1 / 100 * year1 - pay1) / year1 / month1;
+	alice.mortgage.year = 30;
+	alice.flat_cost = 14000000;
+	 alice.mortgage.payment = 1000000;
+	 alice.mortgage.month_pay = (alice.flat_cost - alice.mortgage.payment) * alice.mortgage.rate / 12 / (1 - pow(1 + alice.mortgage.rate / 12, -alice.mortgage.year * alice.mortgage.month));
 }
-
-void alice_ostatok1() {
-	int alice_fullsalary = 300000;
-	int alice_trata = 50000;
-	alice_ostatok = alice_fullsalary - alice_trata - home_month1;
+void alice_ostatok() {
+	 alice.salary = 300000;
+	 alice.expences = 50000;
+	alice.ostatok += alice.salary - alice.expences - alice.mortgage.month_pay;
 }
+void bob_ostatok_month() {
+	bob.salary = 250000;
+	bob.expences = 50000;
+	bob.ostatok += (bob.salary - bob.expences);
 
-void pay_bob2() {
-	sum_pay = (salary - trata);
+}
+void bob_savings_bank() {
+	bob.bank_rate = 0, 16;
+	bob.ostatok = bob.profit + bob.ostatok;
+	bob.profit = bob.ostatok * bob.bank_rate;
+	
+}
+void bob_first_capitall_bank() {
+	bob.savings = 1000000;
+	bob.profit_savings += bob.savings * bob.bank_rate;
+	bob.savings += bob.savings * bob.bank_rate;
+	
+
 }
 
 void simulation() {
 	int month = 9;
 	int year = 2024;
-	int n = 0;
 	while (!((month == 9) && (year == 2024 + 30))) {
+		bob_ostatok_month();
+		bob_first_capitall_bank();
+		bob_savings_bank();
+		home_month_pay();
+		alice_ostatok();
 		month++;
-		sum_pay += sum_pay;
-		sum_pay_all += sum_pay * procent / 100;
-		sum_start += money * procent / 100 / 12;
 
-		sum_start += sum_start;
-		near_full_ostatok_bob = salary - trata + salary - trata;
-		alice_ostatok += alice_ostatok;
-		sum_start += sum_start;
 
 		if (month == 13) {
 			month = 1;
@@ -55,16 +79,22 @@ void simulation() {
 		}
 	}
 }
+	 
+	void bob_all_money() {
+		bob.all_money = bob.ostatok + bob.savings + bob.savings;
+}
+	void alice_all_money() {
+		alice.all_money = alice.flat_cost + alice.ostatok;
+	}
 
- void  end()
+ 
+void  end()
 {
-	double full_money_bob = near_full_ostatok_bob + sum_pay_all + sum_start + money;
-	double full_money_alice = alice_ostatok + home;
-	if (full_money_bob > full_money_alice)
+	if (bob.all_money > alice.all_money)
 	{
 		printf("Bob richer Alice");
 	}
-	else if (full_money_bob < full_money_alice)
+	else 
 	{
 		printf("Alice richer bob");
 
@@ -73,16 +103,17 @@ void simulation() {
 }
 
  int main() {
-	home_month_pay();
-	alice_ostatok1();
-	pay_bob2();
-	simulation();
-	end();
-
-	
-	
+	 home_month_pay();
+	 alice_ostatok();
+	 bob_ostatok_month();
+	 bob_savings_bank();
+	 bob_first_capitall_bank();
+	 simulation();
+	 bob_all_money();
+	 alice_all_money();
+	 end();
+	 
 }
-
 
 
 
