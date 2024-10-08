@@ -1,58 +1,200 @@
-#include <math.h>
-#include <stdio.h>
+#include<stdio.h>
+#include<math.h>
 
-long int years = 30;
-long int month = years * 12;
+typedef long long int Money;
 
-struct person {
-	int initial_capital;
-    int salary;
-	bool sadden_waste;
+struct Cat{
+    Money food;
 };
 
-int initilize_person()
+struct Car
 {
-	struct person alice = {1000000,200000,false};
-	struct person bob = {1000000,200000, true};
-	linking_to_months(alice.initial_capital , alice.salary, bob.initial_capital,bob.salary);
-}
+    Money benzin;
+    Money remont;
+};
 
-long int alice_month_pay = 30000;
-long int bob_month_pay = 15000;
+struct Mortgage {
+    double rate;
+    Money credit;
+    Money payment;
+    Money month_pay;
+};
 
-double calculate_loan_payment(const double loan_payment, const double loan_rate, int loan_years)
-{ 
-	double month_rate = loan_rate / 12 / 100;
-	return loan_years * (month_rate * pow(1 + month_rate, month)) / (pow(1 + month_rate, month) - 1);
-}
-
-void linking_to_months(int alice_initial_capital, int alice_salary, int bob_initial_capital, int bob_salary)
+struct Arenda 
 {
-	long int flat_price = 10000000;
-	int bob_buy_car = 1000000;
-	alice_initial_capital = 0;
-	for (int i = 1; i <= month; i++) {
-		bob_initial_capital *= 1+(20/100);
-		bob_initial_capital += bob_salary;
-		bob_initial_capital -= bob_month_pay;
-		
-		if (month == 52) {
-			bob_initial_capital -= bob_buy_car;
-		} 
-		
-		alice_initial_capital += alice_salary;
-		alice_initial_capital -= alice_month_pay;
-		alice_initial_capital -= calculate_loan_payment((flat_price-alice_initial_capital), 18 , years);
-		
-		if (month % 12 == 0) {
-			printf("Year = %d\n", month / 12);
-			printf("Alice would have %lld\t", alice_initial_capital);
-			printf("Bob would have %lld\n", bob_initial_capital);
-		}
-	}
+    Money price;
+    Money month_pay;
+};
+
+struct Person {
+    Money salary;
+    Money account;
+    Money food;
+    Money expences;
+    struct Cat cat;
+    struct Mortgage mortgage;
+    struct Arenda arenda; 
+    struct Car car;
+};
+
+struct Person alice;
+struct Person bob;
+
+void alice_mortgage()
+{
+    alice.account -= alice.mortgage.month_pay;
 }
+
+
+int calculate_credit()
+{
+    Money year = 30;
+    Money month = year * 12;
+    return 30* (alice.mortgage.rate * pow(1 + alice.mortgage.rate, month)) / (pow(1 + alice.mortgage.rate, month) - 1);
+}
+
+
+void alice_food(const int month)
+{
+    if (month == 1) {
+        alice.food *= 1.1;
+    }
+    alice.account -= alice.food;
+}
+
+
+void bob_food(const int month)
+{
+    if (month == 1) {
+        bob.food *= 1.1;
+    }
+    bob.account -= alice.food;
+}
+
+
+void alice_init()
+{
+    alice.account = 1000000;
+    alice.salary = 200000;
+    alice.food = 10000;
+    alice.expences = 70000;
+
+    alice.mortgage.payment = 1000000;
+    alice.mortgage.credit = 14000000;
+    alice.mortgage.rate = 0.17;
+    alice.mortgage.month_pay = calculate_credit();
+    alice.account -= alice.mortgage.payment;
+
+    alice.cat.food = 5000;
+}
+
+
+void bob_init()
+{
+    bob.account = 1000000;
+    bob.salary  = 200000;
+    bob.food = 15000;
+    bob.expences = 50000;
+
+    bob.arenda.price = 30000;
+    bob.arenda.month_pay = 10000;
+
+    bob.car.benzin = 100000;
+}
+
+
+void alice_cat_vet(const int month, const int year)
+{
+    if ((month == 12) && (year==2026)) {
+        alice.account -= 30000;
+    }
+    if ((month == 3) && (year == 2035)) {
+        alice.account -= 30000;
+    }
+     if ((month == 6) && (year == 2043)) {
+        alice.account -= 30000;
+    }
+}
+
+
+
+void bob_car_obslug(const int month, const int year)
+{
+    if ((month == 11) && (year==2027)) {
+        bob.account -= bob.car.remont;
+    }
+    if ((month == 3) && (year == 2035)) {
+        bob.account -= bob.car.remont;
+    }
+     if ((month == 6) && (year == 2043)) {
+        bob.account -= bob.car.remont;
+    }
+}
+
+
+void alice_salary(const int month, const int year)
+{
+    alice.account += alice.salary;    
+}
+
+
+void bob_salary(const int month, const int year)
+{
+    bob.account += bob.salary;  
+}
+
+
+void influense(int const month, int const year)
+{
+    if (month ==1){
+        alice.expences *= 1.07;
+        bob.expences *= 1.07; 
+    } 
+}
+
+
+void print_result()
+{
+    printf("Alice account = %lld \t", alice.account);
+    printf("Bob account = %lld \n" , bob.account);
+}
+
+
+void simulation()
+{
+    int month = 9;
+    int year = 2024;
+
+    while( !((month == 9) && (year == 2024 + 30)) ) {
+
+        alice_salary(month, year);
+        alice_mortgage();
+        alice_food(month);
+        alice_cat_vet(month, year);
+        
+        bob_salary(month, year);
+        bob_food(month);
+        bob_car_obslug(month, year);
+
+        influense(month, year);
+
+        month++;
+        if(month == 13) {
+            month = 1;
+            year++;
+            print_result();
+        }
+    }
+}
+
 
 int main()
 {
-	initilize_person();
+    alice_init();
+
+    bob_init();
+
+    simulation();
+
+    return 1;
 }
