@@ -1,11 +1,16 @@
 #include<stdio.h>
 #include<math.h>
+#include<stdbool.h>
+
 
 typedef long long int Money;
+typedef bool Logik;
+
 
 struct Cat{
     Money food;
-    bool cat_is_alive = true;
+    Logik buy_cat;
+    Logik cat_is_alive;
 };
 
 
@@ -13,6 +18,7 @@ struct Car {
     Money benzin;
     Money remont;
 };
+
 
 struct Mortgage {
     double rate;
@@ -91,6 +97,8 @@ void alice_init()
     alice.account -= alice.mortgage.payment;
 
     alice.cat.food = 5000;
+    alice.cat.buy_cat = false;
+    alice.cat.cat_is_alive = true;
 }
 
 
@@ -108,9 +116,18 @@ void bob_init()
 }
 
 
+void alice_buy_cat()
+{   
+    if (alice.cat.buy_cat == false){
+    alice.account -= 30000;
+    alice.cat.buy_cat = true;
+    }
+}
+
+
 void alice_cat(const int month, const int year)
 {   
-    if (alice.cat.cat_is_alive == true){
+    if (alice.cat.cat_is_alive){
     alice.account -= alice.cat.food;
     
         if ((month == 12) && (year==2026)) {
@@ -119,8 +136,8 @@ void alice_cat(const int month, const int year)
         if ((month == 3) && (year == 2035)) {
         alice.account -= 30000;
         }
-        if ((month == 6) && (year == 2043)) {
-        alice.account -= 30000;
+        if ((month == 6) && (year == 2040)) {
+        alice.cat.cat_is_alive = false;
         }
     }
     
@@ -180,6 +197,7 @@ void simulation()
         alice_salary(month, year);
         alice_mortgage();
         alice_food(month);
+        alice_buy_cat();
         alice_cat(month, year);
         
         bob_salary(month, year);
