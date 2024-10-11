@@ -1,85 +1,174 @@
-﻿// Task1.cpp : Этот файл содержит функцию "main". Здесь начинается и заканчивается выполнение программы.
-//
+﻿#include<stdio.h>
 
-#include <iostream>
+typedef long long int Money;
 
-// ставки для подсчетов
-const float RealInflateRate = 1 + 9 / 100;
-const float RealSalaryIncrease = 1 + 9 / 100;
 
-struct Bob
-{
-    float Deposit;
-    float DepositRate; 
-    float RentAMonth; 
-    float SalaryAMonth; 
-    int MonthCount;
+struct Mortgage {
+    double rate;
+    Money credit;
+    Money platez;
+    Money month_pay;
 };
 
-struct Alice
-{
-    float FirstPay;
-    float Credit;
-    float CreditRate;
-    float SalaryAMonth;
-    int MonthCount;
+struct Person {
+    Money salary;
+    Money account;
+    Money food;
+    Money expences;
+    Money deposit_rate; // monthly!
+    Money flat;
+    struct Mortgage mortgage;
 };
 
-float Calculation_Bob(Bob Data)      // сумма вклада
+struct Person alice;
+struct Person bob;
+
+void alice_mortgage()
 {
-    float Result = 0;
-    // ставка деозита для подсчета
-    float RealDepositRate = 1 + Data.DepositRate / 100;
-    // сумма депозита после нескольких лет
-    Data.Deposit *= pow(RealDepositRate, Data.MonthCount);
+    alice.account -= alice.mortgage.month_pay;
 
-
-    for (int Month = 1; Month <= Data.MonthCount; Month++)
-    {
-        Result += (Data.SalaryAMonth - Data.RentAMonth);  // зарплата - аренда
-
-        Data.SalaryAMonth *= RealSalaryIncrease; // повышение зарплаты
-        Data.RentAMonth *= RealInflateRate; // повышение стоимости аренды
-    }
-
-    return Result + Data.Deposit;
 }
 
-float Calculation_Alice(Alice Data)
+void bob_flat(const int month)
 {
-    float Result = 0;
-
-    // ежемесячная ставка
-    float RealCreditRate = Data.CreditRate / 100; // теперь НЕ в процентах
-    // формула расчета "общей ставки"
-    float GeneralCreditRate = pow(1 + Data.CreditRate, Data.MonthCount);
-    // платеж в месяц
-    float PaymentAMonth = Data.Credit * RealCreditRate * GeneralCreditRate / (GeneralCreditRate - 1);
-
-    for (int Month = 1; Month <= Data.MonthCount; Month++)
-    {
-        Result += (Data.SalaryAMonth - PaymentAMonth) * 12;  // зарплата - ежемесячный платеж
-
-        Data.SalaryAMonth *= RealSalaryIncrease; // повышение зарплаты
+    bob.account -= bob.flat;
+    if (month == 1) {
+        bob.flat *= 1.07;
     }
-
-    return Result - Data.FirstPay;
 }
 
+void bob_deposit()
+{
+    bob.account *= bob.deposit_rate;
+}
+
+void alice_food(const int month)
+{
+    if (month == 1) {
+        alice.food *= 1.1;
+    }
+    alice.account -= alice.food;
+}
+
+void bob_food(const int month)
+{
+    if (month == 1) {
+        bob.food *= 1.2;
+    }
+    bob.account -= bob.food;
+}
+
+void alice_expences(const int month) {
+    if (month == 1) {
+        alice.expences *= 1.15;
+    }
+    alice.account -= alice.expences;
+}
+
+void bob_expences(const int month) {
+    if (month == 1) {
+        bob.expences *= 1.1;
+    }
+    bob.account -= bob.expences;
+}
+
+void alice_init()
+{
+    alice.account = 1000 * 1000;
+    alice.salary = 200 * 1000;
+    alice.food = 10 * 1000;
+    alice.expences = 70 * 1000;
+
+    alice.mortgage.platez = 1000 * 1000;
+    alice.mortgage.credit = 14000 * 1000;
+    alice.mortgage.rate = 0.17;
+    alice.mortgage.month_pay = 100 * 1000;
+    alice.account -= alice.mortgage.platez;
+}
+
+void bob_init()
+{
+    bob.salary = 200 * 1000;
+    bob.food = 10 * 1000;
+    bob.expences = 70 * 1000;
+
+    bob.flat = 100 * 1000;
+    bob.deposit_rate = 0.18;
+}
+void alice_print()
+{
+    printf("Alice account = %lld \n", alice.account);
+}
+
+void bob_print()
+{
+    printf("Bob account = %lld \n", bob.account);
+}
+
+void alice_salary(const int month, const int year)
+{
+    if (month == 1) {
+        alice.salary *= 1.07;
+    }
+    alice.account += alice.salary;
+}
+
+void bob_salary(const int month, const int year)
+{
+    if (month == 1) {
+        bob.salary *= 1.07;
+    }
+    bob.account += bob.salary;
+}
+
+void simulation_alice()
+{
+    int month = 9;
+    int year = 2024;
+
+    while (!((month == 9) && (year == 2024 + 30))) {
+
+        alice_salary(month, year);
+        alice_mortgage();
+        alice_food(month);
+        alice_expences(month);
+
+        month++;
+        if (month == 13) {
+            month = 1;
+            year++;
+        }
+    }
+}
+void simulation_bob()
+{
+    int month = 9;
+    int year = 2024;
+
+    while (!((month == 9) && (year == 2024 + 30))) {
+        bob_salary(month, year);
+        bob_deposit();
+        bob_flat(month);
+        bob_food(month);
+        bob_expences(month);
+
+        month++;
+        if (month == 13) {
+            month = 1;
+            year++;
+        }
+    }
+}
 
 int main()
 {
-    printf("Bob:%.2f\n", Calculation_Bob({ 1000000, 12,30000,200000, 30 }));
-    printf("Alice:%.2f\n", Calculation_Alice({ 1000, 13000000, 17, 200000, 30 }));
+    alice_init();
+    bob_init();
+
+    simulation_alice();
+    simulation_bob();
+
+    bob_print();
+    alice_print();
+    return 1;
 }
-
-// Запуск программы: CTRL+F5 или меню "Отладка" > "Запуск без отладки"
-// Отладка программы: F5 или меню "Отладка" > "Запустить отладку"
-
-// Советы по началу работы 
-//   1. В окне обозревателя решений можно добавлять файлы и управлять ими.
-//   2. В окне Team Explorer можно подключиться к системе управления версиями.
-//   3. В окне "Выходные данные" можно просматривать выходные данные сборки и другие сообщения.
-//   4. В окне "Список ошибок" можно просматривать ошибки.
-//   5. Последовательно выберите пункты меню "Проект" > "Добавить новый элемент", чтобы создать файлы кода, или "Проект" > "Добавить существующий элемент", чтобы добавить в проект существующие файлы кода.
-//   6. Чтобы снова открыть этот проект позже, выберите пункты меню "Файл" > "Открыть" > "Проект" и выберите SLN-файл.
