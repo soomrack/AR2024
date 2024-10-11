@@ -3,24 +3,25 @@
 typedef long long int Money;
 
 struct Ipoteka {
-	Money credit;
-	Money monthpay;
+    Money credit;
+    Money monthpay;
+    double rate;
 };
 	
 struct Bank {
-	Money vk;
-	Money monthpay;
-	Money dep;
+    Money vklad;
+    Money monthpay;
+    Money deposite;
 };
 	
 struct Person {
-	Money zp;
-	Money acc;
-	Money food;
-	Money r;
-	Money monthpay;
-	struct Bank bank;
-	struct Ipoteka ipoteka;
+    Money zarplata;
+    Money account;
+    Money food;
+    Money rashod;
+    Money monthpay;
+    struct Bank bank;
+    struct Ipoteka ipoteka;
 };
 
 struct Person Alice;
@@ -28,115 +29,128 @@ struct Person Bob;
 
 void Alice_money ()
  {
-	Alice.acc = 0;
-	Alice.zp = 200000;
-	Alice.r = 50000;
-	Alice.monthpay = 100000;
+    Alice.account = 0;
+    Alice.zarplata = 200000;
+    Alice.rashod = 50000;
+    Alice.monthpay = 100000;
 }
-void Alice_zp (const int month, const int year) {
+void Alice_zarplata (const int month, const int year) {
 	
-	if (month == 1) {
-		Alice.zp *= 1.1;
-	}
-	if (month == 9) {
-		Alice.acc += Alice.zp;
-	}
+    if (month == 1) {
+        Alice.zarplata *= 1.1;
+  }
+    if (month == 9) {
+	Alice.account += Alice.zarplata;
+  }
+}
+
+void Alice_monthpay (int year)
+{
+    year = 2024;
+    if (year == 2034 || year == 2044 || year == 2054)
+  {
+	Alice.monthpay += 5000;
+        Alice.account -= Alice.monthpay;
+  }
+}
+
+void Alice_ipoteka ()
+{
+      Alice.account -= Alice.ipoteka.monthpay;
 }
 
 void Bob_money () {
-	Bob.acc = 0;
-	Bob.zp = 200000;
-	Bob.r = 40000;
-	Bob.monthpay = 80000;
-	Bob.bank.dep = 200000 - 40000-80000;
-	Bob.bank.vk = 1000000;
+    Bob.account = 0;
+    Bob.zarplata = 200000;
+    Bob.rashod = 40000;
+    Bob.monthpay = 80000;
+    Bob.bank.deposite = 200000 - 40000-80000;
+    Bob.bank.vklad = 1000000;
 }
 
 void Bob_bank (int dep)
 {
-	int month = 9;
-	int year = 2024;
+    int month = 9;
+    int year = 2024;
 	
-	while (!((month == 9) && (year == 2054)) )
-	{
-	dep = 20;
-	Bob.acc = Bob.zp - Bob.monthpay - Bob.bank.vk; 
-	Bob.bank.vk = ((dep/12)*0.01 +1);
-	}
+    while (!((month == 9) && (year == 2054)) )
+    {
+        Bob.account = Bob.zarplata - Bob.monthpay - Bob.bank.vklad; 
+	Bob.bank.vklad = ((dep/12)*0.01 +1);
+    }
 }
 	
-void Alice_monthpay (int year)
-{
-	year = 2024;
-	if (year == 2034 || year == 2044 || year == 2054)
-	{
-		Alice.monthpay += 5000;
-	}
-}
-	
-void Bob_zp (const int month, const int year) {
-	if (month == 1) {
-		Bob.zp *= 1.1;
-	}
-	if (month == 9) {
-		Bob.acc += Bob.zp;
-	}
+void Bob_zarplata (const int month, const int year) {
+    if (month == 1) {
+	Bob.zarplata *= 1.1;
+    }
+    if (month == 9) {
+	Bob.account += Bob.zarplata;
+    }
 }
 
 void Bob_monthpay (int year)
 {
-	year = 2024;
-	if (year == 2034 || year == 2044 || year == 2054)
-	{
-		Bob.monthpay += 5000;
-	}
+    year = 2024;
+    if (year == 2034 || year == 2044 || year == 2054)
+    {
+        Bob.monthpay += 5000;
+    }
 }
 
 void Bob_print( )
 {
-	printf ("bob capital = %lld \n", Bob.acc);
+    printf ("bob capital = %lld \n", Bob.account);
 }
 
 void Alice_print( )
 {
-	printf ("alice capital = %lld \n", Alice.acc);
+    if (Alice.account > Bob.account) {
+        printf ("Alice has more money on %lld\n");
+    }	
+    if (Bob.account > Alice.account) {
+	printf ("Bob has more money on %lld\n");
+    }
+    printf ("alice capital = %lld \n", Alice.account);
 }
+	
+
 
 void simulation( )
 {
-	int month = 9;
-	int year = 2024;
-	while ( !((month == 9) && (year == 2024 + 30)) ) {
+    int month = 9;
+    int year = 2024;
+    while ( !((month == 9) && (year == 2024 + 30)) ) {
 		
-		Alice_zp (month, year);
-		Alice_r  (month);
-		Alice_monthpay (month);
+        Alice_zarplata (month, year);
 		
-		month++;
-		if (month == 13) {
-			month = 1;
-			year++;
-		}
-	}
-	while ( !((month == 9) && (year == 2024 + 30)) ) {
+	Alice_monthpay (month);
 		
-		Bob_zp (month, year);
-		Bob_r  (month);
-		Bob_monthpay (month);
+	    month++;
+	    if (month == 13) {
+	        month = 1;
+		year++;
+	    }
+    }
+    while ( !((month == 9) && (year == 2024 + 30)) ) {
 		
-		month++;
-		if (month == 13) {
-			month = 1;
-			year++;
-		}
-	}
+        Bob_zarplata (month, year);
+		
+	Bob_monthpay (month);
+		
+	    month++;
+	    if (month == 13) {
+		month = 1;
+		year++;
+	    }
+    }
 }
 		
 int main()
 {
     Alice_money();
     
-	Bob_money();
+    Bob_money();
 	
     simulation();
 
