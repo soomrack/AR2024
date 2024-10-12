@@ -1,0 +1,171 @@
+#include <stdio.h>
+typedef long long int Money;
+
+
+struct Mortgage  //структура ипотеки
+{
+    double rate;
+    Money credit;
+    Money month_pay;
+};
+	
+struct Bank  //структура банка
+{
+    Money vklad;
+    Money month_pay;
+    Money deposite;
+};
+	
+struct Person  //структура для человека
+{
+    Money salary;   //доходы
+    Money expence;  //расходы
+    Money account;  //счёт
+    Money food;
+    Money month_pay;
+    struct Bank bank;
+    struct Mortgage mortgage;
+};
+
+struct Person Alice;
+struct Person Bob;
+
+void Alice_money()
+ {
+    Alice.account = 0;
+    Alice.salary = 200000;
+    Alice.expence = 60000;
+    Alice.month_pay = 100000;
+}
+void Alice_salary(const int month, const int year)
+{
+	
+    if (month == 12)
+    {
+        Alice.account += Alice.salary;
+    }
+    if (month == 1)
+    {
+	    Alice.salary *= 1.06;
+    }
+}
+
+void Alice_month_pay(int year)
+{
+    year = 2024;
+    if (year == 2034 || year == 2044 || year == 2054)
+  {
+	Alice.month_pay += 10000;
+        Alice.account -= Alice.month_pay;
+  }
+}
+
+void Alice_mortgage()
+{
+      Alice.account -= Alice.mortgage.month_pay;
+}
+
+void Bob_money()
+{
+    Bob.account = 0;
+    Bob.salary = 200000;
+    Bob.expence = 40000;
+    Bob.month_pay = 80000;
+    Bob.bank.deposite = 200000 - 40000-80000;
+    Bob.bank.vklad = 1000000;
+}
+
+void Bob_bank(int deposite)
+{
+    Bob.bank.vklad += (Bob.account * deposite / 100);
+    Bob.bank.vklad += (Bob.bank.vklad * 0.03 / 12);
+}
+	
+void Bob_salary(const int month, const int year)
+{
+    if (month == 12)
+    {
+        Bob.account += Bob.salary;
+    }
+    if (month == 1)
+    {
+        Bob.salary *= 1.06;
+    }
+
+    Bob.account += Bob.salary;
+}
+
+void Bob_month_pay(int year)
+{
+    year = 2024;
+    if (year == 2034 || year == 2044 || year == 2054)
+    {
+        Bob.month_pay += 10000;
+    }
+}
+
+void Bob_print()
+{
+    printf ("bob capital = %lld \n", Bob.account);
+}
+
+void Alice_print()
+{
+    if (Alice.account > Bob.account)
+    {
+        printf ("Alice has more money on %lld\n");
+    }	
+    if (Bob.account > Alice.account)
+    {
+	printf ("Bob has more money on %lld\n");
+    }
+    printf ("alice capital = %lld \n", Alice.account);
+}
+	
+
+
+void simulation()
+{
+    int month = 9;
+    int year = 2024;
+
+    while ( !((month == 9) && (year == 2054)) )
+    {
+		
+        Alice_salary (month, year);
+		
+	    Alice_month_pay (month);
+		month++;
+	    if (month == 13)
+        {
+	        month = 1;
+		    year++;
+	    }
+    }
+    while ( !((month == 9) && (year == 2054)) )
+    {
+		Bob_salary(month, year);
+		Bob_month_pay(month);
+		month++;
+	    if (month == 13)
+        {
+		month = 1;
+		year++;
+	    }
+    }
+}
+		
+int main()
+{
+    Alice_money();
+    
+    Bob_money();
+	
+    simulation();
+
+    Alice_print();
+    
+    Bob_print();
+    
+    return 0;
+}
