@@ -17,7 +17,7 @@ struct Person {
     Money credit_monthly_payment;
     int year_of_raising;
     Money car_price;
-	int buy_car;
+    int buy_car;
     struct Deposit deposite;
 };
 
@@ -33,8 +33,8 @@ struct Person bob;
 
 void alice_init()
 {
-	alice.deposite.account = 0;
-	alice.deposite.interest = 0.19;
+    alice.deposite.account = 0;
+    alice.deposite.interest = 0.19;
     alice.expenditure = 399 + 22500 + 5000 + 4500; // Расходы за месяй (Цена подписки СберПрайм + еда + одежда + комуналка)
     alice.salary = 300000;
     alice.credit_monthly_payment = 226312;
@@ -43,8 +43,8 @@ void alice_init()
 
 void bob_init()
 {
-	bob.deposite.account = 1313000;
-	bob.deposite.interest = 0.19;
+    bob.deposite.account = 1313000;
+    bob.deposite.interest = 0.19;
     bob.expenditure = 399 + 22500 + 5000 + 4500; // Расходы за месяй (Цена подписки СберПрайм + еда + одежда + комуналка)
     bob.salary = 300000;
     bob.rent = 30000;
@@ -57,15 +57,15 @@ void bob_init()
 
 void alice_expense_counting()
 {
-	alice.deposite.account += alice.deposite.account * alice.deposite.interest / 12;
-	alice.deposite.account += alice.salary - alice.expenditure - alice.credit_monthly_payment;
+    alice.deposite.account += alice.deposite.account * alice.deposite.interest / 12;
+    alice.deposite.account += alice.salary - alice.expenditure - alice.credit_monthly_payment;
 };
 
 
 void bob_expense_counting()
 {
-	bob.deposite.account += bob.deposite.account * bob.deposite.interest / 12;
-	bob.deposite.account += bob.salary - bob.expenditure - bob.rent;
+    bob.deposite.account += bob.deposite.account * bob.deposite.interest / 12;
+    bob.deposite.account += bob.salary - bob.expenditure - bob.rent;
 };
 
 
@@ -89,7 +89,7 @@ void bob_inflation()
 
 void inflation_changes()
 {
-	if (new_year == 1) {
+    if (new_year == 1) {
         alice_inflation();
         bob_inflation();
         new_year = 0;
@@ -100,10 +100,10 @@ void inflation_changes()
 void month_and_year_counter()
 {
     month_counter++;
-	if (month_counter == 13) {
-		year_counter++;
+    if (month_counter == 13) {
+        year_counter++;
         month_counter = 1;
-		new_year = 1;
+        new_year = 1;
 	};
 };
 
@@ -120,7 +120,7 @@ void bob_buy_car()
 {
     if (bob.buy_car == 0 && bob.deposite.account >= bob.car_price) {
         bob.deposite.account -= bob.car_price;
-		bob.buy_car = 1;
+        bob.buy_car = 1;
     };
 };
 
@@ -150,11 +150,11 @@ int main()
 {
     alice_init();		
 
-	bob_init();
+    bob_init();
 
-	while (year_counter != 30) {		
+    while (year_counter != 30) {		
         cycle_body();
-	};
+    };
     print();
     return 0;
 }
