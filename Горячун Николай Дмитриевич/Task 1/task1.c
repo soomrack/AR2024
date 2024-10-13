@@ -104,7 +104,7 @@ void month_and_year_counter()
         year_counter++;
         month_counter = 1;
         new_year = 1;
-	};
+    };
 };
 
 
