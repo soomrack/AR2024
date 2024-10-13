@@ -1,118 +1,128 @@
 #include <stdio.h>
 
-typedef long long int Money;
+typedef long long int MONEY;
 
-struct Mortgage {
-    double rate;
-    Money credit;
-    Money pay;
-    Money month_pay;
+struct IPOTEKA
+{
+    double STAVKA;
+    MONEY KREDIT;
+    MONEY MESYAC_PLATEZH_ALICE;
 };
 
-struct Bank {
-    Money vklad;
-    Money month_pay;
+struct CHELOVEK
+{
+    MONEY ZARPLATA;
+    MONEY SKOLKO_DENEG;
+    MONEY RASHODI;
+    MONEY MASHINA;
+    MONEY DENGI;
+    MONEY KVARTIRA;
+    struct IPOTEKA Ipoteka;
+    struct VKLAD Vklad;
 };
 
-struct Individual {
-    Money zarplata;
-    Money rashod;
-    Money status;
-    Money kvartira;
-    Money rubless; 
-    struct Mortgage mortgage;
-    struct Bank bank;
+struct VKLAD
+{
+    MONEY VKLADIK;    
+    MONEY MESYAC_PLATEZH_BOB;
 };
 
-struct Individual Alice;
-struct Individual Robert;  
+struct CHELOVEK ALICE;
 
-void Alice_money() {
-    Alice.status = 0;
-    Alice.zarplata = 200*1000;
-    Alice.rashod = 50*1000;
-    Alice.rubless = 0;
+struct CHELOVEK BOB;
 
-    Alice.mortgage.rate = 0.17;
-    Alice.mortgage.credit = 13*1000*1000;
-    Alice.mortgage.month_pay = 150*1000;
+void alice_ipoteka()
+{
+    ALICE.SKOLKO_DENEG -= ALICE.Ipoteka.MESYAC_PLATEZH_ALICE;
 }
 
-void Alice_mortgage() {
-    Alice.status -= Alice.mortgage.month_pay;
+void alice_dengi()
+{
+    ALICE.SKOLKO_DENEG = 0;
+    ALICE.ZARPLATA = 200*1000;
+    ALICE.RASHODI = 50*1000;
+
+    ALICE.Ipoteka.STAVKA = 0.17;
+    ALICE.Ipoteka.KREDIT = 13*1000*1000;
+    ALICE.Ipoteka.MESYAC_PLATEZH_ALICE = 150*1000;
 }
 
-void Alice_zarplata(const int month, const int year) {
+void alice_zarplata(const int month, const int year)
+{
+    if(month == 1) {
+        ALICE.SKOLKO_DENEG += ALICE.ZARPLATA;
+    }
+    if(month==12){
+        ALICE.ZARPLATA *= 1.09;
+    }
+}
+
+void bob_dengi(){
+    BOB.SKOLKO_DENEG = 0;
+    BOB.ZARPLATA = 200*1000;
+    BOB.RASHODI = 50*1000;
+    BOB.MASHINA = 10*1000;
+    BOB.Vklad.MESYAC_PLATEZH_BOB = 120*10000;
+}
+
+void bob_zarplata(const int month, const int year)
+{
     if(month == 12) {
-        Alice.status += Alice.zarplata;
+        BOB.SKOLKO_DENEG += BOB.ZARPLATA;
     }
     if(month == 1) {
-        Alice.zarplata *= 1.09;
+        BOB.ZARPLATA *= 1.09;
     }
-    Alice.status += Alice.zarplata;
+    BOB.SKOLKO_DENEG += BOB.ZARPLATA;
 }
 
-void Alice_print() {
-    if (Alice.status > Robert.status) {
-        printf ("Alice has more money than Robert on %lld\n", Alice.status - Robert.status);
-    }
-
-    if (Alice.status < Robert.status) {
-        printf ("Robert has more money than Alice on %lld\n", Robert.status - Alice.status);
-    }
-
-    printf ("Alice capital = %lld \n", Alice.status);
-}
-
-void Robert_money() {
-    Robert.status = 0;
-    Robert.zarplata = 200*1000;
-    Robert.rashod = 50*1000;
-    Robert.kvartira = 30*1000; 
-    Robert.rubless = 0;
-    Robert.bank.month_pay = 120*1000;
-}
-
-void Robert_zarplata(const int month, const int year) {
-    if(month == 12) {
-        Robert.status += Robert.zarplata;
-    }
-    if(month == 1) {
-        Robert.zarplata *= 1.09;
-    }
-    Robert.status += Robert.zarplata;
-}
-
-void Robert_bank(int deposit) {
+void Bob_vklad(int deposit)
+{
     int month = 9;
     int year = 2024;
 
-    while( !((month == 9) && (year == 2054)) ) {
-
-    deposit = 20; 
-    Robert.status -= Robert.bank.month_pay;
-    Robert.bank.vklad = ((deposit/12)*0.01+1);
-    Robert.rubless += (Robert.zarplata - Robert.bank.month_pay - Robert.rashod - Robert.kvartira);
-    Robert.status += (Robert.bank.vklad + Robert.rubles);
+    while ( !((month == 9) && (year == 2054)) ) {
+        deposit = 20;
+        BOB.Vklad.VKLADIK = ((deposit/12)*0.01+1);
+        BOB.SKOLKO_DENEG -= BOB.Vklad.MESYAC_PLATEZH_BOB;
+        BOB.DENGI += (BOB.ZARPLATA -BOB.Vklad.MESYAC_PLATEZH_BOB - BOB.RASHODI - BOB.MASHINA);
+        BOB.SKOLKO_DENEG += (BOB.Vklad.VKLADIK + BOB.DENGI);
     }
 }
 
-void Robert_print() {
-    printf ("Robert capital = %lld \n", Robert.status);
-
+void bob_mashina(int year, int month)
+{   
+    if (year == 2031 && month == 3 && BOB.SKOLKO_DENEG == 15 * 1000 * 1000){
+        BOB.SKOLKO_DENEG -= 15 * 1000 * 1000;
+    }
+    else if(year >= 2031 && month > 3){
+        BOB.SKOLKO_DENEG -= 15 * 1000;
+    }
+    else if(month == 9){
+        BOB.SKOLKO_DENEG -= 50 * 1000;
+    }
 }
 
-void simulation() {
+void bob_kvartira(int year)
+{
+    year = 2024;
+    if (year== 2034 || year == 2044 || year == 2054) {
+        BOB.KVARTIRA += 1000;
+    }
+} 
+
+void simulation()
+{
     int month = 9;
     int year = 2024;
 
     while( !((month == 9) && (year == 2054)) ) {
         
-        Alice_zarplata(month, year);
-        Alice_mortgage();
+        alice_zarplata(month, year);
+        alice_ipoteka();
         
-        Robert_zarplata(month, year);
-        Robert_kvartira(year);
+        bob_zarplata(month, year);
+        bob_kvartira(year);
 
         month++;
         if(month == 13) {
@@ -120,18 +130,28 @@ void simulation() {
             year++;
         }
     }
-    
 }
 
-int main() {
-    Alice_money();
+void alice_print()
+{
+    printf ("ALICE = %lld \n", ALICE.SKOLKO_DENEG);
+}
 
-    Robert_money();
+void bob_print()
+{
+    printf ("BOB = %lld \n", BOB.SKOLKO_DENEG);
+}
+
+int main()
+{
+    alice_dengi();
+
+    bob_dengi();
 
     simulation();
 
-    Alice_print();
+    alice_print();
 
-    Robert_print();
+    bob_print();
     return 1;
 }
