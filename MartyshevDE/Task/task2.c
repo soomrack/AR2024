@@ -8,7 +8,7 @@ struct Matrix {
     size_t cols; 
     size_t rows; 
     double* data; 
-};
+}; 
 
 
 struct Matrix Matrix_allocate (size_t cols, size_t rows) {
