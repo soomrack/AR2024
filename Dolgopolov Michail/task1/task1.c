@@ -4,14 +4,15 @@ typedef long long int Money; //RUR
 
 long double inflation = 0.10;
 Money alice_flat_cost = 10 * 1000 * 1000;
+Money bob_yacht_cost = 10 * 1000 * 1000;
+Money yacht_trip_cost = 2 * 1000 * 1000;
 
-
-struct Deposit{
+    struct Deposit
+{
    Money deposit_account;
    double rate;
    Money month_pay;
 };
-
 
 struct Mortgage{
    double rate;
@@ -151,9 +152,26 @@ void bob_deposit()
    bob.deposit.deposit_account += bob.salary - bob.food - bob.expences - bob.rent;
 }
 
+void bob_yacht(const int month, const int year)
+{
+   if ((year == 2024 + 3) && (month == 6)){
+      bob.account -= bob_yacht_cost;
+   } // покупка яхты
+   bob.account -= bob_yacht_cost/12/10;// затраты на содержание яхты(годовая стоимость содержания яхты приблизительно равно 10% её стоимости)
+   if (month == 1){
+      bob_yacht_cost += bob_yacht_cost * inflation;
+      yacht_trip_cost += yacht_trip_cost * inflation;
+   }
+   if (month == 8){
+      bob.account -= yacht_trip_cost;
+      yacht_trip_cost += yacht_trip_cost * inflation;
+      bob.account -= bob.salary;//взял отпуск за свой счет
+   }
+}
+
 void bob_print()
 {
-   printf("Bob account = %lld \n", bob.account + bob.deposit.deposit_account);
+   printf("Bob account = %lld \n", bob.account + bob.deposit.deposit_account + bob_yacht_cost);
 }
 
 void simulation()
@@ -172,6 +190,11 @@ void simulation()
       bob_food(month);
       bob_expences(month);
       bob_deposit();
+
+      if (year >= 2024 + 3){
+         bob_yacht(month,year);
+      }
+
       month++;
       if (month == 13){
          month = 1;
@@ -182,7 +205,8 @@ void simulation()
 
 void result()
 {
-   if (alice.account >= bob.account){
+   if (alice_flat_cost + alice.account + alice.deposit.deposit_account >= bob.account + bob.deposit.deposit_account + bob_yacht_cost)
+   {
       printf("Alice won\n");
    }
    else{
