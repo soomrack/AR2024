@@ -22,7 +22,7 @@ struct Matrix Matrix_allocate (size_t cols, size_t rows) {
     
     memset (A.data, 0, cols * rows * sizeof(double)); // Заполнение матрицы нулями
     return A;
-}
+} 
 
 
 void Matrix_free (struct Matrix A) {
