@@ -158,7 +158,7 @@ int main() {
     printf ("Multiplication A on B:\n");
     Matrix_print(F);
 
-    // Освобождение памяти
+    
     Matrix_free(A);
     Matrix_free(B);
     Matrix_free(C);
