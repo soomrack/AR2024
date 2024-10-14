@@ -1,0 +1,147 @@
+#include <stdio.h> // загрузка библиотеки
+
+typedef long long int Money;  // рубли
+
+
+struct Mortgage {  // что входит в ипотеку
+    double rate;  // процент ставки
+    Money credit;  //кредитированные деньги
+    Money summa; // общая сумма
+    Money month_pay; // ежемесячная выплата
+};
+
+
+struct Bank_deposit{  // что входит во вклад
+    double rate;  // ставка вклада
+    Money deposit_account; // деньги, уже лежащие во вкладе
+};
+
+
+struct Person{ // что входит персонально каждому человеку
+    Money salary; // зарплата
+    Money account; // вклад или ипотека
+    Money kvartira; // затраты на жилье
+    Money expenses; // расходы
+    Money vacation_account; // деньги на отпуск
+    Money vacation_cost; // цена на отпуск
+    struct Mortgage mortgage;
+    struct Bank_deposit deposit;
+};
+
+
+struct Person bob; // присваиваем 
+struct Person alice; // присваиваем 
+
+// Alice
+void alice_salary(const int month, const int year)
+{
+    if (month == 1){ // каждый первый месяц следующего  года
+        alice.salary *= 1.07; // зарплата поднимается на 7% (индексация)
+    }
+    alice.account += alice.salary; // счет алисы + ее зарплата
+}
+
+
+void alice_mortgage() // ипотека алисы
+{
+    alice.account -= alice.mortgage.month_pay; // счет алисы - ежемесячный платеж
+}
+
+
+void alice_expenses(const int month) // расходы алисы
+{
+    if (month == 1) { // каждый первый месяц следующего года
+        alice.expenses *= 1.1; // расходы алисы на 10% (инфляция)
+    }
+    alice.account -= alice.expenses; // счет алисы - расходы на жизнь
+}
+
+void alice_kvartira(const int month) // квартира алисы
+{
+    if (month == 1){ // каждый первыйф месяц следующего года 
+        alice.kvartira *= 1.05; // содержание(ком.услуги) увеличиваются на 5%
+    }
+}
+
+
+void alice_init() // входные данные
+{
+    alice.account = 1000000;
+    alice.salary = 200000;
+    alice.expenses = 50000;
+    alice.mortgage.summa = 1000000;
+    alice.mortgage.credit = 13000000;
+    alice.mortgage.rate = 0.17;
+    alice.mortgage.month_pay = 150000;
+    alice.account -= alice.mortgage.summa;
+    alice.kvartira = 13000000;
+}
+
+void alice_print()
+{
+    printf("alice account = %11d \n", alice_kvartira + alice.account); // вывод счета алисы
+}
+
+// Bob
+void bob_salary(const int month, const int year) // зарпалата боба
+{
+    bob.account += bob.salary; // счет боба + его зарплата
+    if (month == 1) { // каждый первый месяц следующего года
+        bob.salary *= 1.07; //зарпалата боба поднимается на 7%(индексация)
+    }
+}
+
+
+void bob_expenses(const int month, const int year) //расходы боба
+{
+    bob.account -= bob.expenses; //счет боба- его расходы
+    if (month == 1){ // каждый первый месяц следующего года 
+        bob.expenses *= 1.09; // расходы увеличиваются на 9% (инфляция)
+    }
+}
+
+
+void bob_kvartira(const int month, const int year) // квартира боба
+{
+    bob.account -= bob.expenses; //счет боба - его расходы 
+    if (month == 1){ // каждый первый месяц следующего года
+        bob.kvartira *= 1.09; // стоимость квартиры увеличивается на 9%
+    }
+}
+
+
+void bob_bank(const int month, const int year) // банк боба, его вклад
+{
+    bob.deposit.deposit_account *= ((bob.deposit.rate / 12) + 1); // расчет ставки депозита на вкладе 
+    bob.deposit.deposit_account += bob.account; // счет вклада + общий счет
+    bob.account = 0; //счет боба
+}
+
+
+void bob_vacation(const int month) // отпуск боба
+{
+    bob.vacation_account += bob.vacation_cost; // счет боба для отпуска + его стоимость отдыха
+    bob.account -= bob.vacation_cost; // общий счет боба - деньги на отпуск
+    if (month == 9) { //раз в год летом боб летит в отпуск
+        bob.vacation_account = 0;
+    }
+    if (month == 1) { //каждый первый месяц следующего года
+        bob.vacation_cost *= 1.09; //стоимсоть увеличивается на 9% (инфляция)
+    }
+}
+
+
+void bob_init(){ // входные данные для боба 
+    bob.salary = 200000;
+    bob.deposit.deposit_account = 1000000;
+    bob.kvartira = 80000;
+    bob.expenses = 60000;
+    bob.deposit.rate = 0.12;
+    bob.vacation_account = 0;
+    bob.vacation_cost = 60000;
+}
+
+void bob_print()
+{
+    printf("Bob account = %lld \n", bob.deposit.deposit_account); //вывод счета боба, учитвая его вклад
+}
