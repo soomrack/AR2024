@@ -26,22 +26,22 @@ int loan_payment_calculation(struct person user){
     return(monthlyPayment);
     }
 
-long long int alice_simulation(struct person user){
+int alice_simulation(struct person user){
     if(user.salary<user.credit_pay+user.food_expenses)
     {
         printf("\n Alice salary is too low"); 
         return(0); 
     }
-    long long int networth = 0;
-    for(int i=0; i<years; i++)
+    
+    for(int year=0; year<years; year++)
     {
-        networth = networth+(12*((user.salary*index_salary)-user.food_expenses*infliation - user.credit_pay));
+        user.money = user.money+(12*((user.salary*index_salary)-user.food_expenses*infliation - user.credit_pay));
     }
-    networth = networth + price_apartment * pow(infliation,years);
-    return(networth);
+    user.money = user.money + price_apartment * pow(infliation,years);
+    printf("\nAlice ""%lli ", user.money );
 }
 
-long long int bob_simulation(struct person user)
+int bob_simulation(struct person user)
 {
     if(user.salary<user.pay_for_flat_loan+user.food_expenses)
     {
@@ -49,14 +49,14 @@ long long int bob_simulation(struct person user)
         return(0); 
     }
     float networth;
-    for(int i=0; i<years; i++)
+    for(int year=0; year<years; year++)
     {
             user.money = user.money*deposit_percents;
             networth = 12*((user.salary*index_salary)-((user.food_expenses+user.pay_for_flat_loan)*infliation));
             user.money = user.money + networth;
             networth = 0;
         }
-        return(user.money);
+    printf("\nBob ""%lli ", user.money);
 }
 
 int main() 
@@ -71,13 +71,12 @@ person alice;
 alice.salary = 200*1000;
 alice.money = 1000*1000;
 alice.food_expenses = 50*1000;
-
 alice.credit_pay = loan_payment_calculation(person(alice));
-//printf("\n %i", alice.credit_pay);
-alice_end_simulation = alice_simulation(person(alice));
-bob_end_simulation = bob_simulation(person(bob));
-printf("\nAlice ""%lli ", alice_end_simulation );
-printf("\nBob ""%lli ", bob_end_simulation );
+
+
+alice_simulation(person(alice));
+bob_simulation(person(bob));
+
 
 //костыль для оценки стратегий
 // float b0b = bob_end_simulation;
