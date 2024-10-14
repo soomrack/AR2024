@@ -2,28 +2,30 @@
 #include <cmath>
 #define __max(a,b)  (((a) > (b)) ? (a) : (b))
 #define __min(a,b)  (((a) < (b)) ? (a) : (b))
-float infliation = 1.09,index_salary = 1.03, deposit_percents = 1.16;
-long long int bob_end_simulation, alice_end_simulation;
-int years = 30,price_apartment = 95*100*1000, loan_percents = 18;
+float infliation = 1.09,index_salary = 1.03, deposit_percents = 1.16,
+loan_percents = 18;
+long long int bob_end_simulation, alice_end_simulation,
+price_apartment = 95*100*1000;
+int years = 30;
 
 struct person
 {
 int salary;
 int food_expenses;
-long long int bank;
+long long int money;
 int pay_for_flat_loan;
 int credit_pay;
 };
 int loan_payment_calculation(struct person user){
     // Преобразование годовой процентной ставки в месячную и в десятичный формат
-
     double monthlyRate = loan_percents / (12*100);
     // Общее количество платежей
     int totalPayments = years * 12;
-    int monthlyPayment = ((price_apartment - user.bank) * monthlyRate * pow(1 + monthlyRate, totalPayments))/(pow(1 + monthlyRate, totalPayments) - 1);
-    printf("\n %i",monthlyPayment);
+    int monthlyPayment = ((price_apartment - user.money) * monthlyRate * pow(1 + monthlyRate, totalPayments))/(pow(1 + monthlyRate, totalPayments) - 1);
+    //printf("\n %i",monthlyPayment);
     return(monthlyPayment);
     }
+
 long long int alice_simulation(struct person user){
     if(user.salary<user.credit_pay+user.food_expenses)
     {
@@ -49,28 +51,29 @@ long long int bob_simulation(struct person user)
     float networth;
     for(int i=0; i<years; i++)
     {
-            user.bank = user.bank*deposit_percents;
+            user.money = user.money*deposit_percents;
             networth = 12*((user.salary*index_salary)-((user.food_expenses+user.pay_for_flat_loan)*infliation));
-            user.bank = user.bank + networth;
+            user.money = user.money + networth;
             networth = 0;
         }
-        return(user.bank);
+        return(user.money);
 }
 
 int main() 
 {
 person bob;
 bob.salary = 200*1000;
-bob.bank = 1000*1000;
+bob.money = 1000*1000;
 bob.food_expenses = 50*1000;
 bob.pay_for_flat_loan = 30*1000;
 
 person alice;
 alice.salary = 200*1000;
-alice.bank = 1000*1000;
+alice.money = 1000*1000;
 alice.food_expenses = 50*1000;
 
 alice.credit_pay = loan_payment_calculation(person(alice));
+//printf("\n %i", alice.credit_pay);
 alice_end_simulation = alice_simulation(person(alice));
 bob_end_simulation = bob_simulation(person(bob));
 printf("\nAlice ""%lli ", alice_end_simulation );
