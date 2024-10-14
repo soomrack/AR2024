@@ -64,7 +64,7 @@ void Bob_money () {
     Bob.zarplata = 200000;
     Bob.rashod = 40000;
     Bob.monthpay = 80000;
-    Bob.bank.deposite = 200000 - 40000-80000;
+    Bob.bank.vklad = Bob.account - Bob.rashod - Bob.monthpay;
     Bob.bank.vklad = 1000000;
 }
 
@@ -76,7 +76,7 @@ void Bob_bank (int dep)
     while (!((month == 9) && (year == 2054)) )
     {
         Bob.account = Bob.zarplata - Bob.monthpay - Bob.bank.vklad; 
-	Bob.bank.vklad = ((dep/12)*0.01 +1);
+	    Bob.bank.vklad = ((dep/12)*0.01 +1);
     }
 }
 	
@@ -159,3 +159,4 @@ int main()
     Bob_print();
     return 0;
 }
+
