@@ -39,11 +39,11 @@ void alice_ipoteka()
 void alice_dengi()
 {
     ALICE.SKOLKO_DENEG = 0;
-    ALICE.ZARPLATA = 200*1000;
+    ALICE.ZARPLATA = 2000*1000;
     ALICE.RASHODI = 50*1000;
 
     ALICE.Ipoteka.STAVKA = 0.17;
-    ALICE.Ipoteka.KREDIT = 13*1000*1000;
+    ALICE.Ipoteka.KREDIT = 12*1000*1000;
     ALICE.Ipoteka.MESYAC_PLATEZH_ALICE = 150*1000;
 }
 
