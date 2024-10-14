@@ -4,8 +4,7 @@
 #define __min(a,b)  (((a) < (b)) ? (a) : (b))
 float infliation = 1.09,index_salary = 1.03, deposit_percents = 1.16,
 loan_percents = 18;
-long long int bob_end_simulation, alice_end_simulation,
-price_apartment = 95*100*1000;
+long long int price_apartment = 95*100*1000;
 int years = 30;
 
 struct person
