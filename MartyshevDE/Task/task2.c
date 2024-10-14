@@ -5,12 +5,12 @@
 
 
 struct Matrix {
-    size_t cols; // Количество столбцов
-    size_t rows; // Количество строк
-    double* data; // Массив данных
+    size_t cols; 
+    size_t rows; 
+    double* data; 
 };
 
-// Функция для выделения памяти под матрицу
+
 struct Matrix Matrix_allocate (size_t cols, size_t rows) {
     struct Matrix A = {cols, rows, NULL};
     A.data = (double*) malloc (cols * rows * sizeof(double));
@@ -24,7 +24,7 @@ struct Matrix Matrix_allocate (size_t cols, size_t rows) {
     return A;
 }
 
-// Функция для освобождения памяти
+
 void Matrix_free (struct Matrix A) {
     if (A.data != NULL) {
         free (A.data);
@@ -45,15 +45,15 @@ void Matrix_set (struct Matrix A, size_t row, size_t col, double value) {
 // Сложение двух матриц
 struct Matrix Matrix_add (struct Matrix A, struct Matrix B) {
     if (A.rows != B.rows || A.cols != B.cols) {
-        printf ("Error: the dimensions of the matrices do not match for addition\n"); //Если не совпадают столбцы и строки
+        printf ("Error: the dimensions of the matrices do not match for addition\n"); 
         return (struct Matrix) {0, 0, NULL};
     }
 
-    struct Matrix result = Matrix_allocate (A.cols, A.rows); // Выделяем память для матрицы
+    struct Matrix result = Matrix_allocate (A.cols, A.rows); 
     
     for (size_t i = 0; i < A.rows; i++) {
         for (size_t j = 0; j < A.cols; j++) {
-            Matrix_set (result, i, j, Matrix_get(A, i, j) + Matrix_get(B, i, j)); // Сложение матрицы
+            Matrix_set (result, i, j, Matrix_get(A, i, j) + Matrix_get(B, i, j)); 
         }
     }
     return result;
@@ -110,7 +110,7 @@ struct Matrix Matrix_multiply (struct Matrix A, struct Matrix B) {
     return result;
 }
 
-// Печать матрицы
+
 void Matrix_print (struct Matrix A) {
     for (size_t i = 0; i < A.rows; i++) {
         for (size_t j = 0; j < A.cols; j++) {
@@ -122,9 +122,9 @@ void Matrix_print (struct Matrix A) {
 
 
 int main() {
-    // Границы матрицы
-    struct Matrix A = Matrix_allocate(3, 3);
-    struct Matrix B = Matrix_allocate(3, 3);
+    
+    struct Matrix A = Matrix_allocate(2, 2);
+    struct Matrix B = Matrix_allocate(2, 2);
     
     Matrix_set(A, 0, 0, 1);
     Matrix_set(A, 0, 1, 2);
