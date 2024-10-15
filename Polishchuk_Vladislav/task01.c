@@ -4,29 +4,25 @@
 typedef long long int Money;
 
 
-struct Bank
-{
+struct Bank {
     Money vklad;
-    Money month_pay;
+    Money invest;
 };
 
 
-struct Mortgage
-{
+struct Mortgage {
     double inter_rate;
     Money credit;
-    Money pay;
     Money month_pay;
 };
 
 
-struct Person
-{
+struct Person {
     Money salary;
     Money expenses;
-    Money status;
     Money flat;
     Money remains;
+    Money count;
     struct Mortgage mortgage;
     struct Bank bank;
 };
@@ -38,7 +34,7 @@ struct Person Bob;
 
 void Alice_money()
 {
-    Alice.status = 0;
+    Alice.count = 0;
     Alice.salary = 200 * 1000;
     Alice.expenses = 50 * 1000;
     Alice.remains = 0;
@@ -51,94 +47,84 @@ void Alice_money()
 
 void Alice_mortgage()
 {
-    Alice.status -= Alice.mortgage.month_pay;
+    Alice.count -= Alice.mortgage.month_pay;
 }
 
 
-void Alice_salary(const int month, const int year)
+void Alice_salary(const int month)
 {
     if(month == 12) {
-        Alice.status += Alice.salary;
+        Alice.count += Alice.salary;
     }
 
     if(month == 1) {
         Alice.salary *= 1.08;
     }
 
-    Alice.status += Alice.salary;
+    Alice.count += Alice.salary;
 }
 
 
 void Alice_print()
 {
-    if (Alice.status > Bob.status) {
-        printf ("Alice has more money than Bob on %lld\n", Alice.status - Bob.status);
+    if (Alice.count > Bob.count) {
+        printf ("Alice has more money than Bob on %lld\n", Alice.count - Bob.count);
     }
 
-    if (Alice.status < Bob.status) {
-        printf ("Bob has more money than Alice on %lld\n", Bob.status - Alice.status);
+    if (Alice.count < Bob.count) {
+        printf ("Bob has more money than Alice on %lld\n", Bob.count - Alice.count);
     }
-    printf ("Alice capital = %lld \n", Alice.status);
+    printf ("Alice capital = %lld \n", Alice.count);
 }
 
 
 void Bob_money()
 {
-    Bob.status = 0;
+    Bob.count = 0;
     Bob.salary = 200 * 1000;
     Bob.expenses = 50 * 1000;
     Bob.flat = 30 * 1000; 
     Bob.remains = 0;
-    Bob.bank.month_pay = 120 * 1000;
+    Bob.bank.invest = 120 * 1000;
 }
 
 
-void Bob_salary(const int month, const int year)
+void Bob_salary(const int month)
 {
     if (month == 12) {
-        Bob.status += Bob.salary;
+        Bob.count += Bob.salary;
     }
     if (month == 1) {
         Bob.salary *= 1.08;
     }
 
-    Bob.status += Bob.salary;
+    Bob.count += Bob.salary;
 }
 
 
 void Bob_bank(int deposit)
 {
-    Bob.bank.vklad += (Bob.status * deposit / 100);
+    Bob.bank.vklad += (Bob.count * deposit / 100);
     Bob.bank.vklad += (Bob.bank.vklad * 0.01 / 12);
-}
-
-
-
-void Bob_flat(int year)
-{
-    year = 2024;
-    if (year == 2034 || year == 2044 || year == 2054) {
-        Bob.flat += 10000;
-    }
 }
 
 
 void Bob_print()
 {
-    printf ("Bob capital = %lld\n", Bob.status);
+    printf ("Bob capital = %lld\n", Bob.count);
 }
 
 
-void Bob_car(int year, int month)
+void Bob_car(int month, int flag)
 {   
-    if (year == 2031 && month == 3 && Bob.status == 15 * 1000 * 1000){
-        Bob.status -= 15 * 1000 * 1000;
-    }
-    else if(year >= 2031 && month > 3){
-        Bob.status -= 15 * 1000;
-    }
-    else if(month == 9){
-        Bob.status -= 50 * 1000;
+    if (Bob.bank.vklad >= 3 * 1000 * 1000 && flag == 1){
+        Bob.count -= 3 * 1000 * 1000;
+        Bob.bank.vklad -= 3 * 1000 * 1000;
+        flag = 0;
+    } else if(flag == 0 && month != 9){
+        Bob.count -= 15 * 1000;
+    } else if(flag == 0 && month == 9){
+        Bob.count -= 40 * 1000;
     }
 }
 
@@ -147,19 +133,18 @@ void Bob_car(int year, int month)
 
 void simulation()
 {
-    int month = 9;
+    int month = 1;
     int year = 2024;
 
-    while( !((month == 9) && (year == 2054)) ) {
+    while( !((month == 1) && (year == 2055)) ) {
         
-        Alice_salary(month, year);
+        Alice_salary(month);
         Alice_mortgage();
         
-        Bob_salary(month, year);
-        Bob_flat(year);
+        Bob_salary(month);
         Bob_bank(20);
 
-        Bob_car(year, month);
+        Bob_car(month, 1);
 
         month++;
         if (month == 13) {
