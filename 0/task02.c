@@ -92,8 +92,14 @@ int main()
     Matrix A, B;
     A = matrix_allocate(2, 2);  // TODO: check for allocated
     B = matrix_allocate(2, 2);  // TODO: check for allocated
-    matrix_set(A, (double[]){1., 2., 3., 4.});
-    matrix_set(B, (double[]){1., 0., 0., 1.});
+    matrix_set(A, (double[]){
+            1., 2.,
+            3., 4.
+        });
+    matrix_set(B, (double[]){
+            1., 0.,
+            0., 1.
+        });
     matrix_print(A);
     matrix_print(B);
 
