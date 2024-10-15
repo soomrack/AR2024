@@ -1,81 +1,77 @@
 #include <stdio.h>
 
-int A_salary = 200 * 1000;
-int B_salary = 200 * 1000;
-long flat = 1400 * 10000;
-int A_mortgage = 50 * 1000;
-int B_rent = 40 * 1000;
-int A_expenses = 50 * 1000;
-int B_expenses = 60 * 1000;
-long A_account = 0;
-int year; int month;
-long B_account = 0;
+typedef long money;
 
-void Alice()
-{
-    while (year <= 2024 + 30)
-    {
-        A_account += A_salary;
-        A_account -= A_expenses - A_mortgage;
+struct person {
+    money salary;
+    money account;
+    money charges;
+    money rent;
+    money flat;
+    money loan;
+    money unforeseen_situations;
+};
+person Bob{ 200 * 1000, 1000 * 1000, 25 * 1000, 40 * 1000, 0, 100 * 1000, 10 * 1000 };
+person Alice{ 200 * 1000, 1000 * 1000, 30 * 1000, 0, 14000 * 1000, 100 * 1000, 10 * 1000 };
 
+void Bob_salary(const int month, const int year) {
+    if (month == 12) {
+        Bob.salary *= 1.08;
+    }
+    Bob.account += Bob.salary;
+} 
+
+void Bob_charges(const int month, const int year) {
+    if (month == 12) {
+        Bob.rent *= 1.08;
+        Bob.unforeseen_situations *= 1.08;
+    }
+    Bob.charges = Bob.unforeseen_situations + Bob.rent;
+    Bob.account -= Bob.charges;
+}
+
+void Alice_salary(const int month, const int year) {
+    if (month == 12) {
+        Alice.salary *= 1.08;
+        Alice.flat *= 1.08;
+    }
+    Alice.account += Alice.salary;
+}
+
+void Alice_charges(const int month, const int year) {
+    if (month == 12) {
+        Alice.unforeseen_situations *= 1.08;
+    }
+    Alice.charges = Alice.unforeseen_situations + Alice.loan;
+    Alice.account -= Alice.charges;
+}
+
+int year;
+int month;
+
+void simulation() {
+    while (!(year == 2054 && month == 10)) {
+        Alice_salary(month, year);
+        Alice_charges(month, year);
+        Bob_salary(month, year);
+        Bob_charges(month, year);
         month++;
-        if (month == 13)
-        {
-            year++;
+        if (month == 13) {
+            year = year + 1;
             month = 1;
         }
-
-        if (month == 12)
-        {
-            A_salary *= 1.08;
-            flat *= 1.08;  // индексация //
-            A_expenses *= 1.08;
-        }
-        if (year == 2024 + 30 && month == 10) break;
-    }
-    A_account += flat;
-}
-
-void Bob()
-{
-    while (year <= 2024 + 30)
-    {
-        B_account += B_salary;
-        B_account -= B_expenses -= B_rent;
-
-        month++;
-        if (month == 13)
-        {
-            year++;
-            month = 1;
-        }
-
-        if (month == 12)
-        {
-            B_salary *= 1.08;
-            B_expenses *= 1.08; // индексация //
-            B_rent *= 1.08;
-        }
-        if (year == 2024 + 30 && month == 10) break;
     }
 }
 
-void result()
-{
-    if (B_account > A_account)
-    {
-        printf("Bob has more money than Alice!\n");
-    }
-    else
-    {
-        printf("Alice has more money then Bob!\n");
+void result() {
+    if (Bob.account > Alice.account) {
+        printf("Bob is richer\n");
+    } else {
+        printf("Alice is richer\n");
     }
 }
-
-int main()
-{
-    Alice();
-    Bob();
+int main() {
+    simulation();
     result();
     return 0;
 }
