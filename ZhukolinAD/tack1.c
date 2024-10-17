@@ -6,6 +6,7 @@ int year = 2024;
 double summ1 = 0;
 double summ2 = 0;
 
+
 struct human{
   struct expenses{
     double food;
@@ -45,6 +46,7 @@ struct expenses bob = {
   .utilities = 12000,
   .other = 50000
 };
+
 
 struct human Bob = {
   .salary=300*1000,
@@ -96,6 +98,7 @@ void bob_salary(int month, int year) {
 
   Bob.account += Bob.salary;
 }
+
 
 void bob_expenses(int month, int year) {
   if (month == 12)
