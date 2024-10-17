@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <locale.h>
 
 
 int month = 9;
