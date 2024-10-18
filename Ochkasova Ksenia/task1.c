@@ -144,7 +144,7 @@ void simulation( )
 		
 	Alice_monthpay (month);
 
-	Alice_rashod (month):
+	Alice_rashod (month);
 
 	Bob_zarplata (month, year);
 		
