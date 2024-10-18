@@ -38,8 +38,10 @@ void Alice_zarplata (const int month, const int year) {
 	
     if (month == 1) {
         Alice.zarplata *= 1.1;
-    }
+  }
+
 	Alice.account += Alice.zarplata;
+  
 }
 
 void Alice_monthpay (int year)
@@ -92,6 +94,7 @@ void Bob_zarplata (const int month, const int year) {
 	Bob.zarplata *= 1.1;
     }
 	Bob.account += Bob.zarplata;
+    
 }
 
 void Bob_monthpay (int year)
@@ -114,16 +117,16 @@ void Bob_rashod(const int month)
 
 void Bob_print( )
 {
-    printf ("bob capital = %lld\n", Bob.account);
+    printf ("bob capital = %lld \n", Bob.account);
 }
 
 void Alice_print( )
 {
     if (Alice.account > Bob.account) {
-        printf ("Alice has more money on \n");
+        printf ("Alice has more money \n");
     }	
     if (Bob.account > Alice.account) {
-	printf ("Bob has more money on \n");
+	printf ("Bob has more money \n");
     }
     printf ("alice capital = %lld \n", Alice.account);
 }
@@ -169,4 +172,3 @@ int main()
     Bob_print();
     return 0;
 }
-
