@@ -118,16 +118,16 @@ void Bob_rashod(const int month)
 
 void Bob_print( )
 {
-    printf ("bob capital = %lld \n", Bob.account);
+    printf ("bob capital = %lld\n", Bob.account);
 }
 
 void Alice_print( )
 {
     if (Alice.account > Bob.account) {
-        printf ("Alice has more money on %lld\n");
+        printf ("Alice has more money on \n");
     }	
     if (Bob.account > Alice.account) {
-	printf ("Bob has more money on %lld\n");
+	printf ("Bob has more money on \n");
     }
     printf ("alice capital = %lld \n", Alice.account);
 }
