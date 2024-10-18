@@ -38,10 +38,8 @@ void Alice_zarplata (const int month, const int year) {
 	
     if (month == 1) {
         Alice.zarplata *= 1.1;
-  }
-    if (month == 9) {
+    }
 	Alice.account += Alice.zarplata;
-  }
 }
 
 void Alice_monthpay (int year)
@@ -93,9 +91,7 @@ void Bob_zarplata (const int month, const int year) {
     if (month == 1) {
 	Bob.zarplata *= 1.1;
     }
-    if (month == 9) {
 	Bob.account += Bob.zarplata;
-    }
 }
 
 void Bob_monthpay (int year)
