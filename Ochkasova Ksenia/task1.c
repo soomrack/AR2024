@@ -59,6 +59,15 @@ void Alice_ipoteka ()
       Alice.account -= Alice.ipoteka.monthpay;
 }
 
+void Alice_rashod(const int month)
+{
+    Alice.account -= Alice.rashod;
+    
+    if (month == 1) {
+        Alice.rashod *= 1.1;
+    }
+}
+	
 void Bob_money () {
     Bob.account = 0;
     Bob.zarplata = 200000;
@@ -98,6 +107,15 @@ void Bob_monthpay (int year)
     }
 }
 
+void Bob_rashod(const int month)
+{
+    Bob.account -= Bob.rashod;
+    
+    if (month == 1) {
+        Bob.rashod *= 1.1;
+    }
+}
+
 void Bob_print( )
 {
     printf ("bob capital = %lld \n", Bob.account);
@@ -125,22 +143,18 @@ void simulation( )
         Alice_zarplata (month, year);
 		
 	Alice_monthpay (month);
+
+	Alice_rashod (month):
+
+	Bob_zarplata (month, year);
+		
+	Bob_monthpay (month);
+
+	Bob_rashod (month);
 		
 	    month++;
 	    if (month == 13) {
 	        month = 1;
-		year++;
-	    }
-    }
-    while ( !((month == 9) && (year == 2024 + 30)) ) {
-		
-        Bob_zarplata (month, year);
-		
-	Bob_monthpay (month);
-		
-	    month++;
-	    if (month == 13) {
-		month = 1;
 		year++;
 	    }
     }
