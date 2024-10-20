@@ -15,11 +15,17 @@ struct Person {
     Money account;
     Money food;
     Money expences;
-    Money deposit_rate; // monthly!
     Money flat;
     struct Mortgage mortgage;
 };
 
+struct Bank_account {
+    Money deposit_rate; // monthly!
+    Money account;
+    int deposit_rate_elevation;
+};
+
+struct Bank_account bank_account;
 struct Person alice;
 struct Person bob;
 
@@ -39,7 +45,14 @@ void bob_flat(const int month)
 
 void bob_deposit()
 {
-    bob.account *= bob.deposit_rate;
+    bank_account.account = bob.account;
+    bank_account.account *= bank_account.deposit_rate;
+    if (bank_account.account >= 10000 * 1000 && bank_account.deposit_rate_elevation < 1) {
+        bank_account.deposit_rate += 0.01;
+        bank_account.deposit_rate_elevation++;
+    };
+    bob.account = bank_account.account;
+    bank_account.account = 0;
 }
 
 void alice_food(const int month)
@@ -86,14 +99,20 @@ void alice_init()
     alice.account -= alice.mortgage.platez;
 }
 
+void bank_init()
+{
+    bank_account.account = 0;
+    bank_account.deposit_rate = 1.2;
+    bank_account.deposit_rate_elevation = 0;
+}
+
 void bob_init()
 {
     bob.salary = 200 * 1000;
     bob.food = 10 * 1000;
     bob.expences = 70 * 1000;
 
-    bob.flat = 100 * 1000;
-    bob.deposit_rate = 0.18;
+    bob.flat = 40 * 1000;
 }
 void alice_print()
 {

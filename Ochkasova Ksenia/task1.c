@@ -39,9 +39,9 @@ void Alice_zarplata (const int month, const int year) {
     if (month == 1) {
         Alice.zarplata *= 1.1;
   }
-    if (month == 9) {
+
 	Alice.account += Alice.zarplata;
-  }
+  
 }
 
 void Alice_monthpay (int year)
@@ -59,6 +59,15 @@ void Alice_ipoteka ()
       Alice.account -= Alice.ipoteka.monthpay;
 }
 
+void Alice_rashod(const int month)
+{
+    Alice.account -= Alice.rashod;
+    
+    if (month == 1) {
+        Alice.rashod *= 1.1;
+    }
+}
+	
 void Bob_money () {
     Bob.account = 0;
     Bob.zarplata = 200000;
@@ -84,9 +93,8 @@ void Bob_zarplata (const int month, const int year) {
     if (month == 1) {
 	Bob.zarplata *= 1.1;
     }
-    if (month == 9) {
 	Bob.account += Bob.zarplata;
-    }
+    
 }
 
 void Bob_monthpay (int year)
@@ -98,6 +106,15 @@ void Bob_monthpay (int year)
     }
 }
 
+void Bob_rashod(const int month)
+{
+    Bob.account -= Bob.rashod;
+    
+    if (month == 1) {
+        Bob.rashod *= 1.1;
+    }
+}
+
 void Bob_print( )
 {
     printf ("bob capital = %lld \n", Bob.account);
@@ -106,10 +123,10 @@ void Bob_print( )
 void Alice_print( )
 {
     if (Alice.account > Bob.account) {
-        printf ("Alice has more money on %lld\n");
+        printf ("Alice has more money \n");
     }	
     if (Bob.account > Alice.account) {
-	printf ("Bob has more money on %lld\n");
+	printf ("Bob has more money \n");
     }
     printf ("alice capital = %lld \n", Alice.account);
 }
@@ -125,22 +142,18 @@ void simulation( )
         Alice_zarplata (month, year);
 		
 	Alice_monthpay (month);
+
+	Alice_rashod (month);
+
+	Bob_zarplata (month, year);
+		
+	Bob_monthpay (month);
+
+	Bob_rashod (month);
 		
 	    month++;
 	    if (month == 13) {
 	        month = 1;
-		year++;
-	    }
-    }
-    while ( !((month == 9) && (year == 2024 + 30)) ) {
-		
-        Bob_zarplata (month, year);
-		
-	Bob_monthpay (month);
-		
-	    month++;
-	    if (month == 13) {
-		month = 1;
 		year++;
 	    }
     }
@@ -159,4 +172,3 @@ int main()
     Bob_print();
     return 0;
 }
-

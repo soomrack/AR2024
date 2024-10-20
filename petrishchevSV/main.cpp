@@ -1,89 +1,180 @@
 #include <stdio.h>
 #include <cmath>
-#define __max(a,b)  (((a) > (b)) ? (a) : (b))
-#define __min(a,b)  (((a) < (b)) ? (a) : (b))
-float infliation = 1.09,index_salary = 1.03, deposit_percents = 1.16,
-loan_percents = 18;
-long long int price_apartment = 95*100*1000;
-int years = 30;
 
-struct person
-{
-int salary;
-int food_expenses;
-long long int money;
-int pay_for_flat_loan;
-int credit_pay;
+typedef long long int rub;
+
+
+int YEARS_SIMULATION = 30,
+START_YEAR = 2024;
+double INFLIATION = 1.09;
+
+
+
+struct Mortgage{
+double rate;
+rub credit;
+rub month_pay;
 };
-int loan_payment_calculation(struct person user){
-    // Преобразование годовой процентной ставки в месячную и в десятичный формат
-    double monthlyRate = loan_percents / (12*100);
-    // Общее количество платежей
-    int totalPayments = years * 12;
-    int monthlyPayment = ((price_apartment - user.money) * monthlyRate * pow(1 + monthlyRate, totalPayments))/(pow(1 + monthlyRate, totalPayments) - 1);
-    //printf("\n %i",monthlyPayment);
-    return(monthlyPayment);
-    }
-
-int alice_simulation(struct person user){
-    if(user.salary<user.credit_pay+user.food_expenses)
-    {
-        printf("\n Alice salary is too low"); 
-        return(0); 
-    }
-    
-    for(int year=0; year<years; year++)
-    {
-        user.money = user.money+(12*((user.salary*index_salary)-user.food_expenses*infliation - user.credit_pay));
-    }
-    user.money = user.money + price_apartment * pow(infliation,years);
-    printf("\nAlice ""%lli ", user.money );
-}
-
-int bob_simulation(struct person user)
-{
-    if(user.salary<user.pay_for_flat_loan+user.food_expenses)
-    {
-        printf("\n Bob salary is too low"); 
-        return(0); 
-    }
-    float networth;
-    for(int year=0; year<years; year++)
-    {
-            user.money = user.money*deposit_percents;
-            networth = 12*((user.salary*index_salary)-((user.food_expenses+user.pay_for_flat_loan)*infliation));
-            user.money = user.money + networth;
-            networth = 0;
-        }
-    printf("\nBob ""%lli ", user.money);
-}
-
-int main() 
-{
-person bob;
-bob.salary = 200*1000;
-bob.money = 1000*1000;
-bob.food_expenses = 50*1000;
-bob.pay_for_flat_loan = 30*1000;
-
-person alice;
-alice.salary = 200*1000;
-alice.money = 1000*1000;
-alice.food_expenses = 50*1000;
-alice.credit_pay = loan_payment_calculation(person(alice));
 
 
-alice_simulation(person(alice));
-bob_simulation(person(bob));
+struct Bank{
+double rate;
+rub credit;
+};
 
 
-//костыль для оценки стратегий
-// float b0b = bob_end_simulation;
-// float all = alice_end_simulation;
-// if (__min(all,b0b)/__max(all,b0b)>0.95) printf("\nboth of these strategics are good");
-// else
+struct Person{
+double index_s;
+rub salary;
+rub status;
+rub expenses;
+
+rub apartment;
+rub loan_kvartira_pay;
+
+struct Mortgage mortgage;
+struct Bank bank;
+};
+
+
+
+// rub loan_payment_calculation(struct Person user)
 // {
-// if (all>b0b) printf("\nAlice strategic is better");
-// else printf("\nBob strategic is better");
+//     double monthly_rate = user.mortgage.rate / (12*100);
+//     int total_payments = YEARS_SIMULATION * 12;
+//     int monthly_payment = ((user.mortgage.credit) * monthly_rate * pow(1 + monthly_rate, total_payments))/(pow(1 + monthly_rate, total_payments) - 1);
+//     //printf("\n %i",monthlyPayment);
+//     return(monthly_payment);
 // }
+
+
+Person bob;
+Person alice;
+
+
+void alice_money()
+{
+    alice.salary = 200 * 1000;
+    alice.status = 1000 * 1000;
+    alice.expenses = 50 * 1000;
+    alice.apartment = 9500 * 1000;
+    alice.index_s = 1.09;
+
+    alice.mortgage.rate  = 17;
+    alice.mortgage.credit =  alice.apartment - alice.status;
+    alice.status = 0;
+    alice.mortgage.month_pay = 150 * 1000;
 }
+
+void alice_mortgage(int month)
+{
+alice.status -= alice.mortgage.month_pay;
+alice.status -= alice.expenses;
+if (month == 12)
+{
+alice.apartment *= INFLIATION;
+}
+
+}
+
+
+void bob_money()
+{
+bob.salary = 200*1000;
+bob.status = 1000 * 1000;
+bob.expenses = 50 * 1000;
+bob.bank.rate = 1.01245;
+bob.loan_kvartira_pay = 50*1000;
+}
+
+
+void bob_bank()
+{
+bob.status -= bob.expenses;
+bob.status *= bob.bank.rate;
+}
+
+
+void bob_kvartira(int year,int month)
+{
+bob.status -= bob.loan_kvartira_pay;
+if (((year - START_YEAR)%5 == 0) and (month == 9))
+{
+    bob.loan_kvartira_pay += 5000;
+}
+
+}
+
+
+void alice_salary(int month)
+{
+    if (month==12)
+    {
+        alice.salary *= alice.index_s;
+    }
+    alice.status += alice.salary;
+    printf("\n %i", alice.salary);
+}
+
+
+void simulation()
+{
+    int month = 10;
+    int year = START_YEAR;
+    int end_year = START_YEAR + YEARS_SIMULATION;
+
+    while( not(((month == 10) and (year == end_year))) ) 
+    {
+        alice_salary(month);
+        
+        alice_mortgage(month);
+        
+        bob.status += 200000;
+        bob_bank();
+        bob_kvartira(year,month);
+
+        month++;
+        if(month == 13) 
+        {
+            month = 1;
+            year++;
+        }
+        //debug
+        printf("\n %i", alice.mortgage.month_pay);
+        printf("\n %i", alice.status);
+    }
+    alice.status += alice.apartment;
+}
+
+
+void strategic_evaluation()
+{
+    printf("\n Bob  %i", bob.status );
+    printf("\n Alice  %i", alice.status );
+    
+    if (alice.status > bob.status)
+    {
+        printf("\n Alice strategic is better");
+    }
+    else
+    {
+        printf("\n Bob strategic is better");
+    }
+
+}
+
+
+int main()
+{
+    alice_money();
+
+    bob_money();
+
+    simulation();
+
+    strategic_evaluation();
+    return 1;
+}
+
+
+
