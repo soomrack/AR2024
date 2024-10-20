@@ -4,167 +4,202 @@
 #include <string.h>
 
 
-struct Matrix {
+struct Matrix 
+{
     size_t cols; 
-    size_t rows; 
-    double* data; 
+    size_t rows;  
+    double* data;
 }; 
 
 
-struct Matrix Matrix_allocate (size_t cols, size_t rows) {
-    struct Matrix A = {cols, rows, NULL};
-    A.data = (double*) malloc (cols * rows * sizeof(double));
+void martix_exception(const int code, char* msg)
+{
+    if(code == 1)
+    {
+        printf("ERROR: %s\n", msg);   // Ошибка
+    }
+
+    if(code == 2)
+    {
+        printf("Matrix %s\n", msg);   // Матрица
+    }
+}
+
+
+struct Matrix matrix_allocate (size_t cols, size_t rows) 
+{
+    struct Matrix A = {cols, rows, NULL};  //Не выделять 0 памяти (проверку)
+    A.data = (double*)malloc(cols * rows * sizeof(double)); // Что бы влезало в SIZE_MAX
     
-    if (A.data == NULL) {
-        printf ("Error: Unable to allocate memory\n"); // Ошибка выделения памяти
-        return (struct Matrix) {0, 0, NULL};
+    if (A.data == NULL) 
+    {
+        martix_exception(1, "Unable to allocate memory");
+        return(struct Matrix) {0, 0, NULL};
     }
     
-    memset (A.data, 0, cols * rows * sizeof(double)); // Заполнение матрицы нулями
     return A;
 } 
 
 
-void Matrix_free (struct Matrix A) {
-    if (A.data != NULL) {
-        free (A.data);
-        A.data = NULL;
-    }
+void matrix_free (struct Matrix* A) 
+{
+    free (A->data);
+    *A = (struct Matrix){0, 0, NULL};
+
 }
 
 // Функция для доступа к элементу матрицы
-double Matrix_get (struct Matrix A, size_t row, size_t col) {
+double matrix_get (struct Matrix A, size_t row, size_t col) 
+{
     return A.data [A.cols * row + col];
 }
 
 // Функция для установки значения в элемент матрицы
-void Matrix_set (struct Matrix A, size_t row, size_t col, double value) {
+void matrix_set (struct Matrix A, size_t row, size_t col, double value) 
+{
     A.data [A.cols * row + col] = value;
 }
 
 // Сложение двух матриц
-struct Matrix Matrix_add (struct Matrix A, struct Matrix B) {
-    if (A.rows != B.rows || A.cols != B.cols) {
-        printf ("Error: the dimensions of the matrices do not match for addition\n"); 
+struct Matrix matrix_add (struct Matrix A, struct Matrix B) 
+{
+    if(A.rows != B.rows || A.cols != B.cols) 
+    {
+        martix_exception (1, "The dimensions of the matrices do not match for addition");
         return (struct Matrix) {0, 0, NULL};
     }
 
-    struct Matrix result = Matrix_allocate (A.cols, A.rows); 
+    struct Matrix result = matrix_allocate (A.cols, A.rows); 
     
-    for (size_t i = 0; i < A.rows; i++) {
-        for (size_t j = 0; j < A.cols; j++) {
-            Matrix_set (result, i, j, Matrix_get(A, i, j) + Matrix_get(B, i, j)); 
-        }
+    for(size_t idx = 0; idx < A.rows * A.cols; ++idx);
+    {
+        result.data[idx] = A.data[idx] + B.data[idx];
     }
     return result;
 }
 
 // Вычитание двух матриц
-struct Matrix Matrix_subtract (struct Matrix A, struct Matrix B) {
-    if (A.rows != B.rows || A.cols != B.cols) {
-        printf ("Error: the sizes of the matrices do not match for subtraction\n");
+struct Matrix matrix_subtract (struct Matrix A, struct Matrix B) 
+{
+    if (A.rows != B.rows || A.cols != B.cols) 
+    {
+        martix_exception (1, "The sizes of the matrices do not match for subtraction");
         return (struct Matrix){0, 0, NULL};
     }
 
-    struct Matrix result = Matrix_allocate (A.cols, A.rows);
+    struct Matrix result = matrix_allocate (A.cols, A.rows);
     
-    for (size_t i = 0; i < A.rows; i++) {
-        for (size_t j = 0; j < A.cols; j++) {
-            Matrix_set (result, i, j, Matrix_get(A, i, j) - Matrix_get(B, i, j));
+    for (size_t i = 0; i < A.rows; i++) 
+    {
+        for (size_t j = 0; j < A.cols; j++) 
+        {
+            matrix_set (result, i, j, matrix_get(A, i, j) - matrix_get(B, i, j));
         }
     }
     return result;
 }
 
 // Умножение матрицы на число
-struct Matrix Matrix_scalar_multiply (struct Matrix A, double scalar) {
-    struct Matrix result = Matrix_allocate (A.cols, A.rows);
+struct Matrix matrix_scalar_multiply (struct Matrix A, double scalar) 
+{
+    struct Matrix result = matrix_allocate (A.cols, A.rows);
     
-    for (size_t i = 0; i < A.rows; i++) {
-        for (size_t j = 0; j < A.cols; j++) {
-            Matrix_set (result, i, j, Matrix_get(A, i, j) * scalar);
+    for (size_t i = 0; i < A.rows; i++) 
+    {
+        for (size_t j = 0; j < A.cols; j++) 
+        {
+            matrix_set (result, i, j, matrix_get(A, i, j) * scalar);
         }
     }
     return result;
 }
 
 // Умножение матрицы на матрицу
-struct Matrix Matrix_multiply (struct Matrix A, struct Matrix B) {
-    if (A.cols != B.rows) {
+struct Matrix matrix_multiply (struct Matrix A, struct Matrix B) 
+{
+    if (A.cols != B.rows) 
+    {
         // Неравное кол-во строк и столбцов в обоих матриц
-        printf ("Error: the number of columns of the first matrix is not equal to the number of rows of the second matrix\n");
+        martix_exception (1, "The number of columns of the first matrix is not equal to the number of rows of the second matrix");
         return (struct Matrix) {0, 0, NULL};
     }
 
-    struct Matrix result = Matrix_allocate (B.cols, A.rows);
+    struct Matrix result = matrix_allocate (B.cols, A.rows);
     
-    for (size_t i = 0; i < A.rows; i++) {
-        for (size_t j = 0; j < B.cols; j++) {
+    for (size_t i = 0; i < A.rows; i++) 
+    {
+        for (size_t j = 0; j < B.cols; j++) 
+        {
             double sum = 0.0; // Сумма для кождого элемента
-            for (size_t k = 0; k < A.cols; k++) {
-                sum += Matrix_get(A, i, k) * Matrix_get(B, k, j); // Умножение матрицы на матрицу
+            for (size_t k = 0; k < A.cols; k++) 
+            {
+                sum += matrix_get(A, i, k) * matrix_get(B, k, j); // Умножение матрицы на матрицу
             }
-            Matrix_set (result, i, j, sum); // Сохранение результата
+            matrix_set (result, i, j, sum); // Сохранение результата
         }
     }
     return result;
 }
 
 
-void Matrix_print (struct Matrix A) {
-    for (size_t i = 0; i < A.rows; i++) {
-        for (size_t j = 0; j < A.cols; j++) {
-            printf ("%d ", Matrix_get(A, i, j));
+void matrix_print (struct Matrix A) 
+{
+    for (size_t i = 0; i < A.rows; i++) 
+    {
+        for (size_t j = 0; j < A.cols; j++) 
+        {
+            printf ("%2.1f ", matrix_get(A, i, j));
         }
         printf ("\n");
     }
 }
 
 
-int main() {
+int main() 
+{
     
-    struct Matrix A = Matrix_allocate(2, 2);
-    struct Matrix B = Matrix_allocate(2, 2);
+    struct Matrix A = matrix_allocate(2, 2);
+    struct Matrix B = matrix_allocate(2, 2);
     
-    Matrix_set(A, 0, 0, 1);
-    Matrix_set(A, 0, 1, 2);
-    Matrix_set(A, 1, 0, 3);
-    Matrix_set(A, 1, 1, 4);
+    matrix_set(A, 0, 0, 1);
+    matrix_set(A, 0, 1, 2);
+    matrix_set(A, 1, 0, 3);
+    matrix_set(A, 1, 1, 4);
 
-    Matrix_set(B, 0, 0, 5);
-    Matrix_set(B, 0, 1, 6);
-    Matrix_set(B, 1, 0, 7);
-    Matrix_set(B, 1, 1, 8);
+    matrix_set(B, 0, 0, 5);
+    matrix_set(B, 0, 1, 6);
+    matrix_set(B, 1, 0, 7);
+    matrix_set(B, 1, 1, 8);
 
-    printf ("Matrix A:\n");
-    Matrix_print(A);
+    printf("Matrix A:\n");
+    matrix_print(A);
 
-    printf ("Matrix B:\n");
-    Matrix_print(B);
+    printf("Matrix B:\n");
+    matrix_print(B);
 
-    struct Matrix C = Matrix_add (A, B);
-    printf ("The amount A and B:\n");
-    Matrix_print(C);
+    struct Matrix C = matrix_add (A, B);
+    printf("The amount A and B:\n");
+    matrix_print(C);
 
-    struct Matrix D = Matrix_subtract (A, B);
-    printf ("Difference A and B:\n");
-    Matrix_print(D);
+    struct Matrix D = matrix_subtract (A, B);
+    printf("Difference A and B:\n");
+    matrix_print(D);
 
-    struct Matrix E = Matrix_scalar_multiply (A, 2.0);
-    printf ("Multiplication A on 2.0:\n");
-    Matrix_print(E);
+    struct Matrix E = matrix_scalar_multiply (A, 2.0);
+    printf("Multiplication A on 2.0:\n");
+    matrix_print(E);
 
-    struct Matrix F = Matrix_multiply (A, B);
-    printf ("Multiplication A on B:\n");
-    Matrix_print(F);
+    struct Matrix F = matrix_multiply (A, B);
+    printf("Multiplication A on B:\n");
+    matrix_print(F);
 
     
-    Matrix_free(A);
-    Matrix_free(B);
-    Matrix_free(C);
-    Matrix_free(D);
-    Matrix_free(E);
-    Matrix_free(F);
+    matrix_free(&A);
+    matrix_free(&B);
+    matrix_free(&C);
+    matrix_free(&D);
+    matrix_free(&E);
+    matrix_free(&F);
 
     return 0;
 }
