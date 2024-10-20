@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
+#include <limits.h>
 
 
 struct Matrix 
@@ -12,7 +13,7 @@ struct Matrix
 }; 
 
 
-void martix_exception(const int code, char* msg)
+void matrix_exception(const int code, char* msg)
 {
     if(code == 1)
     {
@@ -28,12 +29,25 @@ void martix_exception(const int code, char* msg)
 
 struct Matrix matrix_allocate (size_t cols, size_t rows) 
 {
-    struct Matrix A = {cols, rows, NULL};  //Не выделять 0 памяти (проверку)
-    A.data = (double*)malloc(cols * rows * sizeof(double)); // Что бы влезало в SIZE_MAX
+    struct Matrix A = {cols, rows, NULL};  
+    A.data = (double*)malloc(cols * rows * sizeof(double)); 
     
+    if (cols == 0 || rows == 0) 
+    {
+        matrix_exception(1, "Matrix dimensions must be greater than 0");    //Размер матрицы должен быть больше 0
+        return (struct Matrix){0, 0, NULL};
+    }
+
+    if (cols > SIZE_MAX / rows || (cols * rows) > SIZE_MAX / sizeof(double)) 
+    {
+        matrix_exception(1, "Matrix size exceeds allowable memory limit");  //Размер матрицы превышает допустимый предел памяти
+        return (struct Matrix){0, 0, NULL};
+    }
+
+
     if (A.data == NULL) 
     {
-        martix_exception(1, "Unable to allocate memory");
+        matrix_exception(1, "Unable to allocate memory");   //Не удается выделить память
         return(struct Matrix) {0, 0, NULL};
     }
     
@@ -65,13 +79,13 @@ struct Matrix matrix_add (struct Matrix A, struct Matrix B)
 {
     if(A.rows != B.rows || A.cols != B.cols) 
     {
-        martix_exception (1, "The dimensions of the matrices do not match for addition");
+        matrix_exception (1, "The dimensions of the matrices do not match for addition");   //Размеры матриц не совпадают при сложении
         return (struct Matrix) {0, 0, NULL};
     }
 
     struct Matrix result = matrix_allocate (A.cols, A.rows); 
     
-    for(size_t idx = 0; idx < A.rows * A.cols; ++idx);
+    for (size_t idx = 0; idx < A.rows * A.cols; ++idx)
     {
         result.data[idx] = A.data[idx] + B.data[idx];
     }
@@ -83,18 +97,15 @@ struct Matrix matrix_subtract (struct Matrix A, struct Matrix B)
 {
     if (A.rows != B.rows || A.cols != B.cols) 
     {
-        martix_exception (1, "The sizes of the matrices do not match for subtraction");
+        matrix_exception (1, "The sizes of the matrices do not match for subtraction");   //Размеры матриц не совпадают при вычитании
         return (struct Matrix){0, 0, NULL};
     }
 
     struct Matrix result = matrix_allocate (A.cols, A.rows);
-    
-    for (size_t i = 0; i < A.rows; i++) 
+
+    for (size_t idx = 0; idx < A.rows * A.cols; ++idx)
     {
-        for (size_t j = 0; j < A.cols; j++) 
-        {
-            matrix_set (result, i, j, matrix_get(A, i, j) - matrix_get(B, i, j));
-        }
+        result.data[idx] = A.data[idx] - B.data[idx];
     }
     return result;
 }
@@ -104,12 +115,9 @@ struct Matrix matrix_scalar_multiply (struct Matrix A, double scalar)
 {
     struct Matrix result = matrix_allocate (A.cols, A.rows);
     
-    for (size_t i = 0; i < A.rows; i++) 
+    for (size_t idx = 0; idx < A.rows * A.cols; ++idx)
     {
-        for (size_t j = 0; j < A.cols; j++) 
-        {
-            matrix_set (result, i, j, matrix_get(A, i, j) * scalar);
-        }
+        result.data[idx] = A.data[idx] * scalar;
     }
     return result;
 }
@@ -120,22 +128,22 @@ struct Matrix matrix_multiply (struct Matrix A, struct Matrix B)
     if (A.cols != B.rows) 
     {
         // Неравное кол-во строк и столбцов в обоих матриц
-        martix_exception (1, "The number of columns of the first matrix is not equal to the number of rows of the second matrix");
+        martix_exception (1, "The number of columns of the first matrix is not equal to the number of rows of the second matrix");   //Количество столбцов первой матрицы не равно количеству строк второй матрицы
         return (struct Matrix) {0, 0, NULL};
     }
 
     struct Matrix result = matrix_allocate (B.cols, A.rows);
     
-    for (size_t i = 0; i < A.rows; i++) 
+    for (size_t row = 0; row < A.rows; row++) 
     {
-        for (size_t j = 0; j < B.cols; j++) 
+        for (size_t col = 0; col < B.cols; col++) 
         {
-            double sum = 0.0; // Сумма для кождого элемента
-            for (size_t k = 0; k < A.cols; k++) 
+            result.data[row * result.cols + col] = 0.0; // Сумма для кождого элемента
+
+            for (size_t idx = 0; idx < A.cols; idx++)
             {
-                sum += matrix_get(A, i, k) * matrix_get(B, k, j); // Умножение матрицы на матрицу
+                result.data[row * result.cols + col] += A.data[row * A.cols + idx] * B.data[idx * B.cols  + col]; // Умножение матрицы на матрицу
             }
-            matrix_set (result, i, j, sum); // Сохранение результата
         }
     }
     return result;
@@ -144,11 +152,11 @@ struct Matrix matrix_multiply (struct Matrix A, struct Matrix B)
 
 void matrix_print (struct Matrix A) 
 {
-    for (size_t i = 0; i < A.rows; i++) 
+    for (size_t row = 0; row < A.rows; row++) 
     {
-        for (size_t j = 0; j < A.cols; j++) 
+        for (size_t col = 0; col < A.cols; col++) 
         {
-            printf ("%2.1f ", matrix_get(A, i, j));
+            printf ("%2.1f ", matrix_get(A, row, col));
         }
         printf ("\n");
     }
