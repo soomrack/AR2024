@@ -146,7 +146,7 @@ Matrix matrix_multiply (Matrix A, Matrix B)
                 result.data[row * result.cols + col] += A.data[row * A.cols + idx] * B.data[idx * B.cols  + col]; // Умножение матрицы на матрицу
             }
         }
-    } 
+    }
     return result;
 }
 
