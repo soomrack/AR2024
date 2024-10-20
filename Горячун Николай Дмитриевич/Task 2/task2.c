@@ -25,7 +25,7 @@ void matrix_free(struct Matrix Free)
 {
     if (Free.data != NULL) {
         free(Free.data);
-	    Free.data = NULL;
+        Free.data = NULL;
     };
 }
 
@@ -103,31 +103,31 @@ int main()
     struct Matrix A = Matrix_allocate(3, 3);
     struct Matrix B = Matrix_allocate(3, 3);
 
-	A.data [0] = 1;
-	A.data [1] = 7;
-	A.data [2] = 2;
-	A.data [3] = 6;
-	A.data [4] = 4;
-	A.data [5] = 1;
-	A.data [6] = 3;
-	A.data [7] = 5;
-	A.data [8] = 8;
+    A.data [0] = 1;
+    A.data [1] = 7;
+    A.data [2] = 2;
+    A.data [3] = 6;
+    A.data [4] = 4;
+    A.data [5] = 1;
+    A.data [6] = 3;
+    A.data [7] = 5;
+    A.data [8] = 8;
 
-	B.data [0] = 8;
-	B.data [1] = 5;
-	B.data [2] = 6;
-	B.data [3] = 4;
-	B.data [4] = 1;
-	B.data [5] = 3;
-	B.data [6] = 9;
-	B.data [7] = 7;
-	B.data [8] = 2;
+    B.data [0] = 8;
+    B.data [1] = 5;
+    B.data [2] = 6;
+    B.data [3] = 4;
+    B.data [4] = 1;
+    B.data [5] = 3;
+    B.data [6] = 9;
+    B.data [7] = 7;
+    B.data [8] = 2;
 
-	struct Matrix C = multiply_of_matrixs(A, B);
+    struct Matrix C = multiply_of_matrixs(A, B);
     struct Matrix D = sum_of_matrixs(A, B);
     struct Matrix E = subtraction_of_matrixs(A, B);
     struct Matrix F = multiply_of_constant_and_matrix(A, 5);
-	print_matrix(F);
+    print_matrix(F);
 
     matrix_free(A);
     matrix_free(B);
