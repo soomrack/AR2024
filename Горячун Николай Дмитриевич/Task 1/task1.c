@@ -55,34 +55,37 @@ void bob_init()
 }
 
 
-void alice_expense_counting()
+void alice_deposite_counting()
 {
+    Money account_for_deposite = alice.salary - alice.expenditure - alice.credit_monthly_payment;
     alice.deposite.account += alice.deposite.account * alice.deposite.interest / 12;
-    alice.deposite.account += alice.salary - alice.expenditure - alice.credit_monthly_payment;
+    alice.deposite.account += account_for_deposite;
 };
 
 
-void bob_expense_counting()
+void bob_deposite_counting()
 {
+    Money account_for_deposite = bob.salary - bob.expenditure - bob.rent;
     bob.deposite.account += bob.deposite.account * bob.deposite.interest / 12;
-    bob.deposite.account += bob.salary - bob.expenditure - bob.rent;
+    bob.deposite.account += account_for_deposite;
 };
 
 
-void alice_inflation()
+void alice_expenditure_inflation()
 {
     alice.expenditure += alice.expenditure * inflation;
-    alice.salary += alice.salary * inflation;
+};
+
+void bob_expenditure_inflation()
+{
+    bob.expenditure += bob.expenditure * inflation;
 };
 
 
-void bob_inflation()
+void bob_house_inflation()
 {
-    bob.expenditure += bob.expenditure * inflation;
     bob.rent += bob.rent * inflation;
-    bob.salary += bob.salary * inflation;
     bob.apartment_price += bob.apartment_price * inflation;
-    bob.car_price += bob.car_price * inflation;
 };
 
 
@@ -90,15 +93,18 @@ void bob_inflation()
 void inflation_changes()
 {
     if (new_year == 1) {
-        alice_inflation();
-        bob_inflation();
-        new_year = 0;
-    }
+        alice_expenditure_inflation();
+
+        bob_expenditure_inflation();
+        bob_house_inflation();
+    };
 };
 
 
 void month_and_year_counter()
 {
+    new_year = 0;
+
     month_counter++;
     if (month_counter == 13) {
         year_counter++;
@@ -108,31 +114,53 @@ void month_and_year_counter()
 };
 
 
-void bob_raising()
+void bob_salary()
 {
+    if (new_year == 1) {
+        bob.salary += bob.salary * inflation;
+    }
+
     if (year_counter == bob.year_of_raising) {
         bob.salary += 50000;
     };
 };
 
 
-void bob_buy_car()
+void alice_salary()
 {
+    if (new_year == 1) {
+        alice.salary += alice.salary * inflation;
+    }
+};
+
+
+void bob_car()
+{
+    if (new_year == 1) {
+        bob.car_price += bob.car_price * inflation;
+    };
+
     if (bob.buy_car == 0 && bob.deposite.account >= bob.car_price) {
         bob.deposite.account -= bob.car_price;
         bob.buy_car = 1;
+
+        bob.expenditure += 58 * 150 + 2088;  // бензин (цена за литр * кол-во литров) + налог на машину
     };
 };
 
 
-void cycle_body()
+void simulation()
 {
-    bob_raising();
-    alice_expense_counting();
-    bob_expense_counting();
-    bob_buy_car();
-    month_and_year_counter();
-    inflation_changes();
+    while (year_counter != 30) {
+        inflation_changes();
+        bob_salary();
+        bob_car();
+        bob_deposite_counting();
+
+        alice_deposite_counting();
+
+        month_and_year_counter();
+    };
 };
 
 
@@ -149,12 +177,10 @@ void print()
 int main()
 {
     alice_init();		
-
     bob_init();
+		
+    simulation();
 
-    while (year_counter != 30) {		
-        cycle_body();
-    };
     print();
     return 0;
 }
