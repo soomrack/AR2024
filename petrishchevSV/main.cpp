@@ -37,17 +37,6 @@ struct Bank bank;
 };
 
 
-
-// rub loan_payment_calculation(struct Person user)
-// {
-//     double monthly_rate = user.mortgage.rate / (12*100);
-//     int total_payments = YEARS_SIMULATION * 12;
-//     int monthly_payment = ((user.mortgage.credit) * monthly_rate * pow(1 + monthly_rate, total_payments))/(pow(1 + monthly_rate, total_payments) - 1);
-//     //printf("\n %i",monthlyPayment);
-//     return(monthly_payment);
-// }
-
-
 Person bob;
 Person alice;
 
@@ -80,10 +69,11 @@ alice.apartment *= INFLIATION;
 
 void bob_money()
 {
-bob.salary = 200*1000;
+bob.salary = 200 * 1000;
 bob.status = 1000 * 1000;
 bob.expenses = 50 * 1000;
 bob.bank.rate = 1.01245;
+bob.index_s = 1.09;
 bob.loan_kvartira_pay = 50*1000;
 }
 
@@ -102,9 +92,17 @@ if (((year - START_YEAR)%5 == 0) and (month == 9))
 {
     bob.loan_kvartira_pay += 5000;
 }
-
 }
 
+
+void bob_salary(int month)
+{
+    if (month==12)
+    {
+        bob.salary *= bob.index_s;
+    }
+    bob.status += bob.salary;
+}
 
 void alice_salary(int month)
 {
@@ -113,7 +111,6 @@ void alice_salary(int month)
         alice.salary *= alice.index_s;
     }
     alice.status += alice.salary;
-    printf("\n %i", alice.salary);
 }
 
 
@@ -125,11 +122,11 @@ void simulation()
 
     while( not(((month == 10) and (year == end_year))) ) 
     {
-        alice_salary(month);
         
+        alice_salary(month);
         alice_mortgage(month);
         
-        bob.status += 200000;
+        bob_salary(month);
         bob_bank();
         bob_kvartira(year,month);
 
