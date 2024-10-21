@@ -1,0 +1,57 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef long long int Money;
+
+// 定义银行结构体
+struct Bank {
+    double interestRate;
+    Money deposit;
+};
+
+// 定义人结构体
+struct Person {
+    Money income;
+    Money savings;
+    struct Bank bank;
+};
+
+// 人进行存款操作
+void personDeposit(struct Person *person, Money amount) {
+    person->savings += amount;
+    person->bank.deposit += amount;
+    // 根据银行的利率计算利息并更新存款
+    person->savings += person->savings * person->bank.interestRate;
+}
+
+// 初始化人的财务状况和银行
+void initPersonAndBank(struct Person *person, Money income, double interestRate) {
+    person->income = income;
+    person->savings = 0;
+    person->bank.interestRate = interestRate;
+    person->bank.deposit = 0;
+}
+
+// 打印人的财务状况和银行信息
+void printPersonAndBank(struct Person person) {
+    printf("Income: %lld\n", person.income);
+    printf("Savings: %lld\n", person.savings);
+    printf("Bank Interest Rate: %.2f\n", person.bank.interestRate);
+    printf("Bank Deposit: %lld\n", person.bank.deposit);
+    printf("\n");
+}
+
+int main() {
+    struct Person alice;
+    initPersonAndBank(&alice, 5000, 0.03);
+
+    // 模拟几个月的财务状况变化
+    for (int month = 1; month <= 6; month++) {
+        // 每月收入存入银行
+        personDeposit(&alice, alice.income);
+        printf("Month %d:\n", month);
+        printPersonAndBank(alice);
+    }
+
+    return 0;
+}
