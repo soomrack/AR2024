@@ -1,103 +1,157 @@
 #include <stdio.h>
 
-typedef long long ll;
+typedef long long int  Money; // Rur
 
-ll inflation = 100;
-ll deposit_percentage = 20;
-ll month_deposit = deposit_percentage * 100/12;
-const ll years = 30;
-const int allmonth =  years*12+1;
 
-struct finance {
-    ll capital = 0;
-    ll salary = 0;
-    ll apartment = 0;
-    ll mortgage = 0;
-    ll rent = 0;
-    ll deposit = 0;
-    ll expenses = 0;
+struct Mortgage {
+    Money mortgage;
+    Money month_mortgage;
 };
 
-void Alice_data (struct finance * user) {
-    user->capital = 1e6;
-    user->expenses = 4e6;
-    user->salary = 2e5;
-    user->apartment = 13e6 - user->capital;
-    user->capital = 0;
-    user->mortgage = user->apartment/allmonth;
+
+struct Person {
+    Money account;
+    Money salary;
+    Money apartment;
+    Money rent;
+    Money expenses;
+    Mortgage mymortgage;
+};
+
+
+struct Person Alice;
+struct Person Bob;
+
+
+void init_Alice()
+{
+    Alice.account = 1000000;
+    Alice.salary = 200000;
+    Alice.expenses = 30000;
+    Alice.apartment = 13000000;
+
+    Alice.mymortgage.mortgage = Alice.apartment;
+    Alice.mymortgage.mortgage -= Alice.account;
+    Alice.mymortgage.mortgage *= 1.2;
+    Alice.account = 0;
+
+    Alice.mymortgage.month_mortgage = Alice.mymortgage.mortgage / (30 * 12);
 }
 
-void Bob_data(struct finance * user) {
-    user->capital = 1e6;
-    user->salary = 2e5;
-    user->rent = 3e4;
-    user->expenses = 4e6;
-}
 
-void Change(struct finance ** user, struct finance changes[][allmonth], int a, int b) {
-    --b;
-    (**user).capital += changes[a][b].capital;
-    (**user).salary += changes[a][b].salary;
-    (**user).apartment += changes[a][b].apartment;
-    (**user).mortgage += changes[a][b].mortgage;
-    (**user).rent += changes[a][b].rent;
-    (**user).deposit += changes[a][b].deposit;
-    (**user).expenses += changes[a][b].expenses;
+void init_Bob()
+{
+    Bob.account = 1000000;
+    Bob.salary = 200000;
+    Bob.expenses = 30000;
+    Bob.rent = 30000;
 }
 
 
-void Routine(struct finance Changes[][allmonth], struct finance * Bob, struct finance * Alice) {
-    for (int month = 0; month < allmonth; ++month) {
+void alice_salary(const int month, const int year)
+{
+    Alice.account += Alice.salary;
+    
+    if(month == 9) Alice.salary *= 1.08;
+}
 
-        Change(&Alice, Changes, 0, month);
-        Change(&Bob, Changes, 1, month);
 
-        Bob->capital += Bob->salary;
-        Bob->capital -= Bob->expenses;
-        Bob->capital -= Bob->rent;
-        Bob->deposit += Bob->capital;
-        Bob->deposit *= month_deposit;
-        Bob->deposit /= 100;
-        Bob->capital = 0;
+void alice_expenses(const int month, const int salary)
+{
+    Alice.account -= Alice.expenses;
 
-        Alice->capital+= Alice->salary;
-        Alice->capital -= Alice->mortgage + Alice->expenses;
-        Alice-> deposit += Alice->capital;
-        Alice->deposit*=month_deposit;
-        Alice->deposit/=100;
-        Alice->capital = 0;
+    if(month == 9) Alice.expenses *= 1.08;
+}
 
-        if( month % 12 == 0) {
-            inflation += 8;
-            Bob->salary= Bob->salary * inflation * 100 / (inflation-8);
-            Bob->salary/=inflation;
-            Alice->salary= Alice->salary * inflation * 100 * (inflation-8);
-            Alice->salary/=inflation;
-            Bob->rent = Bob->rent* inflation * 100 / (inflation-8);
-            Bob->rent/=100;
-            Alice->apartment = Alice->apartment* inflation * 100 /(inflation- 8);
-            Alice->apartment/=100;
-            Alice->expenses = Alice->expenses* inflation * 100 /(inflation- 8);
-            Alice->expenses/=100;
-            Bob->expenses = Bob->expenses* inflation * 100 /(inflation- 8);
-            Bob->expenses/=100;
+
+void alice_apartment(const int month, const int year)
+{
+    if (month == 9) Alice.apartment *= 1.08;
+}
+
+
+void alice_mortgage(){
+    Alice.account -= Alice.mymortgage.month_mortgage;
+}
+
+
+void alice_deposit(const int month, const int year)
+{
+    
+
+    Alice.account *= 1 + (0.2 / 12);  // 0.2 = 20 percent
+}
+
+
+void bob_salary(const int month, const int year)
+{
+    Bob.account += Bob.salary;
+
+    if (month == 9) Bob.salary *= 1.08; 
+}
+
+
+void bob_expenses(const int month, const int salary)
+{
+    Bob.account -= Bob.expenses;
+
+    if (month == 9) Bob.expenses *= 1.08;
+}
+
+
+void bob_rent(const int month, const int salary)
+{
+    Bob.account -= Bob.rent;
+
+    if(month == 9) Bob.rent *= 1.08;
+}
+
+
+void bob_deposit(const int month, const int year)
+{
+
+    Bob.account *= 1 + (0.2 / 12); // 0.2 = 20 percent
+}
+
+
+void simulation()
+{
+    int month = 9;
+    int year = 2024;
+
+    while( !((month == 9) && (year == 2024 + 30)) ){
+        alice_salary(month, year);
+        alice_expenses(month, year);
+        alice_apartment(month, year);
+        alice_mortgage();
+        alice_deposit(month, year);
+
+        bob_salary(month, year);
+        bob_rent(month, year);
+        bob_expenses(month, year);
+        bob_deposit(month, year);
+
+        month++;
+        if(month == 13) {
+            month = 1;
+            year++;
         }
-
-
-
     }
 }
 
-
-int main(){
-    finance Bob, Alice, Changes[2][allmonth];
-    Alice_data(&Alice);
-    Bob_data(&Bob);
-    /* если хотите изменить параметры героя, то выберите поле Changes, потом самого героя:
-     * Боб 1
-     * Алиса 2
-     * потом введите месяц, в котором у героя изменятся параметры*/
-    Routine(Changes, &Bob, &Alice);
-    if ( Alice.deposit + Alice.apartment > Bob.deposit) printf("Alice");
+void print()
+{
+    if (Alice.account + Alice.apartment > Bob.account) printf ("Alice");
     else printf("Bob");
+}
+
+
+int main()
+{
+    init_Alice();
+    init_Bob();
+
+    simulation();
+    
+    print();
 }
