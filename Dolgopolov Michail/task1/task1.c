@@ -4,8 +4,8 @@ typedef long long int Money; //RUR
 
 long double inflation = 0.10;
 Money alice_flat_cost = 10 * 1000 * 1000;
-Money bob_yacht_cost = 10 * 1000 * 1000;
-Money yacht_trip_cost = 2 * 1000 * 1000;
+Money bob_yacht_cost = 5 * 1000 * 1000;
+Money yacht_trip_cost = 500 * 1000;
 
 
 struct Deposit{
@@ -137,9 +137,9 @@ void bob_salary(const int month, const int year)
 {
     if (!((year >= 2024 + 3) && (month == 8))){  // взял отпуск за свой счет
        bob.account += bob.salary;
-       if (month == 1){
-         bob.salary += bob.salary * inflation;
        }
+    if (month == 1){
+        bob.salary += bob.salary * inflation;
     }
 }
 
@@ -154,7 +154,8 @@ void bob_rent(const int month)
 void bob_deposit()
 {
     bob.deposit.deposit_account += bob.deposit.deposit_account * alice.deposit.rate / 12;
-    bob.deposit.deposit_account += bob.salary - bob.food - bob.expences - bob.rent;
+    bob.deposit.deposit_account += bob.account;
+    bob.account = 0;
 }
 
 void bob_yacht(const int month, const int year)
@@ -196,9 +197,9 @@ void simulation()
        bob_salary(month,year);
        bob_food(month);
        bob_expences(month);
+       bob_yacht(month, year);
        bob_deposit();
  
-       bob_yacht(month,year);
  
        month++;
        if (month == 13){
