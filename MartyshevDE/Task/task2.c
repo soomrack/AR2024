@@ -20,11 +20,6 @@ void matrix_exception(const int code, char* msg)
     {
         printf("ERROR: %s\n", msg);   // Ошибка
     }
-
-    if(code == 2)
-    {
-        printf("Matrix %s\n", msg);   // Матрица
-    }
 }
 
 
@@ -96,7 +91,7 @@ Matrix matrix_add (Matrix A, Matrix B)
 // Вычитание двух матриц
 Matrix matrix_subtract (Matrix A, Matrix B) 
 {
-    if (A.rows != B.rows || A.cols != B.cols) 
+    if (A.rows != B.rows || A.cols != B.cols)
     {
         matrix_exception (1, "The sizes of the matrices do not match for subtraction");   //Размеры матриц не совпадают при вычитании
         return (Matrix){0, 0, NULL};
