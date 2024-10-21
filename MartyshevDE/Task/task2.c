@@ -14,10 +14,13 @@ struct Matrix
 typedef struct Matrix Matrix;
 
 
-void matrix_exception(const int code, char* msg)
+enum MatrixException {ERROR};
+typedef enum MatrixException MatrixException;
+
+
+void matrix_exception(const MatrixException code, char* msg)
 {
-    if(code == 1)
-    {
+    if(code == ERROR) {
         printf("ERROR: %s\n", msg);   // Ошибка
     }
 } 
@@ -28,21 +31,18 @@ Matrix matrix_allocate (size_t cols, size_t rows)
     Matrix A = {cols, rows, NULL};  
     A.data = (double*)malloc(cols * rows * sizeof(double)); 
     
-    if (cols == 0 || rows == 0) 
-    {
-        matrix_exception(1, "Matrix dimensions must be greater than 0");    //Размер матрицы должен быть больше 0
+    if (cols == 0 || rows == 0) {
+        matrix_exception(ERROR, "Matrix dimensions must be greater than 0");    
+        return (Matrix){cols, rows, NULL};
+    }
+
+    if (cols > SIZE_MAX / rows || (cols * rows) > SIZE_MAX / sizeof(double)) {
+        matrix_exception(ERROR, "Matrix size exceeds allowable memory limit");  
         return (Matrix){0, 0, NULL};
     }
 
-    if (cols > SIZE_MAX / rows || (cols * rows) > SIZE_MAX / sizeof(double)) 
-    {
-        matrix_exception(1, "Matrix size exceeds allowable memory limit");  //Размер матрицы превышает допустимый предел памяти
-        return (Matrix){0, 0, NULL};
-    }
-
-    if (A.data == NULL) 
-    {
-        matrix_exception(1, "Unable to allocate memory");   //Не удается выделить память
+    if (A.data == NULL) {
+        matrix_exception(ERROR, "Unable to allocate memory");  
         return(Matrix){0, 0, NULL};
     }
     
@@ -69,75 +69,65 @@ void matrix_set(const Matrix A, const double *values)
     memcpy(A.data, values, A.rows * A.cols * sizeof(double));
 }
 
-// Сложение двух матриц
-Matrix matrix_add (Matrix A, Matrix B) 
+// return A += B
+Matrix matrix_add (const Matrix A, const Matrix B) 
 {
-    if(A.rows != B.rows || A.cols != B.cols) 
-    {
-        matrix_exception (1, "The dimensions of the matrices do not match for addition");   //Размеры матриц не совпадают при сложении
+    if(A.rows != B.rows || A.cols != B.cols) {
+        matrix_exception (ERROR, "The dimensions of the matrices do not match for addition");   
         return (Matrix){0, 0, NULL};
     }
 
     Matrix result = matrix_allocate (A.cols, A.rows); 
     
-    for (size_t idx = 0; idx < A.rows * A.cols; ++idx)
-    {
+    for (size_t idx = 0; idx < result.rows * result.cols; ++idx) {
         result.data[idx] = A.data[idx] + B.data[idx];
     }
     return result;
 }
 
-// Вычитание двух матриц
+// return A -= B
 Matrix matrix_subtract (Matrix A, Matrix B) 
 {
-    if (A.rows != B.rows || A.cols != B.cols)
-    {
-        matrix_exception (1, "The sizes of the matrices do not match for subtraction");   //Размеры матриц не совпадают при вычитании
+    if (A.rows != B.rows || A.cols != B.cols) {
+        matrix_exception (ERROR, "The sizes of the matrices do not match for subtraction");   
         return (Matrix){0, 0, NULL};
     }
 
     Matrix result = matrix_allocate (A.cols, A.rows);
 
-    for (size_t idx = 0; idx < A.rows * A.cols; ++idx)
-    {
+    for (size_t idx = 0; idx < result.rows * result.cols; ++idx) {
         result.data[idx] = A.data[idx] - B.data[idx];
     }
     return result;
 }
 
-// Умножение матрицы на число
+// A * scalar
 Matrix matrix_scalar_multiply (Matrix A, double scalar) 
 {
     Matrix result = matrix_allocate (A.cols, A.rows);
     
-    for (size_t idx = 0; idx < A.rows * A.cols; ++idx)
-    {
+    for (size_t idx = 0; idx < result.rows * result.cols; ++idx) {
         result.data[idx] = A.data[idx] * scalar;
     }
     return result;
 }
 
-// Умножение матрицы на матрицу
+// A *= B
 Matrix matrix_multiply (Matrix A, Matrix B) 
 {
-    if (A.cols != B.rows) 
-    {
-        // Неравное кол-во строк и столбцов в обоих матриц
-        matrix_exception (1, "The number of columns of the first matrix is not equal to the number of rows of the second matrix");   //Количество столбцов первой матрицы не равно количеству строк второй матрицы
+    if (A.cols != B.rows) {
+        matrix_exception (ERROR, "The number of columns of the first matrix is not equal to the number of rows of the second matrix"); 
         return (Matrix){0, 0, NULL};
     }
 
     Matrix result = matrix_allocate (B.cols, A.rows);
     
-    for (size_t row = 0; row < A.rows; row++) 
-    {
-        for (size_t col = 0; col < B.cols; col++) 
-        {
-            result.data[row * result.cols + col] = 0.0; // Сумма для каждого элемента
+    for (size_t row = 0; row < result.rows; row++) {
+        for (size_t col = 0; col < result.cols; col++) {
+            result.data[row * result.cols + col] = 0.0; 
 
-            for (size_t idx = 0; idx < A.cols; idx++)
-            {
-                result.data[row * result.cols + col] += A.data[row * A.cols + idx] * B.data[idx * B.cols  + col]; // Умножение матрицы на матрицу
+            for (size_t idx = 0; idx < A.cols; idx++) {
+                result.data[row * result.cols + col] += A.data[row * A.cols + idx] * B.data[idx * B.cols  + col]; 
             }
         }
     }
@@ -147,10 +137,8 @@ Matrix matrix_multiply (Matrix A, Matrix B)
 
 void matrix_print (Matrix A) 
 {
-    for (size_t row = 0; row < A.rows; row++) 
-    {
-        for (size_t col = 0; col < A.cols; col++) 
-        {
+    for (size_t row = 0; row < A.rows; row++) {
+        for (size_t col = 0; col < A.cols; col++) {
             printf ("%2.1f ", matrix_get(A, row, col));
         }
         printf ("\n");
@@ -164,13 +152,11 @@ int main()
     A = matrix_allocate(2, 2);
     B = matrix_allocate(2, 2);
     
-    matrix_set(A, (double[])
-    {
+    matrix_set(A, (double[]) {
         1., 2.,
         3., 4.
     });
-    matrix_set(B, (double[])
-    {
+    matrix_set(B, (double[]) {
         5., 6.,
         7., 8.
     });
