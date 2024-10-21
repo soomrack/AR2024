@@ -12,6 +12,7 @@ struct Deposit {
 struct Person {
     Money expenditure;
     Money salary;
+    Money account;
     Money apartment_price;
     Money rent;
     Money credit_monthly_payment;
@@ -24,7 +25,7 @@ struct Person {
 
 long double inflation = 0.0742;
 int month_counter = 1;
-int year_counter = 0;
+int year_counter = 2024;
 int new_year = 0;
 
 struct Person alice;
@@ -35,8 +36,9 @@ void alice_init()
 {
     alice.deposite.account = 0;
     alice.deposite.interest = 0.19;
-    alice.expenditure = 399 + 22500 + 5000 + 4500; // Расходы за месяй (Цена подписки СберПрайм + еда + одежда + комуналка)
+    alice.expenditure = 399 + 22500 + 5000 + 4500;  // Расходы за месяй (Цена подписки СберПрайм + еда + одежда + комуналка)
     alice.salary = 300000;
+    alice.account = 0;
     alice.credit_monthly_payment = 226312;
 }
 
@@ -45,8 +47,9 @@ void bob_init()
 {
     bob.deposite.account = 1313000;
     bob.deposite.interest = 0.19;
-    bob.expenditure = 399 + 22500 + 5000 + 4500; // Расходы за месяй (Цена подписки СберПрайм + еда + одежда + комуналка)
+    bob.expenditure = 399 + 22500 + 5000 + 4500;  // Расходы за месяй (Цена подписки СберПрайм + еда + одежда + комуналка)
     bob.salary = 300000;
+    bob.account = 0;
     bob.rent = 30000;
     bob.apartment_price = 13000000;
     bob.year_of_raising = 3;
@@ -57,46 +60,38 @@ void bob_init()
 
 void alice_deposite_counting()
 {
-    Money account_for_deposite = alice.salary - alice.expenditure - alice.credit_monthly_payment;
     alice.deposite.account += alice.deposite.account * alice.deposite.interest / 12;
-    alice.deposite.account += account_for_deposite;
+    alice.deposite.account += alice.account;
 };
 
 
 void bob_deposite_counting()
 {
-    Money account_for_deposite = bob.salary - bob.expenditure - bob.rent;
     bob.deposite.account += bob.deposite.account * bob.deposite.interest / 12;
-    bob.deposite.account += account_for_deposite;
+    bob.deposite.account += bob.account;
 };
 
 
 void alice_expenditure_inflation()
 {
-    alice.expenditure += alice.expenditure * inflation;
+    if (new_year == 1) {
+        alice.expenditure += alice.expenditure * inflation;
+    };
 };
 
 void bob_expenditure_inflation()
 {
-    bob.expenditure += bob.expenditure * inflation;
+    if (new_year == 1) {
+        bob.expenditure += bob.expenditure * inflation;
+    };
 };
 
 
 void bob_house_inflation()
 {
-    bob.rent += bob.rent * inflation;
-    bob.apartment_price += bob.apartment_price * inflation;
-};
-
-
-
-void inflation_changes()
-{
     if (new_year == 1) {
-        alice_expenditure_inflation();
-
-        bob_expenditure_inflation();
-        bob_house_inflation();
+        bob.rent += bob.rent * inflation;
+        bob.apartment_price += bob.apartment_price * inflation;
     };
 };
 
@@ -123,6 +118,8 @@ void bob_salary()
     if (year_counter == bob.year_of_raising) {
         bob.salary += 50000;
     };
+
+    bob.account = bob.salary;
 };
 
 
@@ -131,6 +128,8 @@ void alice_salary()
     if (new_year == 1) {
         alice.salary += alice.salary * inflation;
     }
+
+    alice.account = alice.salary;
 };
 
 
@@ -149,14 +148,34 @@ void bob_car()
 };
 
 
+void bob_account()
+{
+    bob.account -= bob.expenditure + bob.rent;
+};
+
+
+void alice_account()
+{
+    alice.account -= alice.expenditure + alice.credit_monthly_payment;
+};
+
+
 void simulation()
 {
-    while (year_counter != 30) {
-        inflation_changes();
+    while (year_counter != 2054) {
+
+        bob_expenditure_inflation();
+        bob_house_inflation();
+
         bob_salary();
         bob_car();
+        bob_account();
         bob_deposite_counting();
 
+        alice_expenditure_inflation();
+
+        alice_salary();
+        alice_account();
         alice_deposite_counting();
 
         month_and_year_counter();
