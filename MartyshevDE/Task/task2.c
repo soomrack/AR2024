@@ -20,7 +20,7 @@ void matrix_exception(const int code, char* msg)
     {
         printf("ERROR: %s\n", msg);   // Ошибка
     }
-}
+} 
 
 
 Matrix matrix_allocate (size_t cols, size_t rows) 
