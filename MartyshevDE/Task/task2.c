@@ -40,11 +40,10 @@ Matrix matrix_allocate (size_t cols, size_t rows)
         return (Matrix){0, 0, NULL};
     }
 
-
     if (A.data == NULL) 
     {
         matrix_exception(1, "Unable to allocate memory");   //Не удается выделить память
-        return(Matrix) {0, 0, NULL};
+        return(Matrix){0, 0, NULL};
     }
     
     return A;
@@ -76,7 +75,7 @@ Matrix matrix_add (Matrix A, Matrix B)
     if(A.rows != B.rows || A.cols != B.cols) 
     {
         matrix_exception (1, "The dimensions of the matrices do not match for addition");   //Размеры матриц не совпадают при сложении
-        return (Matrix) {0, 0, NULL};
+        return (Matrix){0, 0, NULL};
     }
 
     Matrix result = matrix_allocate (A.cols, A.rows); 
@@ -125,7 +124,7 @@ Matrix matrix_multiply (Matrix A, Matrix B)
     {
         // Неравное кол-во строк и столбцов в обоих матриц
         matrix_exception (1, "The number of columns of the first matrix is not equal to the number of rows of the second matrix");   //Количество столбцов первой матрицы не равно количеству строк второй матрицы
-        return (Matrix) {0, 0, NULL};
+        return (Matrix){0, 0, NULL};
     }
 
     Matrix result = matrix_allocate (B.cols, A.rows);
@@ -134,7 +133,7 @@ Matrix matrix_multiply (Matrix A, Matrix B)
     {
         for (size_t col = 0; col < B.cols; col++) 
         {
-            result.data[row * result.cols + col] = 0.0; // Сумма для кождого элемента
+            result.data[row * result.cols + col] = 0.0; // Сумма для каждого элемента
 
             for (size_t idx = 0; idx < A.cols; idx++)
             {
