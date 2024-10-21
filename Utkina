@@ -1,7 +1,132 @@
-#include <iostream>
+#include <stdio.h>
 
-int main()
-{
-    printf("Hello World");
+typedef long long Currency;
+int current_month = 9;
+int current_year = 2024;
+
+struct Mortgage {
+    Currency loan_amount;
+    Currency monthly_payment;
+    double interest_rate; // Процентная ставка
+};
+
+struct Deposit {
+    Currency deposit_amount;
+    double interest_rate; // Процентная ставка
+};
+
+struct Person {
+    Currency income;
+    Currency living_expenses;
+    Currency food_expenses;
+    Currency clothing_expenses;
+    Currency total_expenses;
+    Currency loan_payment;
+    Currency balance;
+    Currency property_value;
+    Currency rent_cost;
+    struct Mortgage mortgage; // Ипотека для Алисы
+    struct Deposit deposit; // Вклад для Боба
+};
+
+struct Person Alice = {
+    300 * 1000, 100 * 1000, 50 * 1000, 20 * 1000, 0,
+    180 * 1000, 0, 14000 * 1000, 400 * 100,
+    {14000 * 1000, 180 * 1000, 0.09} // Ипотека: сумма, ежемесячный платеж, процентная ставка
+};
+
+struct Person Bob = {
+    300 * 1000, 100 * 1000, 50 * 1000, 20 * 1000, 0,
+    180 * 1000, 0, 14000 * 1000, 400 * 100,
+    {0, 0, 0} // Вклад пока не используется
+};
+
+void bob_income(const int month, const int year) {
+    if (month == 12) {
+        Bob.income *= 1.07; // Увеличение дохода в декабре
+    }
+    Bob.balance += Bob.income; // Обновление баланса
+}
+
+void bob_expenses(const int month, const int year) {
+    if (month == 12) {
+        Bob.living_expenses *= 1.08; // Увеличение расходов на жизнь в декабре
+        Bob.rent_cost *= 1.08; // Увеличение арендной платы в декабре
+    }
+    Bob.total_expenses = Bob.living_expenses + Bob.food_expenses + Bob.clothing_expenses + Bob.rent_cost; // Подсчет общих расходов
+    Bob.balance -= Bob.total_expenses; // Обновление баланса
+}
+
+void alice_income(const int month, const int year) {
+    static Currency enhanced_income = Alice.income * 1.5; // Увеличенный доход
+    if (month == 12) {
+        Alice.income *= 1.07; // Увеличение дохода в декабре
+        Alice.property_value *= 1.08; // Увеличение стоимости имущества в декабре
+    }
+    Alice.balance += Alice.income; // Обновление баланса
+    if (month == 9 && year == 2054) {
+        Alice.balance += Alice.property_value; // Добавление стоимости имущества к балансу
+    }
+    if (year == 2028 && month >= 3 && month <= 4) {
+        Alice.income = 0; // Обнуление дохода в марте и апреле
+    }
+    if (year == 2028 && month == 5) {
+        Alice.income = enhanced_income; // Восстановление дохода в мае
+    }
+}
+
+void alice_expenses(const int month, const int year) {
+    if (month == 12) {
+        Alice.living_expenses *= 1.08; // Увеличение расходов на жизнь в декабре
+    }
+    
+    Alice.total_expenses = Alice.living_expenses + Alice.loan_payment + Alice.food_expenses + Alice.clothing_expenses; // Подсчет общих расходов
+    Alice.balance -= Alice.total_expenses; // Обновление баланса
+}
+
+void alice_food_clothing(const int month) {
+    if (month == 12) {
+        Alice.food_expenses *= 1.1; // Увеличение расходов на еду в декабре
+        Alice.clothing_expenses *= 1.1; // Увеличение расходов на одежду в декабре
+    }
+}
+
+void bob_food_clothing(const int month) {
+    if (month == 12) {
+        Bob.food_expenses *= 1.1; // Увеличение расходов на еду в декабре
+        Bob.clothing_expenses *= 1.1; // Увеличение расходов на одежду в декабре
+    }
+}
+
+void run_simulation() {
+    while (!(current_year == 2054 && current_month == 10)) {
+        alice_income(current_month, current_year);
+        alice_food_clothing(current_month);
+        alice_expenses(current_month, current_year);
+        
+        bob_income(current_month, current_year);
+        bob_food_clothing(current_month);
+        bob_expenses(current_month, current_year);
+        
+        current_month++;
+        if (current_month == 13) {
+            current_year++;
+            current_month = 1; // Переход к следующему году
+        }
+    }
+}
+
+void display_result() {
+    if (Alice.balance > Bob.balance) {
+
+
+        printf("nAlice is wealthier by: %lld", Alice.balance - Bob.balance);
+    } else {
+        printf("nBob is wealthier by: %lld", Bob.balance - Alice.balance);
+    }
+}
+int main() {
+    run_simulation();
+    display_result();
     return 0;
 }
