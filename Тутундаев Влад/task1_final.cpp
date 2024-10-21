@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-typedef long long int  Money;
+typedef long long int  Money; // Rub
 
 
 struct Mortgage {
@@ -77,9 +77,9 @@ void alice_mortgage(){
 
 void alice_deposit(int month, int year)
 {
-    int percent = 20;
+    
 
-    Alice.account *= float(percent / 12);
+    Alice.account *= 1 + (0.2 / 12);  // 0.2 = 20 percent
 }
 
 
@@ -87,7 +87,7 @@ void bob_salary(int month, int year)
 {
     Bob.account += Bob.salary;
 
-    if(month == 9) Bob.salary *= 1.08; 
+    if (month == 9) Bob.salary *= 1.08; 
 }
 
 
@@ -95,7 +95,7 @@ void bob_expenses(int month, int salary)
 {
     Bob.account -= Bob.expenses;
 
-    if(month == 9) Bob.expenses *= 1.08;
+    if (month == 9) Bob.expenses *= 1.08;
 }
 
 
@@ -109,9 +109,8 @@ void bob_rent(int month, int salary)
 
 void bob_deposit(int month, int year)
 {
-    int percent = 20;
 
-    Bob.account *= float(percent / 12);
+    Bob.account *= 1 + (0.2 / 12); // 0.2 = 20 percent
 }
 
 
