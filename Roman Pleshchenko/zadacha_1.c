@@ -1,51 +1,44 @@
 #include <stdio.h>
 typedef long long int Money;
-struct Person
-{
+struct Person {
     Money house;
     Money capital;
     Money credit;
     Money salary;
     Money expenses;
-    Money bank;
 
 };
-struct Deposite
-{
+struct Deposite {
     Money deposite_account;
     double deposite_procent;
 };
-struct Person Alice =
-    {
+struct Person Alice = {
     .capital = 14* 1000 * 1000,
     .credit = 185337,
     .salary = 300 * 1000,
     .expenses = 60 * 1000
 };
 
-struct Person Bob =
-    {
+struct Person Bob = {
     .capital = 1000*1000,
     .salary = 300*1000,
     .expenses = 95 * 1000,
 };
 
-struct Deposite Bob_dep =
-    {
+struct Deposite Bob_dep = {
     .deposite_account = 1000*1000,
-    .deposite_procent = 1.1
+    .deposite_procent = 1.06
     };
 
-struct Deposite Alice_dep =
-    {
+struct Deposite Alice_dep = {
     .deposite_account = 0,
-    .deposite_procent = 1.1
+    .deposite_procent = 1.05
     };
 
 void alice_deposite(const int month)
 {
     if (month ==1) {
-        Alice.capital = Alice_dep.deposite_account * Alice_dep.deposite_procent - Alice_dep.deposite_procent;
+        Alice.capital = Alice.capital + Alice_dep.deposite_account * Alice_dep.deposite_procent - Alice_dep.deposite_account;
         Alice_dep.deposite_account = Alice_dep.deposite_account * Alice_dep.deposite_procent;
     }
 }
@@ -54,7 +47,7 @@ void alice_deposite(const int month)
 void bob_deposite(const int month)
 {
     if (month ==1) {
-        Bob.capital = Bob_dep.deposite_account * Bob_dep.deposite_procent - Bob_dep.deposite_procent;
+        Bob.capital =Bob.capital + Bob_dep.deposite_account * Bob_dep.deposite_procent - Bob_dep.deposite_account;
         Bob_dep.deposite_account = Bob_dep.deposite_account * Bob_dep.deposite_procent;
 
     }
@@ -100,6 +93,7 @@ void bob_expenses(const int month)
 
     }
     Bob.capital= Bob.capital - Bob.expenses;
+    Bob_dep.deposite_account = Bob_dep.deposite_account - Bob.expenses;
 }
 
 
@@ -110,6 +104,7 @@ void bob_salary(const int month)
 
     }
     Bob.capital = Bob.capital + Bob.salary;
+    Bob_dep.deposite_account = Bob_dep.deposite_account + Bob.salary;
 }
 
 
@@ -132,13 +127,16 @@ void simulation()
     int month = 9;
     int year = 2024;
     while ( !((month == 10) && (year == 2054)) ) {
+        //Bob
         bob_salary(month);
-        alice_salary(month);
         bob_expenses(month);
+        bob_deposite(month);
+        //Alice
+        alice_salary(month);
         alice_expenses(month);
         alice_credit();
         alice_deposite(month);
-        bob_deposite(month);
+
         month++;
         if (month == 13) {
             month = 1;
@@ -154,7 +152,8 @@ void simulation()
 }
 
 
-int main() {
+int main()
+{
     simulation();
     print();
     return 0;
