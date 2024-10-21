@@ -105,12 +105,13 @@ void alice_print()
 
 void bob_init()
 {
-    bob.account;
+    bob.account == 1000 * 1000;
     bob.salary = 200 * 1000;
     bob.food = 17 * 1000;
     bob.expences = 40 * 1000;
 
-    bob.deposit.deposit_account = 1000 * 1000;
+    bob.deposit.deposit_account += bob.account;
+    bob.account = 0;
     bob.deposit.rate = 0.20;
 
     bob.rent = 30 * 1000;
