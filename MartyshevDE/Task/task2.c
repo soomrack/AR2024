@@ -47,7 +47,7 @@ Matrix matrix_allocate (size_t cols, size_t rows)
     }
     
     return A;
-} 
+}
 
 
 void matrix_free (Matrix* A) 
