@@ -21,7 +21,7 @@ struct Human {
 struct Expenses {
   Money food;
   Money utilities;
-  double other;
+  Money other;
 };
 
 
