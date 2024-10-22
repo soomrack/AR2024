@@ -31,7 +31,7 @@ void Bob_init()
     Bob.loan = 100 * 1000;
     Bob.unexpected_situations = 10 * 1000;
     Bob.deposit = 0;
-    Bob.deposit_percent = 1.004;
+    Bob.deposit_percent = 1.001;    // процент по депозиту //
 }
 
 
@@ -45,7 +45,7 @@ void Alice_init()
     Alice.loan = 100 * 1000;
     Alice.unexpected_situations = 10 * 1000;
     Alice.deposit = 0;
-    Alice.deposit_percent = 1.004;           // 14% по депозиту //  
+    Alice.deposit_percent = 1.001;           // процент по депозиту //  
 }
 
 
