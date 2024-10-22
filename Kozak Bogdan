@@ -101,7 +101,7 @@ void alice_robotics(const int month, const int year)
 {
     if ((month == 12) && (year == 2025))
     {
-        alice.account -= 45000;
+        alice.account -= 37000;
         alice.robotics.is_interesting = 1;
     }
     if ((year == 2032) && (month == 9))
@@ -122,7 +122,7 @@ void alice_basketball(const int month, const int year)
 {
     if ((month == 2) && (year == 2033))
     {
-        alice.account -= 27500;
+        alice.account -= 20000;
         alice.basketball.is_interesting = 1;
     }
     if ((year == 2040) && (month == 6))
@@ -292,7 +292,9 @@ void simulation() // счётчик год(месяц) и в дальнейше�
             year++;
         }
     }
+    alice.account += alice.hypothec.credit;
 
+    bob.account += bob.deposits.capital;
 }
 
 
