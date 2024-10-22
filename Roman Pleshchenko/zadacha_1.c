@@ -1,6 +1,6 @@
 #include <stdio.h>
 typedef long long int Money; //Rub
-typedef int time; // сколько живет кот
+typedef int time; // год жизни
 
 
 struct Person {
@@ -115,10 +115,14 @@ void alice_house(const int month)
 
 void alice_cat(const int month) {
     if (Alice_cat.cat_life < 15){ // когда коту исполняется 15 лет, он умирает
+        if (month ==1) {
+            Alice_cat.cat_expenses *= 1,07;
+        }
         Alice.account -= Alice_cat.cat_expenses;
         if (month == 5 ) {      //у кота в мае День Рождения
             Alice_cat.cat_life += 1;
         }
+        
     }
 }
 
@@ -179,7 +183,7 @@ void simulation()
             month = 1;
             year++;
         }
-        
+
     }
 }
 
