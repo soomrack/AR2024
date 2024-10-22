@@ -96,7 +96,7 @@ void alice_house(const int month, const int year)
 }
 
 
-void bob_salary(int month, int year) {
+void bob_salary(const int month, const int year) {
   if (month == 12) {
       Bob.salary *= 1.09;
   }
@@ -105,7 +105,7 @@ void bob_salary(int month, int year) {
 }
 
 
-void bob_expenses(int month, int year) {
+void bob_expenses(const int month, const int year) {
   if (month == 12) {
       Bob.rent *= 1.09;
       summ2 = (bob.food + bob.other + bob.utilities) * 1.09;
