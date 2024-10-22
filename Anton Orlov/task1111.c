@@ -1,6 +1,6 @@
 #include<stdio.h>
 
-typedef long long int Money;
+typedef long long int Money; //RUB
 
 
 struct Person {
@@ -43,6 +43,9 @@ void alice_init()
     alice_mortgage.years = 30;
     alice_mortgage.platez_month = 112000;
     
+    alice.deposit = 0;
+    alice.deposit_procent = 1.005;
+    
     alice.account -= alice_mortgage.first_platez;
 }
 
@@ -82,13 +85,11 @@ void alice_house(const int month)
     }
 }
 
-
 void alise_deposite()
 {
-    alice.deposit += alice.salary;
-    alice.deposit -= alice.food;
-    alice.deposit -= alice.expence;
-    alice.deposit -= alice_mortgage.platez_month;
+    alice.deposit += alice.account;
+    
+    alice.deposit *= alice.deposit_procent;
 }
 
 
@@ -128,17 +129,18 @@ void bob_expence(const int month)
     bob.account -= bob.expence;
 }
 
-void bob_rent()
+void bob_rent(const int month)
 {
+    if (month == 1) {
+        bob.rent *= 1.07;
+    }
     bob.account -= bob.rent;
 }
 
 void bob_deposite()
 {
-    bob.deposit += bob.salary;
-    bob.deposit -= bob.food;
-    bob.deposit -= bob.expence;
-    bob.deposit -= bob.rent;
+    bob.deposit += bob.account;
+
     bob.deposit *= bob.deposit_procent;
 }
 
@@ -158,7 +160,7 @@ void simulation()
         bob_salary(month);
         bob_food(month);
         bob_expence(month);
-        bob_rent();
+        bob_rent(month);
         bob_deposite();
 
         month += 1;
@@ -167,7 +169,6 @@ void simulation()
             year += 1;
         }
     }
-    //alice.account += alice.cost_house;
 }
 
 
@@ -186,8 +187,11 @@ int main()
 {
     alice_init();
     bob_init();
+    
     simulation();
+    
     alice_print();
     bob_print();
+    
     return 1;
 }
