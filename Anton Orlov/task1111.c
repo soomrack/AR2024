@@ -85,7 +85,7 @@ void alice_house(const int month)
     }
 }
 
-void alise_deposite()
+void alice_deposite()
 {
     alice.deposit += alice.account;
     alice.account = 0;
@@ -156,6 +156,7 @@ void simulation()
         alice_expence(month);
         alice_house(month);
         alice__mortgage();
+        alice_deposite();
         
         bob_salary(month);
         bob_food(month);
