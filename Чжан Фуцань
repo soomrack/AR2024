@@ -18,14 +18,35 @@ struct Person {
 
 // 人进行存款操作
 void personDeposit(struct Person *person, Money amount) {
+    // 检查存款金额合法性
+    if (amount < 0) {
+        printf("Invalid deposit amount.\n");
+        return;
+    }
+
     person->savings += amount;
     person->bank.deposit += amount;
-    // 根据银行的利率计算利息并更新存款
+
+    // 计算利息并更新存款
+    if (person->bank.interestRate < 0) {
+        printf("Invalid interest rate.\n");
+        return;
+    }
     person->savings += person->savings * person->bank.interestRate;
 }
 
 // 初始化人的财务状况和银行
 void initPersonAndBank(struct Person *person, Money income, double interestRate) {
+    // 检查收入和利率合法性
+    if (income < 0) {
+        printf("Invalid income.\n");
+        return;
+    }
+    if (interestRate < 0 || interestRate > 1) {
+        printf("Invalid interest rate.\n");
+        return;
+    }
+
     person->income = income;
     person->savings = 0;
     person->bank.interestRate = interestRate;
