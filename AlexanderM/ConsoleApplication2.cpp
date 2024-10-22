@@ -15,7 +15,7 @@ struct Person {
     Money loan;
     Money unforeseen_situations;
     Money deposit;
-    double deposit_procent;
+    double deposit_percent;
 };
 
 
@@ -32,7 +32,7 @@ void Bob_init() {
     Bob.loan = 100 * 1000;
     Bob.unforeseen_situations = 10 * 1000;
     Bob.deposit = 0;
-    Bob.deposit_procent = 1.004;
+    Bob.deposit_percent = 1.004;
 };
 
 
@@ -45,7 +45,7 @@ void Alice_init() {
     Alice.loan = 100 * 1000;
     Alice.unforeseen_situations = 10 * 1000;
     Alice.deposit = 0;
-    Alice.deposit_procent = 1.004;
+    Alice.deposit_percent = 1.004;
 }
 
 
@@ -73,7 +73,7 @@ void Bob_deposite()
     Bob.deposit -= Bob.unforeseen_situations;
     Bob.deposit -= Bob.charges;
     Bob.deposit -= Bob.rent;
-    Bob.deposit *= Bob.deposit_procent;
+    Bob.deposit *= Bob.deposit_percent;
 }
 
 
@@ -100,7 +100,7 @@ void Alice_deposite() {
     Alice.deposit -= Alice.unforeseen_situations;
     Alice.deposit -= Alice.charges;
     Alice.deposit -= Alice.loan;
-    Alice.deposit *= Alice.deposit_procent;
+    Alice.deposit *= Alice.deposit_percent;
 }
 
 
