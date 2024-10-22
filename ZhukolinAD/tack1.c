@@ -114,6 +114,7 @@ void bob_expenses(int month, int year) {
   Bob.account -= (summ2 + Bob.rent);
 }
 
+
 void bob_deposit(const int month, const int year) {
  if (month == 12) {
       Bob.account *= Bob.deposit_procent;
