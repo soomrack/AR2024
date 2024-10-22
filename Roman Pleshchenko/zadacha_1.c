@@ -126,6 +126,7 @@ void alice_cat(const int month) {
     }
 }
 
+
 void bob_expenses(const int month)
 {
     if (month == 1){
