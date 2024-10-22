@@ -88,7 +88,7 @@ void alice_house(const int month)
 void alise_deposite()
 {
     alice.deposit += alice.account;
-    
+    alice.account = 0;
     alice.deposit *= alice.deposit_procent;
 }
 
@@ -140,7 +140,7 @@ void bob_rent(const int month)
 void bob_deposite()
 {
     bob.deposit += bob.account;
-
+    bob.account = 0;
     bob.deposit *= bob.deposit_procent;
 }
 
