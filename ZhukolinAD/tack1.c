@@ -7,93 +7,98 @@ double summ1 = 0;
 double summ2 = 0;
 
 
-struct human{
-  struct expenses{
+struct human {
+  struct expenses {
     double food;
     double utilities;
     double other;
   };
+  struct mortgage {
+    double procent;
+    double summa_credita;
+    double platez_month;
+    double first_platez;
+    int yers;
+};
   double salary;
   double account;
   double house;
   double rent;
-  double mortgage;
-  double deposit;
-  double living;
+  double deposit_procent;
+};
+
+
+struct mortgage ALice = {
+    .procent = 1.05,
+    .summa_credita = 14000*1000,
+    .platez_month = 74619,
+    .first_platez = 100000,
+    .yers = 30
 };
 
 
 struct expenses alice = {
   .food = 30000,
-  .utilities = 12000,
+  .utilities = 40000,
   .other = 30000
 };
 
 
 struct human Alice = {
-  .salary=300*1000,
-  .living=100*1000,
-  .account=0,
-  .house=14000*1000,
-  .rent=0,
-  .mortgage=150*1000,
-  .deposit=1.15
+  .salary = 300*1000,
+  .account = 0,
+  .deposit_procent = 0
 };
 
 
 struct expenses bob = {
   .food = 30000,
-  .utilities = 12000,
-  .other = 50000
+  .utilities = 40000,
+  .other = 30000
 };
 
 
 struct human Bob = {
   .salary=300*1000,
-  .living=100*1000,
   .account=0,
-  .house=0,
-  .rent=40*1000,
-  .mortgage=0,
-  .deposit=1.15
+  .rent = 40*1000,
+  .deposit_procent = 1.05
 };
 
 
-void alice_house(int month, int year) {
+void alice_salary(const int month, const int year) {
   if (month == 12) {
-    Alice.house *= 1.07;
-  }
-  if (month == 9 && year == 2054) {
-    Alice.account += Alice.house;
-  }
-}
-
-
-void alice_salary(int month, int year) {
-  if (month == 12) {
-      Alice.salary *= 1.07;
-      Alice.account *= Alice.deposit;
+      Alice.salary *= 1.09;
   }
 
   Alice.account += Alice.salary;
 }
 
 
-void alice_expenses(int month, int year) {
+void alice_expenses(const int month, const int year) {
   if (month == 12) {
-      Alice.living *= 1.07;
-      summ1 = (alice.food + alice.other + alice.utilities) * 1.07;
+      summ1 = (alice.food + alice.other + alice.utilities) * 1.09;
   }
 
-  Alice.account += Alice.living - summ1 - Alice.mortgage;
+  Alice.account -= (summ1 + ALice.platez_month);
+}
+
+
+void alice_house(const int month, const int year)
+{
+  Alice.house = ALice.summa_credita;
+    if (month == 12) {
+        Alice.house *= 1.09;
+    }
+    if (month == 9 && year == 2024 + ALice.yers) {
+        Alice.account += Alice.house;
+    }
 }
 
 
 void bob_salary(int month, int year) {
-  if (month == 12)
-  {
-      Bob.salary *= 1.07;
-      Bob.account *= Bob.deposit;
+  if (month == 12) {
+      Bob.salary *= 1.09;
   }
 
   Bob.account += Bob.salary;
@@ -101,24 +106,29 @@ void bob_salary(int month, int year) {
 
 
 void bob_expenses(int month, int year) {
-  if (month == 12)
-  {
-      Bob.living *= 1.07;
-      Bob.rent *= 1.07;
-      summ2 = (bob.food + bob.other + bob.utilities) * 1.07;
+  if (month == 12) {
+      Bob.rent *= 1.09;
+      summ2 = (bob.food + bob.other + bob.utilities) * 1.09;
   }
 
-  Bob.account += Bob.living - summ2 - Bob.rent;
+  Bob.account -= (summ2 + Bob.rent);
+}
+
+void bob_deposit(const int month, const int year) {
+ if (month == 12) {
+      Bob.account *= Bob.deposit_procent;
+  }
 }
 
 
 void simulation() {
-  while (!(year == 2054 && month == 10)) {
-    alice_house(month, year);
+  while (!(year == 2024 + ALice.yers && month == 10)) {
     alice_salary(month, year);
     alice_expenses(month, year);
+    alice_house(month, year);
     bob_salary(month,year);
     bob_expenses(month, year);
+    bob_deposit(month, year);
     month++;
 
     if (month == 13) {
