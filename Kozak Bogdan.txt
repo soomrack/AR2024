@@ -1,14 +1,12 @@
 #include<stdio.h>
 #include<math.h>
 
-double x, y;
 typedef long long int money; // используем пространство long long
 
 struct Deposits
 {
-    double pct; // процент вклада
+    double protsent; // процент вклада
     money capital;
-    money deposits_month_refill;
 };
 
 struct Hypothec {  // Ипотека
@@ -33,6 +31,7 @@ struct Car
     money petrol;  // Бензин
     money insurance; // Страховка
     money maintenance; // Тех. обслуживание
+    int is_car;
 };
 
 
@@ -41,6 +40,7 @@ struct Human {
     money account;
     money food;
     money other; // всякие безделушки
+    money rent;
     struct Hypothec hypothec;
     struct Basketball basketball;
     struct Robotics robotics;
@@ -78,19 +78,17 @@ void alice_other(const int month)
 void alice_init()
 {
     alice.account = 1000 * 1000;
-    alice.salary = 800 * 1000;
+    alice.salary = 365 * 1000;
     alice.food = 10 * 1000;
     alice.other = 70 * 1000;
 
-    alice.hypothec.platez = 500 * 1000;
+    alice.hypothec.platez = 1000 * 1000;
     alice.hypothec.credit = 14000 * 1000;
     alice.hypothec.protsent = 0.14;
-    alice.hypothec.month_pay = alice.hypothec.credit * ((x) / (y));
+    alice.hypothec.month_pay = 285 * 1000;
     alice.account -= alice.hypothec.platez;
+    alice.hypothec.credit -= alice.hypothec.platez;
     alice.hypothec.credit -= alice.hypothec.month_pay;
-
-    x = alice.hypothec.protsent * pow(1 + alice.hypothec.protsent, 360);
-    y = pow(1 + alice.hypothec.protsent, 360) - 1;
 
     alice.robotics.courses = 5000;
     alice.robotics.is_interesting = 0;
@@ -103,7 +101,7 @@ void alice_robotics(const int month, const int year)
 {
     if ((month == 12) && (year == 2025))
     {
-        alice.account -= 45000;
+        alice.account -= 37000;
         alice.robotics.is_interesting = 1;
     }
     if ((year == 2032) && (month == 9))
@@ -124,12 +122,12 @@ void alice_basketball(const int month, const int year)
 {
     if ((month == 2) && (year == 2033))
     {
-        alice.account -= 27500;
+        alice.account -= 20000;
         alice.basketball.is_interesting = 1;
     }
     if ((year == 2040) && (month == 6))
     {
-        alice.basketball.is_interesting = 0;
+        alice.basketball.is_interesting == 0;
     }
     if (month == 1)
     {
@@ -140,6 +138,7 @@ void alice_basketball(const int month, const int year)
         alice.account -= alice.basketball.lesson;
     }
 }
+
 
 void alice_salary(int month) // идексация зарплаты и само её начислеие
 {
@@ -153,6 +152,7 @@ void alice_salary(int month) // идексация зарплаты и само 
     alice.account += alice.salary;
 }
 
+
 void bob_other(const int month)
 {
     if (month == 1)
@@ -161,6 +161,14 @@ void bob_other(const int month)
     }
     bob.account -= bob.other;
 }
+
+
+void bob_rent(const int month)
+{
+    bob.account -= bob.rent;
+
+}
+
 
 void bob_food(const int month)
 {
@@ -171,11 +179,14 @@ void bob_food(const int month)
     bob.account -= bob.food;
 }
 
+
 void bob_deposits()
 {
-    bob.account += bob.deposits.deposits_month_refill;
-
+    bob.deposits.capital += bob.account;
+    bob.deposits.capital *= 0.12;
+    bob.account = 0;
 }
+
 
 void bob_init()
 {
@@ -184,12 +195,14 @@ void bob_init()
     bob.food = 10 * 1000;
     bob.other = 70 * 1000;
 
-    bob.deposits.pct = 0.12;
-    bob.deposits.capital = 100 * 1000 + bob.deposits.deposits_month_refill;
-    bob.deposits.deposits_month_refill = (bob.deposits.capital * pow(1 + (bob.deposits.pct), 1)) - bob.deposits.capital;
+    bob.rent = 32 * 100;
+
+    bob.deposits.capital += bob.account;
+    bob.deposits.capital = 0;
+    bob.deposits.protsent = 0.12;    
 
     bob.robotics.courses = 5000;
-    bob.robotics.is_interesting = 0;
+    bob.robotics.is_interesting == 0;
 
     bob.car.petrol = 8000;
     bob.car.insurance = 3339;
@@ -201,6 +214,7 @@ void bob_car(const int month, const int year)
 {
     if ((month == 12) && (year == 2030))
     {
+        bob.car.is_car == 1;
         bob.account -= 500 * 1000;
         bob.account -= bob.car.petrol;
         bob.account -= bob.car.insurance;
@@ -212,7 +226,10 @@ void bob_car(const int month, const int year)
         bob.account -= bob.car.insurance;
         bob.account -= bob.car.maintenance;
     }
-    bob.account -= bob.car.petrol;
+    if (bob.car.is_car == 1) 
+    {
+        bob.account -= bob.car.petrol;
+    }
 }
 
 void bob_robotics(const int month, const int year)
@@ -260,6 +277,7 @@ void simulation() // счётчик год(месяц) и в дальнейше�
         alice_basketball(month, year);
         alice_robotics(month, year);
         alice_hypothec();
+        
         bob_init();
         bob_salary(month);
         bob_food(month);
@@ -274,7 +292,11 @@ void simulation() // счётчик год(месяц) и в дальнейше�
             year++;
         }
     }
+    alice.account += alice.hypothec.credit;
+
+    bob.account += bob.deposits.capital;
 }
+
 
 void alice_print()
 {
@@ -285,6 +307,7 @@ void bob_print()
 {
     printf("Bob account = %lld \n", bob.account); // kapital
 }
+
 
 int main()
 {
