@@ -1,0 +1,71 @@
+#inclue <stdio.h>
+#inclue <stdio.h>
+
+ //定义矩阵结构体
+typedef strust{
+      int rows;
+      int cols;
+      double**data;
+      }matrix;
+//分配矩阵内存空间
+matrix*matrix_allocate(int rows, int cols) {
+    Matrix *m = (Matrix *)malloc(sizeof(Matrix));
+    m->rows = rows;
+    m->cols = cols;
+    m->data = (double **)malloc(rows * sizeof(double *));
+    for (int i = 0; i < rows; i++) {
+        m->data[i] = (double *)malloc(cols * sizeof(double));
+    }
+    return m;
+}
+
+// 设置矩阵元素值
+void matrix_set(Matrix *m, double values[]) {
+    int index = 0;
+    for (int i = 0; i < m->rows; i++) {
+        for (int j = 0; j < m->cols; j++) {
+            m->data[i][j] = values[index++];
+        }
+    }
+}
+
+// 打印矩阵
+void matrix_print(Matrix *m) {
+    for (int i = 0; i < m->rows; i++) {
+        for (int j = 0; j < m->cols; j++) {
+            printf("%f ", m->data[i][j]);
+        }
+        printf("\n");
+    }
+}
+
+int main() {
+    Matrix *A, *B;
+    A = matrix_allocate(2, 2); 
+    B = matrix_allocate(2, 2); 
+
+    double valuesA[] = {1.0, 2.0, 3.0, 4.0};
+    double valuesB[] = {5.0, 6.0, 7.0, 8.0};
+
+    matrix_set(A, valuesA);
+    matrix_set(B, valuesB);
+
+    matrix_print(A);
+    matrix_print(B);
+
+    // 释放矩阵内存
+for (int i =0; i<A->rows; i++)
+ {
+   free(A->data[1]);
+  } 
+   free(A-data);
+   free(A);
+
+   for(int i =0; i< B->rows; i++);
+    {
+        free(B->data);
+     }
+        free(B->data;
+        free(B);
+        return 0;
+}
