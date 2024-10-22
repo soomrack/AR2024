@@ -27,7 +27,7 @@ struct Deposite {
 
 
 struct Person Alice = {
-    .account = 14 * 1000 * 1000,
+    .account = 0,
     .month_credit = 185337,
     .salary = 300 * 1000,
     .expenses = 60 * 1000
@@ -62,17 +62,18 @@ struct Deposite Alice_dep = {
 void alice_deposite()
 {
     Alice_dep.deposite_account = Alice_dep.deposite_account * Alice_dep.deposite_procent;
-    Alice_dep.deposite_account += Alice.salary - Alice.month_credit - Alice.expenses;
-    Alice.account -= Alice.salary - Alice.month_credit - Alice.expenses;
+
+    Alice_dep.deposite_account += Alice.account;
+    Alice.account = 0;
 }
 
 
 void bob_deposite()
 {
     Bob_dep.deposite_account = Bob_dep.deposite_account * Bob_dep.deposite_procent;
-    Bob_dep.deposite_account += Bob.salary - Bob.expenses;
-    Bob.account -= Bob.salary - Bob.expenses;
 
+    Bob_dep.deposite_account += Bob.account;
+    Bob.account = 0;
 }
 
 
@@ -106,7 +107,6 @@ void alice_credit()
 void alice_house(const int month)
 {
     if (month == 1) {
-        Alice.account += Alice.house * 0,7;
         Alice.house *= 1.07;
     }
 
@@ -122,7 +122,7 @@ void alice_cat(const int month) {
         if (month == 5 ) {      //у кота в мае День Рождения
             Alice_cat.cat_life += 1;
         }
-        
+        Alice.account -= Alice_cat.cat_expenses;
     }
 }
 
@@ -148,13 +148,13 @@ void bob_salary(const int month)
 
 void print()
 {
-    if (Bob.account + Bob_dep.deposite_account > Alice.account + Alice_dep.deposite_account){
-        printf("Bob richer  = %lld \n ", Bob.account + Bob_dep.deposite_account - (Alice.account + Alice_dep.deposite_account));
+    if (Bob_dep.deposite_account > Alice_dep.deposite_account + Alice.house){
+        printf("Bob richer  = %lld \n ", Bob_dep.deposite_account - (Alice_dep.deposite_account + Alice.house));
     }
-    if (Bob.account + Bob_dep.deposite_account < Alice.account + Alice_dep.deposite_account){
-        printf("Alice richer =  %lld \n ", Alice.account + Alice_dep.deposite_account - (Bob.account + Bob_dep.deposite_account));
+    if (Bob_dep.deposite_account < Alice.house + Alice_dep.deposite_account){
+        printf("Alice richer =  %lld \n ", Alice.house + Alice_dep.deposite_account - Bob_dep.deposite_account);
     }
-    if (Bob.account + Bob_dep.deposite_account == Alice.account + Alice_dep.deposite_account){
+    if (Bob_dep.deposite_account == Alice.house + Alice_dep.deposite_account){
         printf("Bob and Alice have the same capital");
     }
 }
@@ -174,9 +174,9 @@ void simulation()
         alice_salary(month);
         alice_expenses(month);
         alice_credit();
+        alice_cat(month);
         alice_deposite();
         alice_house(month);
-        alice_cat(month);
 
         month++;
         if (month == 13) {
