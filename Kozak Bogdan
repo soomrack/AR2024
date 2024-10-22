@@ -3,8 +3,7 @@
 
 typedef long long int Money;   // RUB
 
-struct Deposits
-{
+struct Deposits {
     double protsent; // процент вклада
     Money account;
 };
@@ -26,8 +25,7 @@ struct Basketball {  // Хобби
     int is_interesting;
 };
 
-struct Car
-{
+struct Car {
     Money petrol;  // Бензин
     Money insurance; // Страховка
     Money maintenance; // Тех. обслуживание
@@ -39,7 +37,7 @@ struct Human {
     Money salary;
     Money account;
     Money food;
-    Money other; // всякие безделушки
+    Money exepenses; // всякие безделушки
     Money rent;
     struct Mortgage mortgage;
     struct Basketball basketball;
@@ -52,15 +50,13 @@ struct Human alice;
 struct Human bob;
 
 
-void alice_mortgage()
-{
+void alice_mortgage(){
     alice.account -= alice.mortgage.month_pay;
 
 }
 
 
-void alice_food(const int month)
-{
+void alice_food(const int month) {
     if (month == 1) {
         alice.food *= 1.08;
     }
@@ -68,21 +64,20 @@ void alice_food(const int month)
 }
 
 
-void alice_other(const int month)
+void alice_exepenses(const int month)
 {
     if (month == 1) {
         alice.account -= 6750;
     }
-    alice.account -= alice.other;
+    alice.account -= alice.exepenses;
 }
 
 
-void alice_init()
-{
+void alice_init() {
     alice.account = 1000 * 1000;
     alice.salary = 365 * 1000;
     alice.food = 10 * 1000;
-    alice.other = 70 * 1000;
+    alice.exepenses = 70 * 1000;
 
     alice.mortgage.platez = 1000 * 1000;
     alice.mortgage.credit = 14000 * 1000;
@@ -92,16 +87,15 @@ void alice_init()
     alice.mortgage.credit -= alice.mortgage.platez;
     alice.mortgage.credit -= alice.mortgage.month_pay;
 
-    alice.robotics.courses = 5000;
+    alice.robotics.courses = 4000;
     alice.robotics.is_interesting = 0;
 
-    alice.basketball.lesson = 2500;
+    alice.basketball.lesson = 2000;
     alice.robotics.is_interesting = 0;
 }
 
 
-void alice_robotics(const int month, const int year)
-{
+void alice_robotics(const int month, const int year) {
     if ((month == 12) && (year == 2025))
     {
         alice.account -= 37000;
@@ -122,8 +116,7 @@ void alice_robotics(const int month, const int year)
 }
 
 
-void alice_basketball(const int month, const int year)
-{
+void alice_basketball(const int month, const int year) {
     if ((month == 2) && (year == 2033))
     {
         alice.account -= 20000;
@@ -144,8 +137,7 @@ void alice_basketball(const int month, const int year)
 }
 
 
-void alice_salary(int month) // идексация зарплаты и само её начислеие
-{
+void alice_salary(int month) {
     if (month == 12) {
         alice.account += alice.salary;
     }
@@ -157,13 +149,12 @@ void alice_salary(int month) // идексация зарплаты и само 
 }
 
 
-void bob_other(const int month)
-{
+void bob_exepenses(const int month) {
     if (month == 1)
     {
         bob.account -= 6750;
     }
-    bob.account -= bob.other;
+    bob.account -= bob.exepenses;
 }
 
 
@@ -174,8 +165,7 @@ void bob_rent(const int month)
 }
 
 
-void bob_food(const int month)
-{
+void bob_food(const int month) {
     if (month == 1)
     {
         bob.food *= 1.08;
@@ -184,20 +174,18 @@ void bob_food(const int month)
 }
 
 
-void bob_deposits()
-{
+void bob_deposits() {
+    bob.deposits.account *= 9.7;  (12)
     bob.deposits.account += bob.account;
-    bob.deposits.account *= 0.12;-------
     bob.account = 0;
 }
 
 
-void bob_init()
-{
+void bob_init() {
     bob.account = 1000 * 1000;
     bob.salary = 200 * 1000;
     bob.food = 10 * 1000;
-    bob.other = 70 * 1000;
+    bob.exepenses = 70 * 1000;
 
     bob.rent = 32 * 100;
 
@@ -215,8 +203,7 @@ void bob_init()
 }
 
 
-void bob_car(const int month, const int year)
-{
+void bob_car(const int month, const int year) {
     if ((month == 12) && (year == 2030))
     {
         bob.car.is_car == 1;
@@ -238,8 +225,7 @@ void bob_car(const int month, const int year)
 }
 
 
-void bob_robotics(const int month, const int year)
-{
+void bob_robotics(const int month, const int year) {
     if ((month == 12) && (year == 2025))
     {
         bob.account -= 45000;
@@ -258,8 +244,7 @@ void bob_robotics(const int month, const int year)
 }
 
 
-void bob_salary(int month) // идексация зарплаты и само её начислеие
-{
+void bob_salary(int month) {
     if (month == 12) {
         alice.account += alice.salary;
     }
@@ -271,8 +256,7 @@ void bob_salary(int month) // идексация зарплаты и само е
 }
 
 
-void simulation() // счётчик год(месяц) и в дальнейшем проекция Боба и Алис
-{
+void simulation() {
     int month = 9;
     int year = 2024;
 
@@ -303,19 +287,16 @@ void simulation() // счётчик год(месяц) и в дальнейше�
 }
 
 
-void alice_print()
-{
+void alice_print() {
     printf("Alice account = %lld \n", alice.account); // kapital
 }
 
-void bob_print()
-{
+void bob_print() {
     printf("Bob account = %lld \n", bob.account); // kapital
 }
 
 
-int main()
-{
+int main() {
     alice_init();
     bob_init();
 
