@@ -1,47 +1,47 @@
 #include<stdio.h>
 #include<math.h>
 
-typedef long long int money; // используем пространство long long
+typedef long long int Money;   // RUB
 
 struct Deposits
 {
     double protsent; // процент вклада
-    money capital;
+    Money account;
 };
 
-struct Hypothec {  // Ипотека
+struct Mortgage {  // Ипотека
     double protsent;
-    money credit;
-    money platez;
-    money month_pay;
+    Money credit;
+    Money platez;
+    Money month_pay;
 };
 
 struct Robotics {   // Хобби
-    money courses;
+    Money courses;
     int is_interesting;
 };
 
 struct Basketball {  // Хобби
-    money lesson;
+    Money lesson;
     int is_interesting;
 };
 
 struct Car
 {
-    money petrol;  // Бензин
-    money insurance; // Страховка
-    money maintenance; // Тех. обслуживание
+    Money petrol;  // Бензин
+    Money insurance; // Страховка
+    Money maintenance; // Тех. обслуживание
     int is_car;
 };
 
 
 struct Human {
-    money salary;
-    money account;
-    money food;
-    money other; // всякие безделушки
-    money rent;
-    struct Hypothec hypothec;
+    Money salary;
+    Money account;
+    Money food;
+    Money other; // всякие безделушки
+    Money rent;
+    struct Mortgage mortgage;
     struct Basketball basketball;
     struct Robotics robotics;
     struct Car car;
@@ -52,9 +52,9 @@ struct Human alice;
 struct Human bob;
 
 
-void alice_hypothec()
+void alice_mortgage()
 {
-    alice.account -= alice.hypothec.month_pay;
+    alice.account -= alice.mortgage.month_pay;
 
 }
 
@@ -67,6 +67,7 @@ void alice_food(const int month)
     alice.account -= alice.food;
 }
 
+
 void alice_other(const int month)
 {
     if (month == 1) {
@@ -75,6 +76,7 @@ void alice_other(const int month)
     alice.account -= alice.other;
 }
 
+
 void alice_init()
 {
     alice.account = 1000 * 1000;
@@ -82,13 +84,13 @@ void alice_init()
     alice.food = 10 * 1000;
     alice.other = 70 * 1000;
 
-    alice.hypothec.platez = 1000 * 1000;
-    alice.hypothec.credit = 14000 * 1000;
-    alice.hypothec.protsent = 0.14;
-    alice.hypothec.month_pay = 285 * 1000;
+    alice.mortgage.platez = 1000 * 1000;
+    alice.mortgage.credit = 14000 * 1000;
+    alice.mortgage.protsent = 0.14;
+    alice.mortgage.month_pay = 285 * 1000;
     alice.account -= alice.hypothec.platez;
-    alice.hypothec.credit -= alice.hypothec.platez;
-    alice.hypothec.credit -= alice.hypothec.month_pay;
+    alice.mortgage.credit -= alice.mortgage.platez;
+    alice.mortgage.credit -= alice.mortgage.month_pay;
 
     alice.robotics.courses = 5000;
     alice.robotics.is_interesting = 0;
@@ -96,6 +98,7 @@ void alice_init()
     alice.basketball.lesson = 2500;
     alice.robotics.is_interesting = 0;
 }
+
 
 void alice_robotics(const int month, const int year)
 {
@@ -118,6 +121,7 @@ void alice_robotics(const int month, const int year)
     }
 }
 
+
 void alice_basketball(const int month, const int year)
 {
     if ((month == 2) && (year == 2033))
@@ -131,7 +135,7 @@ void alice_basketball(const int month, const int year)
     }
     if (month == 1)
     {
-        alice.basketball.lesson *= 1.09;
+        alice.basketball.lesson *= 1.05;
     }
     if (alice.basketball.is_interesting == 1)
     {
@@ -182,8 +186,8 @@ void bob_food(const int month)
 
 void bob_deposits()
 {
-    bob.deposits.capital += bob.account;
-    bob.deposits.capital *= 0.12;
+    bob.deposits.account += bob.account;
+    bob.deposits.account *= 0.12;-------
     bob.account = 0;
 }
 
@@ -197,8 +201,8 @@ void bob_init()
 
     bob.rent = 32 * 100;
 
-    bob.deposits.capital += bob.account;
-    bob.deposits.capital = 0;
+    bob.deposits.account += bob.account;
+    bob.deposits.account = 0;
     bob.deposits.protsent = 0.12;    
 
     bob.robotics.courses = 5000;
@@ -209,6 +213,7 @@ void bob_init()
     bob.car.maintenance = 6000;
 
 }
+
 
 void bob_car(const int month, const int year)
 {
@@ -231,6 +236,7 @@ void bob_car(const int month, const int year)
         bob.account -= bob.car.petrol;
     }
 }
+
 
 void bob_robotics(const int month, const int year)
 {
@@ -264,6 +270,7 @@ void bob_salary(int month) // идексация зарплаты и само е
     alice.account += alice.salary;
 }
 
+
 void simulation() // счётчик год(месяц) и в дальнейшем проекция Боба и Алис
 {
     int month = 9;
@@ -292,9 +299,7 @@ void simulation() // счётчик год(месяц) и в дальнейше�
             year++;
         }
     }
-    alice.account += alice.hypothec.credit;
-
-    bob.account += bob.deposits.capital;
+    
 }
 
 
