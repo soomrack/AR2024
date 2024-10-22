@@ -24,6 +24,7 @@ struct human {
   double account;
   double house;
   double rent;
+  double deposit;
   double deposit_procent;
 };
 
@@ -47,6 +48,7 @@ struct expenses alice = {
 struct human Alice = {
   .salary = 300*1000,
   .account = 0,
+  .deposit = 0,
   .deposit_procent = 0
 };
 
@@ -62,6 +64,7 @@ struct human Bob = {
   .salary=300*1000,
   .account=0,
   .rent = 40*1000,
+  .deposit = 0,
   .deposit_procent = 1.05
 };
 
@@ -116,9 +119,11 @@ void bob_expenses(const int month, const int year) {
 
 
 void bob_deposit(const int month, const int year) {
- if (month == 12) {
-      Bob.account *= Bob.deposit_procent;
+  if (month == 12) {
+      Bob.deposit *= Bob.deposit_procent;
   }
+
+  Bob.deposit += Bob.account; 
 }
 
 
