@@ -64,7 +64,7 @@ void Bob_charges(const int month, const int year)
         Bob.rent *= 1.08;
         Bob.unexpected_situations *= 1.08;
     }
-    Bob.account -= Bob.unexpected_situations - Bob.rent;
+    Bob.account -= Bob.unexpected_situations + Bob.rent;
 }
 
 
