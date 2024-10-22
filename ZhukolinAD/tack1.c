@@ -19,7 +19,7 @@ struct human {
     double platez_month;
     double first_platez;
     int yers;
-};
+  };
   double salary;
   double account;
   double house;
