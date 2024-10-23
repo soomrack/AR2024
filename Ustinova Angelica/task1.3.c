@@ -1,12 +1,10 @@
 #include <stdio.h>
 
-typedef long long Money;
-int month = 9;
-int year = 2024;
+typedef long long Money;  // рубли
+int MONTH = 9;
+int YEAR = 2024;
 
-
-struct Person
-{
+struct Person {
     Money salary;
     Money for_living;
     Money account;
@@ -14,43 +12,49 @@ struct Person
     Money house_rent;
     Money expenses;
     Money mortgage;
+    double rate = 1.1;
 };
 
-struct Deposit
-{
-    Money deposit;
-    double rate;
-};
+struct Person Alice, Bob;
 
+void alice_init() {
+    Alice.salary = 300 * 1000;
+    Alice.for_living = 100 * 1000;
+    Alice.account = 0;
+    Alice.house = 14000 * 1000;
+    Alice.house_rent = 0;
+    Alice.expenses = 0;
+    Alice.mortgage = 150 * 1000;
+}
 
-struct Person Alice = { 300 * 1000, 100 * 1000, 0, 14000 * 1000, 0, 0, 150 * 1000 };
-struct Person Bob = { 300 * 1000, 100 * 1000, 0, 14000 * 1000, 40 * 1000, 0, 0, };
+void bob_init() {
+    Bob.salary = 300 * 1000;
+    Bob.for_living = 100 * 1000;
+    Bob.account = 0;
+    Bob.house_rent = 40 * 1000;
+    Bob.expenses = 0;
+    Bob.mortgage = 0;
+}
 
-
-void alice_house(const int month, const int year)
-{
-    if (month == 12) {
+void alice_house(const int MONTH, const int YEAR) {
+    if (MONTH == 12) {
         Alice.house *= 1.08;
     }
-    if (month == 9 && year == 2024 + 30) {
+    if (MONTH == 9 && YEAR == 2024 + 30) {
         Alice.account += Alice.house;
     }
 }
 
-
-void alice_salary(const int month, const int year)
-{
-    if (month == 12) {
+void alice_salary(const int MONTH, const int YEAR) {
+    if (MONTH == 12) {
         Alice.salary *= 1.06;
     }
 
     Alice.account += Alice.salary;
 }
 
-
-void alice_expenses(const int month, const int year)
-{
-    if (month == 12) {
+void alice_expenses(const int MONTH, const int YEAR) {
+    if (MONTH == 12) {
         Alice.for_living *= 1.08;
     }
 
@@ -58,21 +62,22 @@ void alice_expenses(const int month, const int year)
     Alice.account -= Alice.expenses;
 }
 
+void alice_deposit(const int MONTH, const int YEAR) {
+    if (MONTH == 12) {
+        Alice.account *= Alice.rate;
+    }
+}
 
-
-void bob_salary(const int month, const int year)
-{
-    if (month == 12) {
+void bob_salary(const int MONTH, const int YEAR) {
+    if (MONTH == 12) {
         Bob.salary *= 1.06;
     }
 
     Bob.account += Bob.salary;
 }
 
-
-void bob_expenses(const int month, const int year)
-{
-    if (month == 12) {
+void bob_expenses(const int MONTH, const int YEAR) {
+    if (MONTH == 12) {
         Bob.for_living *= 1.08;
         Bob.house_rent *= 1.08;
     }
@@ -81,43 +86,33 @@ void bob_expenses(const int month, const int year)
     Bob.account -= Bob.expenses;
 }
 
+void bob_deposit(const int MONTH, const int YEAR) {
+    if (MONTH == 12) {
+        Bob.account *= Bob.rate;
+    }
+}
 
-void simulation()
-{
-    while (!(year == 2024 + 30 && month == 10)) {
-        alice_house(month, year);
-        alice_salary(month, year);
-        alice_expenses(month, year);
-        void alice_deposit(const int month, const int year);
-        {
-            if (month == 12) {
-                Alice.account * 1.1;
-            }
-        }
+void simulation() {
+    while (!(YEAR == 2024 + 30 && MONTH == 10)) {
+        alice_house(MONTH, YEAR);
+        alice_salary(MONTH, YEAR);
+        alice_expenses(MONTH, YEAR);
+        alice_deposit(MONTH, YEAR);
 
-        bob_salary(month, year);
-        bob_expenses(month, year);
-        void bob_deposit(const int month, const int year);
-        {
-            if (month == 12) {
-                Bob.account * 1.1;
-            }
-        }
+        bob_salary(MONTH, YEAR);
+        bob_expenses(MONTH, YEAR);
+        bob_deposit(MONTH, YEAR);
 
+        MONTH++;
 
-        month++;
-
-        if (month == 13) {
-            year++;
-            month = 1;
+        if (MONTH == 13) {
+            YEAR++;
+            MONTH = 1;
         }
     }
 }
 
-
-
-void result()
-{
+void print_result() {
     if (Alice.account > Bob.account) {
         printf("Alice is richer on %lld\n", Alice.account - Bob.account);
     }
@@ -126,10 +121,10 @@ void result()
     }
 }
 
-
-int main()
-{
+int main() {
+    alice_init();
+    bob_init();
     simulation();
-    result();
+    print_result();
     return 0;
 }
