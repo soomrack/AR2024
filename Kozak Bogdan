@@ -64,8 +64,7 @@ void alice_food(const int month) {
 }
 
 
-void alice_exepenses(const int month)
-{
+void alice_exepenses(const int month) {
     if (month == 1) {
         alice.account -= 6750;
     }
@@ -158,8 +157,7 @@ void bob_exepenses(const int month) {
 }
 
 
-void bob_rent(const int month)
-{
+void bob_rent(const int month) {
     bob.account -= bob.rent;
 
 }
