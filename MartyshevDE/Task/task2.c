@@ -254,7 +254,7 @@ Matrix matrix_inverse(Matrix A)
     matrix_free(&T);
     
     return inverse;
-}
+} 
 
 
 void matrix_print (Matrix A) 
