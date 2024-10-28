@@ -21,7 +21,7 @@ typedef enum MatrixException MatrixException;
 void matrix_exception(const MatrixException code, char* msg)
 {
     if(code == ERROR) {
-        printf("ERROR: %s\n", msg);   // Ошибка
+        printf("ERROR: %s\n", msg);   
     }
 } 
 
@@ -57,17 +57,18 @@ void matrix_free (Matrix* A)
 
 }
 
-// Функция для доступа к элементу матрицы
+
 double matrix_get (Matrix A, size_t row, size_t col) 
 {
     return A.data [A.cols * row + col];
 }
 
-// Функция для установки значения в элемент матрицы
+
 void matrix_set(const Matrix A, const double *values)
 {
     memcpy(A.data, values, A.rows * A.cols * sizeof(double));
 }
+
 
 // return A += B
 Matrix matrix_add (const Matrix A, const Matrix B) 
@@ -85,6 +86,7 @@ Matrix matrix_add (const Matrix A, const Matrix B)
     return result;
 }
 
+
 // return A -= B
 Matrix matrix_subtract (Matrix A, Matrix B) 
 {
@@ -101,6 +103,7 @@ Matrix matrix_subtract (Matrix A, Matrix B)
     return result;
 }
 
+
 // A * scalar
 Matrix matrix_scalar_multiply (Matrix A, double scalar) 
 {
@@ -111,6 +114,7 @@ Matrix matrix_scalar_multiply (Matrix A, double scalar)
     }
     return result;
 }
+
 
 // A *= B
 Matrix matrix_multiply (Matrix A, Matrix B) 
@@ -132,6 +136,124 @@ Matrix matrix_multiply (Matrix A, Matrix B)
         }
     }
     return result;
+}
+
+
+size_t factorial(size_t n) 
+{
+    size_t result = 1;
+    for (size_t i = 2; i <= n; ++i) {
+        result *= i;
+    }
+    return result;
+}
+
+
+Matrix matrix_E(size_t size) 
+{
+    Matrix I = matrix_allocate(size, size);
+    for (size_t i = 0; i < size; ++i) {
+        I.data[i * size + i] = 1.0;
+    }
+    return I;
+}
+
+
+Matrix matrix_exp(Matrix A) 
+{
+    if (A.cols != A.rows) {
+        matrix_exception(ERROR, "Matrix must be square for exponentiation");
+        return (Matrix){0, 0, NULL};
+    }
+
+    Matrix result = matrix_E(A.cols); // E
+    Matrix term = matrix_E(A.cols);   // A^0 / 0!
+    Matrix degree = A;  // A^1
+    
+    for (size_t n = 1; n <= 20; ++n) {
+        term = matrix_multiply(term, A);
+        Matrix scaled_term = matrix_scalar_multiply(term, 1.0 / factorial(n));
+        result = matrix_add(result, scaled_term);
+        
+        matrix_free(&scaled_term);  
+    }
+
+    matrix_free(&term);
+    matrix_free(&degree);
+
+    return result;
+}
+
+
+Matrix matrix_minor(Matrix A, size_t row, size_t col) 
+{
+    Matrix minor = matrix_allocate(A.cols - 1, A.rows - 1);
+    
+    size_t idx = 0;
+    for (size_t i = 0; i < A.rows; ++i) {
+        if (i == row) continue;
+        for (size_t j = 0; j < A.cols; ++j) {
+            if (j == col) continue;
+            minor.data[idx++] = A.data[i * A.cols + j];
+        }
+    }
+    
+    return minor;
+}
+
+
+double matrix_determinant(Matrix A)
+{
+    if (A.cols != A.rows) {
+        matrix_exception(ERROR, "Matrix must be square for determinant calculation");
+        return 0.0;
+    }
+
+    if (A.rows == 2 && A.cols == 2) {
+        return A.data[0] * A.data[3] - A.data[1] * A.data[2];
+    }
+
+    double det = 0.0;
+    for (size_t col = 0; col < A.cols; ++col) {
+    Matrix subMatrix = matrix_minor(A, 0, col);
+    double znak = (col % 2 == 0 ? 1 : -1) * A.data[col];
+    det += znak * matrix_determinant(subMatrix);
+    matrix_free(&subMatrix);
+    }
+    return det;
+}
+
+
+Matrix matrix_T(Matrix A) 
+{
+    Matrix T = matrix_allocate(A.cols, A.rows);
+    
+    for (size_t row = 0; row < A.rows; ++row) {
+        for (size_t col = 0; col < A.cols; ++col) {
+            Matrix minor = matrix_minor(A, row, col);
+            double znak = ((row + col) % 2 == 0 ? 1 : -1) * matrix_determinant(minor);
+            T.data[col * A.rows + row] = znak; 
+            matrix_free(&minor);
+        }
+    }
+    
+    return T;
+}
+
+
+Matrix matrix_inverse(Matrix A) 
+{
+    double det = matrix_determinant(A);
+    if (det == 0) {
+        matrix_exception(ERROR, "Matrix is singular and cannot be inverted");
+        return (Matrix){0, 0, NULL};
+    }
+    
+    Matrix T = matrix_T(A);
+    Matrix inverse = matrix_scalar_multiply(T, 1.0 / det);
+    matrix_free(&T);
+    
+    return inverse;
 }
 
 
@@ -183,13 +305,24 @@ int main()
     printf("Multiplication A on B:\n");
     matrix_print(F);
 
-    
+    Matrix expA = matrix_exp(A);
+    printf("Exponential of A (e^A):\n");
+    matrix_print(expA);
+
+    double detA = matrix_determinant(A);
+    printf("Determinant of A: %f\n", detA);
+
+    Matrix invA = matrix_inverse(A);
+    printf("Inverse of A: \n");
+
     matrix_free(&A);
     matrix_free(&B);
     matrix_free(&C);
     matrix_free(&D);
     matrix_free(&E);
     matrix_free(&F);
+    matrix_free(&expA);
+    matrix_free(&invA);
 
     return 0;
 }
