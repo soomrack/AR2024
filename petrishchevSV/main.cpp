@@ -81,7 +81,7 @@ void alice_salary(int const month)
 
 void bob_init()
 {
-bob.salary = 200 * 1000;
+bob.salary = 150 * 1000;
 bob.status = 1000 * 1000;
 bob.expenses = 50 * 1000;
 bob.bank.rate = 1.01245;
@@ -146,11 +146,7 @@ void simulation()
         bob_salary(month);
         bob_expenses(year, month);
         bob_kvartira(start_year, year, month);
-        printf("\n st %i", bob.status);
         bob_bank();
-        
-        printf("\n st %i", bob.status);
-        printf("\n dep %i", bob.bank.deposit);
         
         month++;
         if(month == 13) {
@@ -167,7 +163,7 @@ void strategic_evaluation()
     printf("\n Bob  %i", bob.bank.deposit );
     printf("\n Alice  %i", alice.status );
     
-    if (alice.status > bob.status) {
+    if (alice.status > bob.bank.deposit) {
         printf("\n Alice strategic is better");
     }
     else {
