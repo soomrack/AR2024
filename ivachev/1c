@@ -1,0 +1,130 @@
+#include <stdio.h>
+
+typedef unsigned long long int Money;
+typedef enum Name {
+    Bob,
+    Alice
+} Name;
+
+typedef struct Mortgage{
+    double rate;
+    Money credit;
+} Mortgage;
+
+typedef struct Person {
+    Name name;
+    Money account;
+    Money eats;
+    Money salary;
+    union {
+        struct {
+            Money rent;
+        };
+        struct {
+            Money utilities;
+            Mortgage mortgage;
+        };
+    };
+} Person;
+
+Person RentPayment(int mounth, Person person)
+{   
+    if (mounth == 1){
+        person.rent *= 1.1; 
+    }
+    person.account -= person.rent;
+    return person;
+}
+
+Person EatsPayment(int mounth, Person person)
+{
+    if (mounth == 1){
+        person.eats *= 1.1;
+    }
+    person.account -= person.eats;
+    return person;
+}
+
+Person AccountRise(int mounth, Person person)
+{
+    if (mounth == 1){
+        person.salary *= 1.07;
+    }
+    person.account += person.salary;
+    return person;
+}
+
+Money CalculateMonthPaymentForMortgage(int mounth_left, Mortgage mortgage){
+    return (Money)(mortgage.credit / (mounth_left + mortgage.credit * mortgage.rate / 12));
+}
+
+Person AccountAddPercent(Person person){
+    person.account *= 1.15;
+    return person;
+}
+
+Person UtilitiesPayment(int mounth, Person person){
+    if (mounth == 1){
+        person.utilities *= 1.1;
+    }
+    person.account -= person.utilities;
+    return person;
+}
+
+Person MortgagePayment(int mounth_left, Person person){
+    Money payment = CalculateMonthPaymentForMortgage(mounth_left, person.mortgage);
+    person.account -= payment;
+    person.mortgage.credit -= payment;
+    return person;
+}
+
+int main()
+{
+    Person a;
+    a.name = Alice;
+    a.account = 13 * 1000 * 1000;
+    a.eats = 30 * 1000;
+    a.salary = 200 * 1000;
+    a.utilities = 10 * 1000;
+    Mortgage m;
+    m.rate = 1.17;
+    m.credit = 13 * 1000 * 1000;
+    a.mortgage = m;
+    
+    Person b;
+    b.name = Bob;
+    b.account = 0;
+    b.eats = 30 * 1000;
+    b.salary = 200 * 1000;
+    b.rent = 30 * 1000;
+    
+    int years;
+    scanf("%d", &years);
+    
+    int mounths = -1;
+    int mod_mouths;
+    while ((mounths - 1) != years * 12){
+        mounths += 1;
+        mod_mouths = mounths % 12 + 1;
+        if (mod_mouths == 1){
+            a = AccountAddPercent(a);
+            b = AccountAddPercent(b);
+        }
+        a = AccountRise(mod_mouths, a);
+        a = EatsPayment(mod_mouths, a);
+        a = UtilitiesPayment(mod_mouths, a);
+        a = MortgagePayment(years * 12 - mounths, a);
+        
+        b = AccountRise(mod_mouths, b);
+        b = EatsPayment(mod_mouths, b);
+        b = RentPayment(mod_mouths, b);
+    }
+    
+    if (b.account <= a.account){
+        printf("%llu vs %llu, Alice won!", a.account, b.account);
+    }
+    else{
+        printf("%llu vs %llu, Bob won!", a.account, b.account);
+    }
+    return 0;
+}
