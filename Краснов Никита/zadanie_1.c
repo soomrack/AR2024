@@ -58,7 +58,7 @@ void Bob_salary(const int month, const int year)
 };
 
 
-void Bob_expenses(const int month, const int salary)
+void Bob_expenses(const int month, const int year)
 {
     Bob.account -= Bob.expenses;
 
@@ -68,7 +68,7 @@ void Bob_expenses(const int month, const int salary)
 };
 
 
-void Bob_rent_flat(const int month, const int salary)
+void Bob_rent_flat(const int month, const int year)
 {
     Bob.account -= Bob.rent_flat;
 
@@ -95,7 +95,7 @@ void Alice_salary(const int month, const int year)
 };
 
 
-void Alice_expenses(const int month, const int salary)
+void Alice_expenses(const int month, const int year)
 {
     Alice.account -= Alice.expenses;
 
