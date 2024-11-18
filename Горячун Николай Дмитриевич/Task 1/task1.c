@@ -62,6 +62,7 @@ void alice_deposite_counting()
 {
     alice.deposite.account += alice.deposite.account * alice.deposite.interest / 12;
     alice.deposite.account += alice.account;
+    alice.account = 0;
 };
 
 
@@ -69,6 +70,7 @@ void bob_deposite_counting()
 {
     bob.deposite.account += bob.deposite.account * bob.deposite.interest / 12;
     bob.deposite.account += bob.account;
+    bob.account = 0;
 };
 
 
@@ -162,7 +164,7 @@ void alice_account()
 
 void simulation()
 {
-    while (year_counter != 2054) {
+    while (year_counter != 2054 && month_counter != 9) {
 
         bob_expenditure_inflation();
         bob_house_inflation();
