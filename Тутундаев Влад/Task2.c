@@ -38,6 +38,7 @@ Matrix alloc_matrix( size_t rows, size_t cols)
    
 }
 
+
 void fill_matrix(const Matrix A, double *arr)
 {
     memcpy(A.data, arr, A.cols * A.rows * sizeof(double));
@@ -51,10 +52,8 @@ void free_matrix(Matrix *A)
 }
 
 
-
-
-
-void print_matrix( const Matrix A){
+void print_matrix( const Matrix A)
+{
     for (size_t rows = 0; rows < A.rows; ++rows){
         for (size_t cols = 0; cols < A.cols; ++cols){
             printf("%f ", A.data[rows * A.cols + cols]);
@@ -63,11 +62,13 @@ void print_matrix( const Matrix A){
     }
 }
 
-void sum_matrix(Matrix A, Matrix B, Matrix * C){
-    free_matrix(&C);
+
+void sum_matrix(Matrix A, Matrix B, Matrix * C) // C = A + B
+{
+    free_matrix(C);
+
     if (A.rows != B.rows || A.cols != B.cols){
         printf("Summation error.");
-        *C = (Matrix){0, 0, NULL};
         return;
     }
     *C = alloc_matrix(A.rows, A.cols);
@@ -79,11 +80,13 @@ void sum_matrix(Matrix A, Matrix B, Matrix * C){
     
 }
 
-void sub_matrix(Matrix A, Matrix B, Matrix * C){
-    free_matrix(&C);
+
+void sub_matrix(Matrix A, Matrix B, Matrix * C) // C = A - B
+{
+    free_matrix(C);
+
     if (A.rows != B.rows || A.cols != B.cols){
         printf("Summation error.");
-        *C = (Matrix){0, 0, NULL};
         return;
     }
 
@@ -95,12 +98,13 @@ void sub_matrix(Matrix A, Matrix B, Matrix * C){
     }  
 }
 
-void mul_matrix(double ratio, Matrix* A) //произведение матрицы на константу
+
+void mul_matrix(double ratio, Matrix* A) // A*= ratio
 {
-    if (A->data == NULL){
+    /*if (A->data == NULL){
         printf("multiplication matrix error.");
         return;
-    }
+    }*/
 
     for (size_t rows = 0; rows < A->rows; ++rows){            
         for (size_t cols = 0; cols < A->cols; ++cols){
@@ -110,7 +114,8 @@ void mul_matrix(double ratio, Matrix* A) //произведение матриц
 }
 
 
-double det_matrix(const Matrix *A){
+double det_matrix(const Matrix *A)
+{
 
     if (A->cols != A->rows){
         printf("Error of finding determinant");
@@ -137,13 +142,11 @@ double det_matrix(const Matrix *A){
             for (size_t m_cols = 0; m_cols < A->cols; ++m_cols){
                 if (m_cols != a_cols && m_rows != 0){
                     M.data[cntr] = A->data[A->rows * m_rows + m_cols];
-                    //printf("%d %d %d %f\n", cntr, m_rows, m_cols, M.data[cntr]);
                     ++cntr;
                     
                 }
             }
         }
-        //print_matrix(M);
         if (a_cols % 2 == 0) det += A->data[a_cols] * det_matrix(&M);
         else det -= A->data[a_cols] * det_matrix(&M);
     }
@@ -154,11 +157,14 @@ double det_matrix(const Matrix *A){
     
 }
 
-void trn_matrix(Matrix *A){
+
+void trn_matrix(Matrix *A)
+{
     if (A->cols != A->rows){
         printf("Transpotation error.");
         return;
     }
+
     double t;
     for (size_t rows = 0; rows < A->rows; ++rows){
         for ( size_t cols = 0; cols < rows; ++ cols){
@@ -171,7 +177,8 @@ void trn_matrix(Matrix *A){
 
 
 
-Matrix inv_matrix(Matrix A){
+Matrix inv_matrix(Matrix A)
+{
 
     if (A.cols != A.rows){
         printf("Inversion error");
@@ -273,7 +280,7 @@ Matrix dgr_matrix( Matrix A, size_t n){
 }
 
 
-Matrix exp_matrix(Matrix A)
+/*Matrix exp_matrix(Matrix A)
 {
     if(A.cols != A.rows){
         printf("exp_matrix error");
@@ -287,7 +294,9 @@ Matrix exp_matrix(Matrix A)
         sum_matrix(B, mul_matrix(1/fact(i),  dgr_matrix(A, i)), &B);
     }
 
-}
+}*/
+
+
 int main(){
     Matrix a1, a2, c;
     a1 = alloc_matrix(3, 3);
