@@ -58,7 +58,7 @@ void matrix_free(Matrix* A)
         free (A->data);
         *A = (Matrix){0, 0, NULL};
     }
-}
+} 
 
 
 double matrix_get(Matrix A, size_t row, size_t col) 
