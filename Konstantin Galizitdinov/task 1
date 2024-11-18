@@ -40,6 +40,9 @@ void Alice_money()
     Alice.mortgage.rate = 0.18;
     Alice.mortgage.credit = 13*1000*1000;
     Alice.mortgage.month_pay = 160*1000;
+    Alice.bank.month_pay = 160*1000;
+    Alice.bank.vklad = 0;
+    Alice.kvartira = 14*1000*1000;
 }
 
 void Bob_money()
@@ -50,26 +53,31 @@ void Bob_money()
     Bob.kvartira = 30*1000; 
     Bob.rubles = 0;
     Bob.bank.month_pay = 130*1000;
+    Bob.bank.vklad = 1000 * 1000;
 }
 
-void Alice_zarplata(const int month, const int year)
+void Alice_zarplata(const int month)
 {
     if(month == 12) {
         Alice.status += Alice.zarplata;
     }
     if(month == 1) {
         Alice.zarplata *= 1.10;
+        Alice.rashod *= 1.10;
+        Alice.kvartira *= 1.10;
     }
     Alice.status += Alice.zarplata;
+    Alice.status -= Alice.rashod;
 }
 
-void Bob_zarplata(const int month, const int year)
+void Bob_zarplata(const int month)
 {
     if(month == 12) {
         Bob.status += Bob.zarplata;
     }
     if(month == 1) {
         Bob.zarplata *= 1.10;
+        Bob.rashod *= 1.10;
     }
     Bob.status += Bob.zarplata;
 }
@@ -94,16 +102,31 @@ void totalAlice()
 
 void Bob_bank(int deposit)
 {
-    int month = 7;
+    int month = 9;
     int year = 2024;
 
-    while( !((month == 7) && (year == 2054)) ) {
+    while( !((month == 9) && (year == 2054)) ) {
 
-    deposit = 20; 
-    Bob.status -= Bob.bank.month_pay;
-    Bob.bank.vklad = ((deposit/12)*0.01+1);
-    Bob.rubles += (Bob.zarplata -Bob.bank.month_pay - Bob.rashod - Bob.kvartira);
-    Bob.status += (Bob.bank.vklad + Bob.rubles);
+        deposit = 20; 
+        Bob.status -= Bob.bank.month_pay;
+        Bob.bank.vklad = ((deposit/12)*0.01+1) * (Bob.bank.vklad + Bob.bank.month_pay); 
+        Bob.rubles += (Bob.zarplata -Bob.bank.month_pay - Bob.rashod - Bob.kvartira);
+        Bob.status += (Bob.bank.vklad + Bob.rubles);
+    }
+}
+
+void Alice_bank(int deposit)
+{
+    int month = 9;
+    int year = 2024;
+    if (Alice.mortgage.credit <= 0)
+        while( !((month == 9) && (year == 2054)) ) {
+
+            deposit = 20; 
+            Alice.status -= Alice.bank.month_pay;
+            Alice.bank.vklad = ((deposit/12)*0.01+1) * (Alice.bank.vklad + Alice.bank.month_pay); 
+            Alice.rubles += (Alice.zarplata - Alice.bank.month_pay);
+            Alice.status += (Alice.bank.vklad + Alice.rubles);
     }
 }
 
@@ -123,15 +146,15 @@ void totalBob()
 
 void simulation()
 {
-    int month = 7;
+    int month = 9;
     int year = 2024;
 
-    while( !((month == 7) && (year == 2054)) ) {
+    while( !((month == 9) && (year == 2054)) ) {
         
-        Alice_zarplata(month, year);
+        Alice_zarplata(month);
         Alice_mortgage();
         
-        Bob_zarplata(month, year);
+        Bob_zarplata(month);
         Bob_kvartira(year);
 
         month++;
@@ -139,7 +162,9 @@ void simulation()
             month = 1;
             year++;
         }
-    }
+    }    
+     Alice.status += Alice.kvartira;    
+    
 }
 
 int main()
