@@ -265,7 +265,7 @@ void matrix_print (Matrix A)
         }
         printf ("\n");
     }
-}
+} 
 
 
 int main() 
