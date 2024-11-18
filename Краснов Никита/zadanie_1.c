@@ -15,6 +15,7 @@ struct Person {
     Money flat;
     Money rent_flat;
     Money account;
+    Money cat;
     struct Mortgage person_mortgage;
 };
 
@@ -38,6 +39,7 @@ void Alice_init()
     Alice.salary = 300000;
     Alice.expenses = 40000;
     Alice.flat = 13000000;
+    Alice.cat = 7000;
 
     Alice.person_mortgage.mortgage = Alice.flat;
     Alice.person_mortgage.mortgage -= Alice.account;
@@ -125,6 +127,15 @@ void Alice_deposit(const int month, const int year)
 };
 
 
+void Alice_cat(const int month, const int salary) {
+    Alice.account -= Alice.cat;
+
+    if (month == 9) {
+        Alice.cat *= 1.06;
+    }
+};
+
+
 void simulation()
 {
     int month = 9;
@@ -141,6 +152,14 @@ void simulation()
         Alice_flat(month, year);
         Alice_mortgage();
         Alice_deposit(month, year);
+
+        if (month == 12) {
+            Bob.account += Bob.salary;
+        }
+
+        if ((year == 2026) | (year == 2027)) {
+            Alice_cat(month, year);
+        }
 
         month++;
         if (month == 13) {
