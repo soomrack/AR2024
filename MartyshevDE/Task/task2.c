@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <limits.h>
+#include <math.h>
 
 
 struct Matrix 
@@ -26,10 +27,9 @@ void matrix_exception(const MatrixException code, char* msg)
 } 
 
 
-Matrix matrix_allocate (size_t cols, size_t rows) 
+Matrix matrix_allocate(size_t cols, size_t rows) 
 {
-    Matrix A = {cols, rows, NULL};  
-    A.data = (double*)malloc(cols * rows * sizeof(double)); 
+    Matrix A = {cols, rows, NULL};   
     
     if (cols == 0 || rows == 0) {
         matrix_exception(ERROR, "Matrix dimensions must be greater than 0");    
@@ -45,22 +45,25 @@ Matrix matrix_allocate (size_t cols, size_t rows)
         matrix_exception(ERROR, "Unable to allocate memory");  
         return(Matrix){0, 0, NULL};
     }
+
+    A.data = (double*)malloc(cols * rows * sizeof(double));
     
     return A;
 }
 
 
-void matrix_free (Matrix* A) 
+void matrix_free(Matrix* A) 
 {
-    free (A->data);
-    *A = (Matrix){0, 0, NULL};
-
+    if (A != NULL && A-> data != NULL) {
+        free (A->data);
+        *A = (Matrix){0, 0, NULL};
+    }
 }
 
 
-double matrix_get (Matrix A, size_t row, size_t col) 
+double matrix_get(Matrix A, size_t row, size_t col) 
 {
-    return A.data [A.cols * row + col];
+    return A.data[A.cols * row + col];
 }
 
 
@@ -71,7 +74,7 @@ void matrix_set(const Matrix A, const double *values)
 
 
 // return A += B
-Matrix matrix_add (const Matrix A, const Matrix B) 
+Matrix matrix_add(const Matrix A, const Matrix B) 
 {
     if(A.rows != B.rows || A.cols != B.cols) {
         matrix_exception (ERROR, "The dimensions of the matrices do not match for addition");   
@@ -88,7 +91,7 @@ Matrix matrix_add (const Matrix A, const Matrix B)
 
 
 // return A -= B
-Matrix matrix_subtract (Matrix A, Matrix B) 
+Matrix matrix_subtract(Matrix A, Matrix B) 
 {
     if (A.rows != B.rows || A.cols != B.cols) {
         matrix_exception (ERROR, "The sizes of the matrices do not match for subtraction");   
@@ -105,7 +108,7 @@ Matrix matrix_subtract (Matrix A, Matrix B)
 
 
 // A * scalar
-Matrix matrix_scalar_multiply (Matrix A, double scalar) 
+Matrix matrix_scalar_multiply(Matrix A, double scalar) 
 {
     Matrix result = matrix_allocate (A.cols, A.rows);
     
@@ -117,7 +120,7 @@ Matrix matrix_scalar_multiply (Matrix A, double scalar)
 
 
 // A *= B
-Matrix matrix_multiply (Matrix A, Matrix B) 
+Matrix matrix_multiply(Matrix A, Matrix B) 
 {
     if (A.cols != B.rows) {
         matrix_exception (ERROR, "The number of columns of the first matrix is not equal to the number of rows of the second matrix"); 
@@ -152,8 +155,8 @@ size_t factorial(size_t n)
 Matrix matrix_E(size_t size) 
 {
     Matrix I = matrix_allocate(size, size);
-    for (size_t i = 0; i < size; ++i) {
-        I.data[i * size + i] = 1.0;
+    for (size_t idx = 0; idx < size * size; idx += size + 1) {
+        I.data[idx] = 1.0;
     }
     return I;
 }
@@ -171,10 +174,17 @@ Matrix matrix_exp(Matrix A)
     Matrix degree = A;  // A^1
     
     for (size_t n = 1; n <= 20; ++n) {
-        term = matrix_multiply(term, A);
-        Matrix scaled_term = matrix_scalar_multiply(term, 1.0 / factorial(n));
-        result = matrix_add(result, scaled_term);
         
+        Matrix old_term = term;
+        term = matrix_multiply(term, A);
+        matrix_free(&old_term);
+
+        Matrix scaled_term = matrix_scalar_multiply(term, 1.0 / factorial(n));
+        
+        Matrix old_result = result;
+        result = matrix_add(result, scaled_term);
+        matrix_free(&old_result);
+
         matrix_free(&scaled_term);  
     }
 
@@ -190,11 +200,11 @@ Matrix matrix_minor(Matrix A, size_t row, size_t col)
     Matrix minor = matrix_allocate(A.cols - 1, A.rows - 1);
     
     size_t idx = 0;
-    for (size_t i = 0; i < A.rows; ++i) {
-        if (i == row) continue;
-        for (size_t j = 0; j < A.cols; ++j) {
-            if (j == col) continue;
-            minor.data[idx++] = A.data[i * A.cols + j];
+    for (size_t rows = 0; rows < A.rows; ++rows) {
+        if (rows == row) continue;
+        for (size_t cols = 0; cols < A.cols; ++cols) {
+            if (cols == col) continue;
+            minor.data[idx++] = A.data[rows * A.cols + cols];
         }
     }
     
@@ -206,7 +216,7 @@ double matrix_determinant(Matrix A)
 {
     if (A.cols != A.rows) {
         matrix_exception(ERROR, "Matrix must be square for determinant calculation");
-        return 0.0;
+        return NAN;
     }
 
     if (A.rows == 2 && A.cols == 2) {
@@ -215,10 +225,10 @@ double matrix_determinant(Matrix A)
 
     double det = 0.0;
     for (size_t col = 0; col < A.cols; ++col) {
-    Matrix subMatrix = matrix_minor(A, 0, col);
-    double znak = (col % 2 == 0 ? 1 : -1) * A.data[col];
-    det += znak * matrix_determinant(subMatrix);
-    matrix_free(&subMatrix);
+        Matrix subMatrix = matrix_minor(A, 0, col);
+        double znak = (col % 2 == 0 ? 1 : -1) * A.data[col];
+        det += znak * matrix_determinant(subMatrix);
+        matrix_free(&subMatrix);
     }
     return det;
 }
@@ -230,9 +240,7 @@ Matrix matrix_T(Matrix A)
     
     for (size_t row = 0; row < A.rows; ++row) {
         for (size_t col = 0; col < A.cols; ++col) {
-            Matrix minor = matrix_minor(A, row, col);
-            double znak = ((row + col) % 2 == 0 ? 1 : -1) * matrix_determinant(minor);
-            T.data[col * A.rows + row] = znak; 
+            Matrix minor = matrix_minor(A, row, col); 
             matrix_free(&minor);
         }
     }
@@ -244,7 +252,7 @@ Matrix matrix_T(Matrix A)
 Matrix matrix_inverse(Matrix A) 
 {
     double det = matrix_determinant(A);
-    if (det == 0) {
+    if (det == 0.00001 || det == NAN) {
         matrix_exception(ERROR, "Matrix is singular and cannot be inverted");
         return (Matrix){0, 0, NULL};
     }
@@ -257,7 +265,7 @@ Matrix matrix_inverse(Matrix A)
 } 
 
 
-void matrix_print (Matrix A) 
+void matrix_print(Matrix A) 
 {
     for (size_t row = 0; row < A.rows; row++) {
         for (size_t col = 0; col < A.cols; col++) {
