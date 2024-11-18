@@ -230,7 +230,7 @@ void simulation()
             year++;
         }
     }
-}
+} 
 
 
 int main()
