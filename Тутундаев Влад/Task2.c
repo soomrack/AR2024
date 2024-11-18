@@ -153,8 +153,7 @@ double det_matrix(const Matrix *A)
 
     free_matrix(&M);
     return det;
-
-    
+  
 }
 
 
@@ -242,7 +241,8 @@ Matrix mul_matrix2(Matrix A, Matrix B) // произведение матриц
     return C;
 }
 
-double fact (size_t n){
+double fact (size_t n)
+{
     double t = 1;
     for (size_t i = 2; i <= n; ++i) t*=i;
     return t;
@@ -264,7 +264,8 @@ Matrix unit_matrix(const size_t t) // t = cols = rows
     return A;
 }
 
-Matrix dgr_matrix( Matrix A, size_t n){
+Matrix dgr_matrix( Matrix A, size_t n)
+{
     if (n == 1) return A;
     if( n < 0){
         printf("dgr_matrix error");
@@ -280,7 +281,7 @@ Matrix dgr_matrix( Matrix A, size_t n){
 }
 
 
-/*Matrix exp_matrix(Matrix A)
+Matrix exp_matrix(Matrix A)
 {
     if(A.cols != A.rows){
         printf("exp_matrix error");
@@ -291,10 +292,10 @@ Matrix dgr_matrix( Matrix A, size_t n){
     B = unit_matrix(A.rows);
 
     for (size_t i = 1; i < 10; ++i){
-        sum_matrix(B, mul_matrix(1/fact(i),  dgr_matrix(A, i)), &B);
+        
     }
 
-}*/
+}
 
 
 int main(){
