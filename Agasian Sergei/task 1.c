@@ -54,7 +54,7 @@ void Alice_credit()
 }
 
 
-void Alice_zarplata( int month)
+void Alice_zarplata(const int month)
 {
     Alice.Bank_Active = Alice.zarplata;
     if (month == 9){
@@ -70,11 +70,13 @@ void Alice_Bank_Account()
 }
 
 
-void Alice_Deposit()
+void Alice_Deposit(const int month)
 {
-    Alice.BankDeposit = Alice.BankDeposit * 1.2;
-    Alice.BankDeposit = Alice.BankDeposit + Alice.Bank;
-    Alice.Bank = 0;
+    if (month ==1){
+        Alice.BankDeposit = Alice.BankDeposit * 1.2;
+        Alice.BankDeposit = Alice.BankDeposit + Alice.Bank;
+        Alice.Bank = 0;
+    }
 }
 
 void Alice_print()
@@ -92,10 +94,10 @@ void Alice_simulation()
         Alice_expensens(month);
         Alice_credit();
         Alice_Bank_Account();
+        Alice_kvartira_cost(month);
+        Alice_Deposit(month);
         month++;
         if (month == 13) {
-            Alice_kvartira_cost(month);
-            Alice_Deposit();
             month = 1;
             year++;
         }
@@ -125,7 +127,7 @@ void Bob_expensens( int month)
 }
 
 
-void Bob_zarplata( int month)
+void Bob_zarplata( const int month)
 {
     Bob.Bank_Active = Bob.zarplata;
     if (month == 9)
@@ -141,11 +143,13 @@ void Bob_Bank_Account()
 }
 
 
-void Bob_Deposit()
+void Bob_Deposit( const int month)
 {
-    Bob.BankDeposit = Bob.BankDeposit * 1.2;
-    Bob.BankDeposit = Bob.BankDeposit + Bob.Bank;
-    Bob.Bank = 0;
+    if (month ==1){
+        Bob.BankDeposit = Bob.BankDeposit * 1.2;
+        Bob.BankDeposit = Bob.BankDeposit + Bob.Bank;
+        Bob.Bank = 0;
+    }
 }
 
 void Bob_education(const int month, const int year)
@@ -180,10 +184,10 @@ void Bob_simulation()
         Bob_zarplata(month);
         Bob_expensens(month);
         Bob_education (month, year);
+        Bob_Bank_Account();
+        Bob_Deposit(month);
         month++;
         if (month == 13){
-            Bob_Bank_Account();
-            Bob_Deposit();
             month = 1;
             year++;
         }

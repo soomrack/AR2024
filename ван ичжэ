@@ -1,19 +1,17 @@
-import numpy as np
-
-# Create a 2x2 matrix
-matrix = np.array([[1, 2], [3, 4]])
-
-# Print the matrix
-print("Original matrix:")
-print(matrix)
-
-# Transpose of the matrix
-transposed_matrix = np.transpose(matrix)
-print("Transposed matrix:")
-print(transposed_matrix)
-
-# Matrix multiplication
-another_matrix = np.array([[5, 6], [7, 8]])
-result_matrix = np.dot(matrix, another_matrix)
-print("Result of matrix multiplication:")
-print(result_matrix)
+Matrix E, F;
+// TODO: check for allocated
+E = matrix_allocate(2, 2);
+// TODO: check for allocated
+F = matrix_allocate(2, 2);
+matrix_set(E, (double[]){5., 6., 7., 8.});
+matrix_set(F, (double[]){2., 0., 0., 2.});
+matrix_set(E, (double[]){
+5., 6.,
+7., 8.
+});
+matrix_set(F, (double[]){
+2., 0.,
+0., 2.
+});
+matrix_print(E);
+matrix_print(F);
