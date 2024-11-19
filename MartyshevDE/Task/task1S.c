@@ -29,7 +29,7 @@ struct Individual
     Money rubles; 
     struct Mortgage mortgage;
     struct Bank bank;
-};
+}; 
 
 
 struct Individual Alice;
