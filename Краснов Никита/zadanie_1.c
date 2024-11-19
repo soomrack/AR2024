@@ -3,6 +3,12 @@
 typedef long long int Money;
 
 
+struct Cat {
+    Money catfood;
+    int life_cat;
+};
+
+
 struct Mortgage {
     Money mortgage;
     Money month_mortgage;
@@ -15,7 +21,7 @@ struct Person {
     Money flat;
     Money rent_flat;
     Money account;
-    Money cat;
+    struct Cat person_cat;
     struct Mortgage person_mortgage;
 };
 
@@ -39,7 +45,9 @@ void Alice_init()
     Alice.salary = 300000;
     Alice.expenses = 40000;
     Alice.flat = 13000000;
-    Alice.cat = 7000;
+    
+    Alice.person_cat.catfood = 7000;  //расходы на кота
+    Alice.person_cat.life_cat = 15;
 
     Alice.person_mortgage.mortgage = Alice.flat;
     Alice.person_mortgage.mortgage -= Alice.account;
@@ -54,7 +62,11 @@ void Bob_salary(const int month, const int year)
 {
     Bob.account += Bob.salary;
 
-    if (month == 9) {
+      if (month == 12) {
+            Bob.account += Bob.salary;
+        }
+
+    if (month == 1) {
         Bob.salary *= 1.06;
     }
 };
@@ -64,7 +76,7 @@ void Bob_expenses(const int month, const int year)
 {
     Bob.account -= Bob.expenses;
 
-    if (month == 9) {
+    if (month == 1) {
         Bob.expenses *= 1.06;
     }
 };
@@ -74,7 +86,7 @@ void Bob_rent_flat(const int month, const int year)
 {
     Bob.account -= Bob.rent_flat;
 
-    if (month == 9) {
+    if (month == 1) {
     Bob.rent_flat *= 1.06;
    }
 };
@@ -91,7 +103,7 @@ void Alice_salary(const int month, const int year)
 {
     Alice.account += Alice.salary;
     
-    if (month == 9) {
+    if (month == 1) {
         Alice.salary *= 1.06;
     }
 };
@@ -101,7 +113,7 @@ void Alice_expenses(const int month, const int year)
 {
     Alice.account -= Alice.expenses;
 
-    if (month == 9) {
+    if (month == 1) {
         Alice.expenses *= 1.06;
     }
 };
@@ -109,7 +121,7 @@ void Alice_expenses(const int month, const int year)
 
 void Alice_flat(const int month, const int year)
 {
-    if (month == 9) {
+    if (month == 1) {
         Alice.flat *= 1.06;
     }
 };
@@ -127,21 +139,25 @@ void Alice_deposit(const int month, const int year)
 };
 
 
-void Alice_cat(const int month, const int salary) {
-    Alice.account -= Alice.cat;
+void Alice_cat(const int month, const int year) {
 
-    if (month == 9) {
-        Alice.cat *= 1.06;
+    if (month == 1) {
+        Alice.person_cat.catfood *= 1.06;
+    }
+
+    if ((year >= 2027) && (year <= (2027 + Alice.person_cat.life_cat))) {  //др кота в 2027
+
+        Alice.account -= Alice.person_cat.catfood;
     }
 };
 
 
 void simulation()
 {
-    int month = 9;
+    int month = 1;
     int year = 2024;
 
-    while( !((month == 9) && (year == 2054)) ) {
+    while( !((month == 1) && (year == 2054)) ) {
         Bob_salary(month, year);
         Bob_expenses(month, year);
         Bob_rent_flat(month, year);
@@ -152,14 +168,7 @@ void simulation()
         Alice_flat(month, year);
         Alice_mortgage();
         Alice_deposit(month, year);
-
-        if (month == 12) {
-            Bob.account += Bob.salary;
-        }
-
-        if ((year == 2026) | (year == 2027)) {
-            Alice_cat(month, year);
-        }
+        Alice_cat(month, year);
 
         month++;
         if (month == 13) {
