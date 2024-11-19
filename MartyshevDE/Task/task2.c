@@ -41,27 +41,26 @@ Matrix matrix_allocate(size_t cols, size_t rows)
         return (Matrix){0, 0, NULL};
     }
 
+    A.data = (double*)malloc(cols * rows * sizeof(double));
+
     if (A.data == NULL) {
         matrix_exception(ERROR, "Unable to allocate memory");  
         return(Matrix){0, 0, NULL};
     }
-
-    A.data = (double*)malloc(cols * rows * sizeof(double));
     
     return A;
 }
 
 
-void matrix_free(Matrix* A) 
+void matrix_free(Matrix *A) 
 {
-    if (A != NULL && A-> data != NULL) {
-        free (A->data);
-        *A = (Matrix){0, 0, NULL};
-    }
-} 
+    if (A == NULL) return;
+    free (A->data);
+    *A = (Matrix){0, 0, NULL};
+}
 
 
-double matrix_get(Matrix A, size_t row, size_t col) 
+double matrix_get(const Matrix A, size_t row, size_t col) 
 {
     return A.data[A.cols * row + col];
 }
@@ -91,7 +90,7 @@ Matrix matrix_add(const Matrix A, const Matrix B)
 
 
 // return A -= B
-Matrix matrix_subtract(Matrix A, Matrix B) 
+Matrix matrix_subtract(const Matrix A, const Matrix B) 
 {
     if (A.rows != B.rows || A.cols != B.cols) {
         matrix_exception (ERROR, "The sizes of the matrices do not match for subtraction");   
@@ -108,7 +107,7 @@ Matrix matrix_subtract(Matrix A, Matrix B)
 
 
 // A * scalar
-Matrix matrix_scalar_multiply(Matrix A, double scalar) 
+Matrix matrix_scalar_multiply(const Matrix A, double scalar) 
 {
     Matrix result = matrix_allocate (A.cols, A.rows);
     
@@ -120,7 +119,7 @@ Matrix matrix_scalar_multiply(Matrix A, double scalar)
 
 
 // A *= B
-Matrix matrix_multiply(Matrix A, Matrix B) 
+Matrix matrix_multiply(const Matrix A, const Matrix B) 
 {
     if (A.cols != B.rows) {
         matrix_exception (ERROR, "The number of columns of the first matrix is not equal to the number of rows of the second matrix"); 
@@ -132,7 +131,6 @@ Matrix matrix_multiply(Matrix A, Matrix B)
     for (size_t row = 0; row < result.rows; row++) {
         for (size_t col = 0; col < result.cols; col++) {
             result.data[row * result.cols + col] = 0.0; 
-
             for (size_t idx = 0; idx < A.cols; idx++) {
                 result.data[row * result.cols + col] += A.data[row * A.cols + idx] * B.data[idx * B.cols  + col]; 
             }
@@ -162,7 +160,7 @@ Matrix matrix_E(size_t size)
 }
 
 
-Matrix matrix_exp(Matrix A) 
+Matrix matrix_exp(const Matrix A) 
 {
     if (A.cols != A.rows) {
         matrix_exception(ERROR, "Matrix must be square for exponentiation");
@@ -171,7 +169,6 @@ Matrix matrix_exp(Matrix A)
 
     Matrix result = matrix_E(A.cols); // E
     Matrix term = matrix_E(A.cols);   // A^0 / 0!
-    Matrix degree = A;  // A^1
     
     for (size_t n = 1; n <= 20; ++n) {
         
@@ -189,13 +186,12 @@ Matrix matrix_exp(Matrix A)
     }
 
     matrix_free(&term);
-    matrix_free(&degree);
 
     return result;
 }
 
 
-Matrix matrix_minor(Matrix A, size_t row, size_t col) 
+Matrix matrix_minor(const Matrix A, size_t row, size_t col) 
 {
     Matrix minor = matrix_allocate(A.cols - 1, A.rows - 1);
     
@@ -212,7 +208,7 @@ Matrix matrix_minor(Matrix A, size_t row, size_t col)
 }
 
 
-double matrix_determinant(Matrix A)
+double matrix_determinant(const Matrix A)
 {
     if (A.cols != A.rows) {
         matrix_exception(ERROR, "Matrix must be square for determinant calculation");
@@ -234,7 +230,7 @@ double matrix_determinant(Matrix A)
 }
 
 
-Matrix matrix_T(Matrix A) 
+Matrix matrix_T(const Matrix A) 
 {
     Matrix T = matrix_allocate(A.cols, A.rows);
     
@@ -249,7 +245,7 @@ Matrix matrix_T(Matrix A)
 }
 
 
-Matrix matrix_inverse(Matrix A) 
+Matrix matrix_inverse(const Matrix A) 
 {
     double det = matrix_determinant(A);
     if (det == 0.00001 || det == NAN) {
@@ -265,7 +261,7 @@ Matrix matrix_inverse(Matrix A)
 } 
 
 
-void matrix_print(Matrix A) 
+void matrix_print(const Matrix A) 
 {
     for (size_t row = 0; row < A.rows; row++) {
         for (size_t col = 0; col < A.cols; col++) {
