@@ -157,7 +157,7 @@ Matrix matrix_E(size_t size)
         I.data[idx] = 1.0;
     }
     return I;
-}
+} 
 
 
 Matrix matrix_exp(const Matrix A) 
