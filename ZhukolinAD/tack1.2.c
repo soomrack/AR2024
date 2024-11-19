@@ -162,15 +162,13 @@ void bob_expenses(const int month, const int year)
 
 void bob_cat(const int month, const int year)
 {
-	if month == 12 
-		{
-			Bob.cat *= 1.07;
-			Bob.account -= Bob.cat;
-		}
-	if (month == 9 && year == 2024 + 5)
-		{
-			Bob.cat = 0;
-		}
+  if (month == 12) {
+	Bob.cat *= 1.07;
+	Bob.account -= Bob.cat;
+  }
+  if (month == 9 && year == 2024 + 5) {
+	Bob.cat = 0;
+  }
 }
 
 
