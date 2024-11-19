@@ -179,7 +179,7 @@ void calendar(){
         bob_salary(month, year);
         bob_mortgage(month);
         bob_food(month);
-        bob_expences(month);  // одежда, личные вещи
+        bob_expences(month);
         bob_cat(month, year);
         month++;
         if(month == 13) {
