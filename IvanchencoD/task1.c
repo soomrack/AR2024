@@ -1,47 +1,41 @@
 #include <stdio.h>
 
 
-// Определение типа для денег
 typedef long long int Money;
 
 
-// Структура для ипотеки
 struct Mortgage 
 {
-    double rate;          // Процентная ставка
-    Money credit;         // Размер кредита
-    Money pay;            // Текущий долг
-    Money month_pay;      // Ежемесячный платеж
+    double rate;          
+    Money credit;         
+    Money pay;            
+    Money month_pay;      
 };
 
 
-// Структура для банка
 struct Bank 
 {
-    Money contribution;   // Вклад
-    Money month_pay;      // Ежемесячный вклад
+    Money contribution;   
+    Money month_pay;      
 };
 
 
-// Структура для индивида
 struct Individual 
 {
-    Money salary;                   // Зарплата
-    Money monthly_expenses;         // Ежемесячные расходы
-    Money status;                   // Текущий капитал
-    Money apartment;                 // Стоимость квартиры
-    Money free_money;               // Рубли на руках
+    Money salary;                   
+    Money monthly_expenses;         
+    Money status;                   
+    Money apartment;                 
+    Money free_money;               
     struct Mortgage mortgage;
     struct Bank bank;
 };
 
 
-// Объявляем глобальные структуры
 struct Individual Alice;
 struct Individual Bob;
 
 
-// Инициализация данных для Алисы
 void initialize_Alice() 
 {
     Alice.status = 0;
@@ -55,27 +49,24 @@ void initialize_Alice()
 } 
 
 
-// Алиса платит ипотеку
 void Alice_pay_mortgage()
 {
     Alice.status -= Alice.mortgage.month_pay;
 }
 
 
-// Зарплата Алисы
 void Alice_update_salary(int month) 
 {
     if (month == 12) {
         Alice.status += Alice.salary;
     }
     if (month == 1) {
-        Alice.salary *= 1.09; // Индексация зарплаты
+        Alice.salary *= 1.09; 
     }
     Alice.status += Alice.salary;
 }
 
 
-// Печать о капитале Алисы
 void Alice_print() 
 {
     if (Alice.status > Bob.status) {
@@ -86,7 +77,6 @@ void Alice_print()
 }
 
 
-// Инициализация данных для Боба
 void initialize_Bob()
 {
     Bob.status = 0;
@@ -98,19 +88,18 @@ void initialize_Bob()
 }
 
 
-// Зарплата Боба
 void Bob_update_salary(int month) 
 {
     if (month == 12) {
         Bob.status += Bob.salary;
     }
     if (month == 1) {
-        Bob.salary *= 1.09; // Индексация зарплаты
+        Bob.salary *= 1.09; 
     }
     Bob.status += Bob.salary;
 }
 
-// Депозит Боба
+
 void Bob_bank(int deposit)
 {
     int month = 9;
@@ -127,7 +116,7 @@ void Bob_bank(int deposit)
 }
 
 
-// Печать о капитале Боба
+
 void Bob_print() 
 {
     if (Alice.status < Bob.status) {
@@ -138,21 +127,19 @@ void Bob_print()
 }
 
 
-// Симуляция работы программы
+
 void simulation() 
 {
     int month = 9;
     int year = 2024;
 
     while (!(month == 9 && year == 2054)) {
-        // Обновление зарплаты и других данных Алисы
+    
         Alice_update_salary(month);
         Alice_pay_mortgage();
 
-        // Обновление зарплаты Боба
         Bob_update_salary(month);
 
-        // Переход к следующему месяцу
         month++;
         if (month == 13) {
             month = 1;
