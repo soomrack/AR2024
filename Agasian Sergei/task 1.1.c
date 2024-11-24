@@ -1,5 +1,4 @@
 #include <stdio.h>
-
 typedef  long long int Money;
 
 struct Person {
@@ -41,12 +40,14 @@ void Alice_expensens(const int month)
      }
 }
 
+
 void Alice_kvartira_cost(const int mouth)
 {
     if (mouth == 1){
        Alice.kvartira_cost = Alice.kvartira_cost * 1.1; 
     }
 }
+
 
 void Alice_credit()
 {
@@ -79,11 +80,13 @@ void Alice_Deposit(const int month)
     }
 }
 
+
 void Alice_print()
 {
     Alice.total = Alice.BankDeposit + Alice.kvartira_cost + Alice.Bank_Active;
     printf("Alice = %lld\n", Alice.total);
 }
+
 
 void Alice_simulation()
 {
@@ -119,8 +122,7 @@ void Bob_expensens( int month)
 {
     Bob.Bank_Active = Bob.Bank_Active - Bob.expenses;
     Bob.Bank_Active = Bob.Bank_Active - Bob.mouth_pay;
-     if (month == 1)
-     {
+     if (month == 1){
         Bob.expenses = Bob.expenses * 1.1;
         Bob.mouth_pay = Bob.mouth_pay * 1.1;
      }
@@ -130,10 +132,9 @@ void Bob_expensens( int month)
 void Bob_zarplata( const int month)
 {
     Bob.Bank_Active = Bob.zarplata;
-    if (month == 9)
-     {
+    if (month == 9){
         Bob.zarplata = Bob.zarplata * 1.09;
-     }
+    }
 }
 
 
@@ -152,6 +153,7 @@ void Bob_Deposit( const int month)
     }
 }
 
+
 void Bob_education(const int month, const int year)
 {
     if ((month == 9) && (year == 2034)){
@@ -168,6 +170,7 @@ void Bob_education(const int month, const int year)
     }
 
 }
+
 
 void Bob_print()
 {
