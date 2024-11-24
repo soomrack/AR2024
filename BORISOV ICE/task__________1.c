@@ -25,12 +25,11 @@ struct Chelovek
     Money account;
     Money rashodi;
     Money mashina;
-    Money dengi;
+    Money ostatki;
     Money kvartira;
     struct Ipoteka Ipoteka;
     struct Vklad Vklad;
 };
-
 
 
 struct Chelovek ALICE;
@@ -105,24 +104,30 @@ void Bob_vklad(int deposit)
         deposit = 20;
         BOB.Vklad.vkladik = ((deposit/12)*0.01+1);
         BOB.account -= BOB.Vklad.mesyac_platezh_bob;
-        BOB.dengi += (BOB.zarplata -BOB.Vklad.mesyac_platezh_bob - BOB.rashodi - BOB.mashina);
-        BOB.account += (BOB.Vklad.vkladik + BOB.dengi);
+        BOB.ostatki += (BOB.zarplata - BOB.Vklad.mesyac_platezh_bob - BOB.rashodi - BOB.mashina);
+        BOB.account += (BOB.Vklad.vkladik + BOB.ostatki);
     }
 }
 
 
 void bob_mashina(int year, int month)
-{   
-    if (year == 2031 && month == 3 && BOB.account == 15 * 1000 * 1000){
-        BOB.account -= 15 * 1000 * 1000;
-    }
-    else if(year >= 2031 && month > 3){
-        BOB.account -= 15 * 1000;
-    }
-    else if(month == 9){
-        BOB.account -= 50 * 1000;
+{
+    static int has_car = 0;
+
+    if (BOB.account >= 3 * 1000 * 1000 && has_car == 0){
+        BOB.account -= 3 * 1000 * 1000;
+        has_car = 1;
+    } 
+    if(has_car == 1){
+        if (month == 9){
+            BOB.account -= 15 * 1000;
+        }
+        else{
+            BOB.account -= 40 * 1000;
+        }
     }
 }
+
 
 
 void bob_rashodi(int month)
@@ -137,7 +142,7 @@ void bob_kvartira(int year)
 {
     year = 2024;
     if (year== 2034 || year == 2044 || year == 2054) {
-        BOB.kvartira += 1000;
+        BOB.kvartira += 10000;
     }
 } 
 
@@ -158,7 +163,6 @@ void simulation()
         bob_mashina(year, month);
         bob_rashodi(month);
         
-
         month++;
         if(month == 13) {
             month = 1;
