@@ -52,7 +52,7 @@ void initialize_Alice()
     Alice.mortgage.rate = 0.17;
     Alice.mortgage.credit = 13 * 1000 * 1000;
     Alice.mortgage.month_pay = 150 * 1000;
-}
+} 
 
 
 // Алиса платит ипотеку
