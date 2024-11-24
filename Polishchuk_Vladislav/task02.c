@@ -309,6 +309,16 @@ int main()
     Matrix F = matrix_multiply (A, B);
     printf("A * B:\n");
     matrix_print(F);
+    
+    Matrix expA = matrix_exp(A);
+    printf("Exp of A:\n");
+    matrix_print(expA);
+
+    double detA = matrix_determinant(A);
+    printf("Det of A: %f\n", detA);
+
+    Matrix invA = matrix_inverse(A);
+    printf("A^-1: \n");
 
     
     matrix_free(&A);
@@ -317,6 +327,8 @@ int main()
     matrix_free(&D);
     matrix_free(&E);
     matrix_free(&F);
+    matrix_free(&expA);
+    matrix_free(&invA);
 
     return 0;
 }
