@@ -60,20 +60,21 @@ void matrix_free(Matrix *A)
 }
 
 
+
+
+
 double matrix_get(const Matrix A, size_t row, size_t col) 
 {
     return A.data[A.cols * row + col];
 }
 
-void set_matrix_element(Matrix *A, size_t row, size_t col, double value) {
-    // Проверка корректности индексов
-    if (row >= A->rows || col >= A->cols) {
+
+void set_matrix_element(const Matrix A, size_t row, size_t col, double value) {
+    if (row >= A.rows || col >= A.cols) {
         matrix_exception(ERROR, "Invalid index for setting element");
         return;
     }
-
-    // Установка значения элемента
-    A->data[row * A->cols + col] = value;
+    A.data[A.cols * row + col] = value;
 }
 
 
@@ -219,8 +220,6 @@ Matrix matrix_minor(const Matrix A, size_t row, size_t col)
 }
 
 
-
-
 double matrix_determinant(const Matrix A)
 {
     if (A.cols != A.rows) {
@@ -258,7 +257,7 @@ Matrix matrix_T(const Matrix A)
 }
     
 
-double cofactor(Matrix m, int row, int col) 
+double cofactor(const Matrix m, int row, int col) 
 {
     Matrix minor;
     minor.rows = m.rows - 1;
@@ -267,13 +266,13 @@ double cofactor(Matrix m, int row, int col)
     for (int r = 0; r < minor.rows; r++) {
         for (int c = 0; c < minor.cols; c++) {
             if (row > r && col > c) {
-                set_matrix_element(&minor, r, c, matrix_get(m, r, c));
+                set_matrix_element(minor, r, c, matrix_get(m, r, c));
             } else if (row > r) {
-                set_matrix_element(&minor, r, c, matrix_get(m, r+1, c));
+                set_matrix_element(minor, r, c, matrix_get(m, r+1, c));
             } else if (col > c) {
-                set_matrix_element(&minor, r, c, matrix_get(m, r, c + 1));
+                set_matrix_element(minor, r, c, matrix_get(m, r, c + 1));
             } else {
-                set_matrix_element(&minor, r, c, matrix_get(m, r + 1, c + 1));
+                set_matrix_element(minor, r, c, matrix_get(m, r + 1, c + 1));
             }
         }
     }
@@ -290,7 +289,7 @@ Matrix get_cofactor_matrix(Matrix m)
 
     for (int row = 0; row < m.rows; row++) {
         for (int col = 0; col < m.cols; col++) {
-            set_matrix_element(&cofactor_matrix, row, col, cofactor(m, row, col));;
+            set_matrix_element(cofactor_matrix, row, col, cofactor(m, row, col));;
         }
     }
 
@@ -320,6 +319,7 @@ void matrix_print(const Matrix A)
         printf ("\n");
     }
 } 
+
 
 int main() 
 {
