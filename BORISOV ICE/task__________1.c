@@ -6,7 +6,7 @@ typedef long long int Money;
 
 struct Ipoteka
 {
-    double stavka;
+    double inter_rate;
     Money kredit;
     Money mesyac_platezh_alice;
 };
@@ -50,7 +50,7 @@ void alice_init()
     ALICE.zarplata = 200*1000;
     ALICE.rashodi = 50*1000;
 
-    ALICE.Ipoteka.stavka = 0.17;
+    ALICE.Ipoteka.inter_rate = 0.17;
     ALICE.Ipoteka.kredit = 13*1000*1000;
     ALICE.Ipoteka.mesyac_platezh_alice = 150*1000;
 }
@@ -74,7 +74,8 @@ if (month == 1){
     ALICE.account -= ALICE.rashodi;
 }
 
-void bob_init(){
+void bob_init()
+{
     BOB.account = 0;
     BOB.zarplata = 200*1000;
     BOB.rashodi = 50*1000;
