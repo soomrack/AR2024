@@ -100,13 +100,9 @@ void Bob_vklad(int deposit)
 {
     int month = 9;
     int year = 2024;
-
-    if ( !((month == 9) && (year == 2054)) ) {
-        deposit = 20;
-        BOB.Vklad.vkladik = ((deposit/12)*0.01+1);
-        BOB.account -= BOB.Vklad.mesyac_platezh_bob;
-        BOB.ostatki += (BOB.zarplata - BOB.Vklad.mesyac_platezh_bob - BOB.rashodi - BOB.mashina);
-        BOB.account += (BOB.Vklad.vkladik + BOB.ostatki);
+    deposit = 20;
+    BOB.Vklad.vkladik = ((deposit/12)*0.01+1);
+    BOB.account -= BOB.Vklad.mesyac_platezh_bob;
     }
 }
 
@@ -119,14 +115,9 @@ void bob_mashina(int year, int month)
         BOB.account -= 3 * 1000 * 1000;
         has_car = 1;
     } 
-    if(has_car == 1){
-        if (month == 9){
-            BOB.account -= 15 * 1000;
-        }
-        else{
-            BOB.account -= 40 * 1000;
-        }
-    }
+    if(has_car == 1){ 
+    	BOB.account -= BOB.mashina;
+	{   
 }
 
 
