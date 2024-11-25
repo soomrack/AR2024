@@ -69,7 +69,7 @@ double matrix_get(const Matrix A, size_t row, size_t col)
 }
 
 
-void set_matrix_element(const Matrix A, size_t row, size_t col, double value) {
+void matrix_set_element(const Matrix A, size_t row, size_t col, double value) {
     if (row >= A.rows || col >= A.cols) {
         matrix_exception(ERROR, "Invalid index for setting element");
         return;
@@ -130,7 +130,7 @@ Matrix matrix_scalar_multiply(const Matrix A, double scalar)
 }
 
 
-// A *= B
+// A * B
 Matrix matrix_multiply(const Matrix A, const Matrix B) 
 {
     if (A.cols != B.rows) {
@@ -206,13 +206,14 @@ Matrix matrix_exp(const Matrix A)
 Matrix matrix_minor(const Matrix A, size_t row, size_t col) 
 {
     Matrix minor = matrix_allocate(A.cols - 1, A.rows - 1);
-    
+    if (minor.data !=  NULL) {
     size_t idx = 0;
     for (size_t rows = 0; rows < A.rows; ++rows) {
         if (rows == row) continue;
         for (size_t cols = 0; cols < A.cols; ++cols) {
             if (cols == col) continue;
             minor.data[idx++] = A.data[rows * A.cols + cols];
+        }
         }
     }
     
@@ -257,22 +258,22 @@ Matrix matrix_T(const Matrix A)
 }
     
 
-double cofactor(const Matrix m, int row, int col) 
+double matrix_cofactor(const Matrix m, size_t row, size_t col) 
 {
     Matrix minor;
     minor.rows = m.rows - 1;
     minor.cols = m.cols - 1;
 
-    for (int r = 0; r < minor.rows; r++) {
-        for (int c = 0; c < minor.cols; c++) {
+    for (size_t r = 0; r < minor.rows; r++) {
+        for (size_t c = 0; c < minor.cols; c++) {
             if (row > r && col > c) {
-                set_matrix_element(minor, r, c, matrix_get(m, r, c));
+                matrix_set_element(minor, r, c, matrix_get(m, r, c));
             } else if (row > r) {
-                set_matrix_element(minor, r, c, matrix_get(m, r+1, c));
+                matrix_set_element(minor, r, c, matrix_get(m, r+1, c));
             } else if (col > c) {
-                set_matrix_element(minor, r, c, matrix_get(m, r, c + 1));
+                matrix_set_element(minor, r, c, matrix_get(m, r, c + 1));
             } else {
-                set_matrix_element(minor, r, c, matrix_get(m, r + 1, c + 1));
+                matrix_set_element(minor, r, c, matrix_get(m, r + 1, c + 1));
             }
         }
     }
@@ -281,7 +282,7 @@ double cofactor(const Matrix m, int row, int col)
 }
 
 
-Matrix get_cofactor_matrix(Matrix m) 
+Matrix matrix_get_cofactor_(Matrix m) 
 {
     Matrix cofactor_matrix;
     cofactor_matrix.rows = m.rows;
@@ -289,7 +290,7 @@ Matrix get_cofactor_matrix(Matrix m)
 
     for (int row = 0; row < m.rows; row++) {
         for (int col = 0; col < m.cols; col++) {
-            set_matrix_element(cofactor_matrix, row, col, cofactor(m, row, col));;
+            matrix_set_element(cofactor_matrix, row, col, matrix_cofactor(m, row, col));;
         }
     }
 
@@ -303,7 +304,7 @@ Matrix matrix_inverse_a(const Matrix m)
     inv_adj.rows = m.rows;
     inv_adj.cols = m.cols;
 
-    Matrix inv_m = get_cofactor_matrix(m);
+    Matrix inv_m = matrix_get_cofactor_(m);
     Matrix transpose_inv_m = matrix_T(inv_m);
     Matrix scalar_inverse = matrix_scalar_multiply(transpose_inv_m, 1 / matrix_determinant(m));
     return scalar_inverse;
