@@ -75,8 +75,6 @@ void Alice_zarplata(const int month)
     if(month == 1) {
         Alice.zarplata *= 1.10;
     };
-    Alice.status += Alice.zarplata;
-
 };
 
 
@@ -106,7 +104,6 @@ void Bob_zarplata(const int month)
     if(month == 1) {
         Bob.zarplata *= 1.10;
     }
-    Bob.status += Bob.zarplata;
 };
 
 
