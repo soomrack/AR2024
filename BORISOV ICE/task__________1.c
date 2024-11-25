@@ -98,8 +98,6 @@ void bob_zarplata(const int month, const int year)
 
 void Bob_vklad(int deposit)
 {
-    int month = 9;
-    int year = 2024;
     deposit = 20;
     BOB.Vklad.vkladik = ((deposit/12)*0.01+1);
     BOB.account -= BOB.Vklad.mesyac_platezh_bob;
@@ -117,7 +115,7 @@ void bob_mashina(int year, int month)
     } 
     if(has_car == 1){ 
     	BOB.account -= BOB.mashina;
-	{   
+    }   
 }
 
 
@@ -138,7 +136,7 @@ void bob_kvartira(int year)
     }
 } 
 
-
+void
 void simulation()
 {
     int month = 9;
