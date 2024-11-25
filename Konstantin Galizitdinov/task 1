@@ -13,7 +13,7 @@ struct Mortgage
 };
 
 
-int month = 0;
+int month = 9;
 int year = 2024;
 
 
