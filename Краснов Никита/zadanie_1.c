@@ -46,7 +46,7 @@ void Alice_init()
     Alice.expenses = 40000;
     Alice.flat = 13000000;
     
-    Alice.person_cat.catfood = 7000;  //расходы на кота
+    Alice.person_cat.catfood = 7000;
     Alice.person_cat.life_cat = 15;
 
     Alice.person_mortgage.mortgage = Alice.flat;
