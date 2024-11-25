@@ -14,20 +14,37 @@ struct Matrix {
 typedef struct Matrix Matrix;
 
 
+enum MatrixExceptionLevel {ERROR, WARNING, INFO, DEBUG};
+
+void matrix_exception(const enum MatrixExceptionLevel level, char *msg)
+{
+    if(level == ERROR) {
+        printf("ERROR: %s", msg);
+    }
+
+    if(level == WARNING) {
+        printf("WARNING: %s", msg);
+    }
+}
+
+
 Matrix matrix_alloc( const size_t rows, const size_t cols)
 {
     Matrix A = {0, 0, NULL};
 
-    if ( (double)(rows / SIZE_MAX * cols * 1.) >= (double)(1. / sizeof(double)) || rows * cols == 0)
-    {
-       printf("the matrix size is not correct.");
+    if ( cols * rows == 0) {
+        return (Matrix){rows, cols, NULL};
+    }
+
+    if ( (double)(rows / SIZE_MAX * cols * 1.) >= (double)(1. / sizeof(double))) {
+       matrix_exception(ERROR, "Allocation size is too big");
        return A;
     } 
 
     A.data = malloc(sizeof(double) * rows * cols);
     
     if ( A.data == NULL){
-        printf("Allocation memory fail.");
+        matrix_exception(ERROR, "Allocation memory fail.");
         return A;
     }
 
@@ -35,18 +52,26 @@ Matrix matrix_alloc( const size_t rows, const size_t cols)
     A.cols = cols;
 
     return A;
-   
 }
 
 
 void matrix_fill(const Matrix A, double *arr)
 {
+    /*if (A.data == NULL){
+        matrix_exception(ERROR, "filling in the matrix fail.");
+        return A;
+    }*/
+
     memcpy(A.data, arr, A.cols * A.rows * sizeof(double));
 }
 
 
 void matrix_free(Matrix *A)
 {
+    if (A == NULL){
+        return;
+    }
+
     free(A->data);
     *A = (Matrix){0, 0, NULL};
 }
@@ -54,66 +79,61 @@ void matrix_free(Matrix *A)
 
 void matrix_print( const Matrix A)
 {
-    for (size_t rows = 0; rows < A.rows; ++rows){
-        for (size_t cols = 0; cols < A.cols; ++cols){
-            printf("%f ", A.data[rows * A.cols + cols]);
-        }
-        printf("\n");
+    for (size_t cntr = 0; cntr < A.rows * A.cols; cntr++){
+        printf("%f ", A.data[cntr]);
+        if ((cntr + 1) % A.cols == 0) printf("\n");
     }
 }
 
 
-void matrix_sum(const Matrix A, const Matrix B, Matrix * C) // C = A + B
+void matrix_sum( Matrix * C, const Matrix A, const Matrix B) // C = A + B
 {
     matrix_free(C);
 
     if (A.rows != B.rows || A.cols != B.cols || A.rows * A.cols == 0){
-        printf("Summation error.");
+        matrix_exception(ERROR, "Summation error.");
         return;
     }
 
     *C = matrix_alloc(A.rows, A.cols);
     if(C->data == NULL){
-        printf("Allocation memory fail.");
+        matrix_exception(ERROR, "Allocation memory fail.");
         return;
     }
 
-    for (size_t rows = 0; rows < A.rows; ++rows){            
-        for (size_t cols = 0; cols < A.cols; ++cols){
-            C->data[rows * A.cols + cols] = A.data[rows * A.cols + cols] + B.data[rows * A.cols + cols];
-        }        
+
+    for (size_t cntr = 0; cntr < C->rows * C->cols; cntr++){
+        C->data[cntr] = A.data[cntr] + B.data[cntr];
     }
     
 }
 
 
-void matrix_sub(const Matrix A, const Matrix B, Matrix * C) // C = A - B
+void matrix_sub(Matrix * C, const Matrix A, const Matrix B) // C = A - B
 {
     matrix_free(C);
 
     if (A.rows != B.rows || A.cols != B.cols || A.cols * A.rows == 0){
-        printf("Summation error.");
+        matrix_exception(ERROR, "Summation error.");
         return;
     }
 
     *C = matrix_alloc(A.rows, A.cols);
     if(C->data == NULL){
-        printf("Allocation memory fail.");
+        matrix_exception(ERROR, "Allocation memory fail.");
         return;
     }
 
-    for (size_t rows = 0; rows < A.rows; ++rows){            
-        for (size_t cols = 0; cols < A.cols; ++cols){
-            C->data[rows * A.cols + cols] = A.data[rows * A.cols + cols] - B.data[rows * A.cols + cols];
-        }        
-    }  
+    for (size_t cntr = 0; cntr < C->rows * C->cols; cntr++){
+        C->data[cntr] = A.data[cntr] - B.data[cntr];
+    }
 }
 
 
-void matrix_mul(const double ratio, Matrix* A) // A*= ratio
+void matrix_mul(Matrix* A, const double ratio) // A*= ratio
 {
     if (A->data == NULL || A->rows * A->cols == 0){
-        printf("multiplication matrix error.");
+        matrix_exception(ERROR, "multiplication matrix error.");
         return;
     }
 
@@ -127,16 +147,17 @@ double matrix_det(const Matrix *A)
 {
 
     if (A->cols != A->rows || A->cols * A->rows == 0 || A->data == NULL){
-        printf("Error of finding determinant");
+        matrix_exception(ERROR, "Error of finding determinant");
         return NAN;
     }
 
     double det = 0;
 
-    if(A->cols == 2){
-        det = A->data[0] * A->data[3] - A->data[1] * A->data[2];
-        return det;
-    }
+    if (A->cols == 1){
+        return A->data[0];
+    } else if(A->cols == 2){
+        return A->data[0] * A->data[3] - A->data[1] * A->data[2];
+    } 
 
     Matrix M;
     M.rows = A->rows - 1;
@@ -169,7 +190,7 @@ double matrix_det(const Matrix *A)
 void matrix_trn(const Matrix *A)
 {
     if (A->cols != A->rows || A->cols * A->rows == 0 || A->data == NULL){
-        printf("Transpotation error.");
+        matrix_exception(ERROR, "matrix transportation fail");
         return;
     }
 
@@ -189,13 +210,13 @@ Matrix matrix_inv(const Matrix A)
 {
 
     if (A.cols != A.rows || A.cols * A.rows == 0 || A.data == NULL){
-        printf("Inversion error");
+        matrix_exception(ERROR, "Inversion error");
         return (Matrix){0, 0, NULL};
     }
 
-
-    if(matrix_det(&A) == 0){
-        printf("Inverse matrix does not exist");
+        double t = matrix_det(&A);
+    if (t == NAN || abs(t) < 1e-6){
+        matrix_exception(ERROR, "Inverse matrix does not exist");
         return (Matrix){0, 0, NULL};
     }
 
@@ -205,7 +226,7 @@ Matrix matrix_inv(const Matrix A)
     Matrix T; // матрица для нахождения алгебраического дополнения
     T = matrix_alloc(A.rows - 1, A.cols - 1);
     if (T.data == NULL){
-        printf("Inversion error");
+        matrix_exception(ERROR, "Inversion error");
         return (Matrix){0, 0, NULL};
     }
 
@@ -227,9 +248,9 @@ Matrix matrix_inv(const Matrix A)
     }
 
     matrix_free(&T);
-    double t = 1. / matrix_det(&A);
+    double p = 1. / matrix_det(&A);
     matrix_trn(&B);
-    matrix_mul(t, &B);
+    matrix_mul(&B, p);
 
     return B;
     
@@ -238,14 +259,14 @@ Matrix matrix_inv(const Matrix A)
 Matrix matrix_mul2(const Matrix A, const Matrix B) // произведение матриц
 {
     if (A.cols != B.rows || A.cols * A.rows == 0 || B.rows * B.cols == 0){
-        printf("Multiplication matrix2 error");
+        matrix_exception(ERROR, "Multiplication matrix2 error");
         return (Matrix){0,0,NULL};
     }
 
     Matrix C;
     C = matrix_alloc(A.rows, B.cols);
     if (C.data == NULL){
-        printf("Multiplication matrix2 error");
+        matrix_exception(ERROR, "Multiplication matrix2 error");
         return (Matrix){0,0,NULL};
     }
 
@@ -274,7 +295,7 @@ Matrix matrix_unit(const size_t t) // t = cols = rows
     Matrix A;
     A = matrix_alloc(t, t);
     if(A.data == NULL){
-        printf("matrix unit error");
+        matrix_exception(ERROR, "matrix unit error");
         return (Matrix){0, 0, NULL};
     }
 
@@ -313,7 +334,7 @@ void matrix_clear(const Matrix *A)
 Matrix matrix_exp(const Matrix A)
 {
     if(A.cols != A.rows || A.cols * A.rows == 0 || A.data == NULL){
-        printf("exp_matrix error");
+        matrix_exception(ERROR, "exp_matrix error");
         return (Matrix){0, 0, NULL};
     }
 
@@ -321,30 +342,36 @@ Matrix matrix_exp(const Matrix A)
 
     B = matrix_alloc(A.rows, A.cols);
     if(B.data == NULL){
-        printf("exp_matrix error");
+        matrix_free(&B);
+        matrix_exception(ERROR, "exp_matrix error");
         return (Matrix){0, 0, NULL};
     }
 
     M1 = matrix_alloc(A.rows, A.cols);
     if(M1.data == NULL){
-        printf("exp_matrix error");
+        matrix_free(&B);
+        matrix_free(&M1);
+        matrix_exception(ERROR, "exp_matrix error");
         return (Matrix){0, 0, NULL};
     }
 
     M2 = matrix_alloc(A.rows, A.cols);
     if(M2.data == NULL){
-        printf("exp_matrix error");
+        matrix_free(&B);
+        matrix_free(&M1);
+        matrix_free(&M2);
+        matrix_exception(ERROR, "exp_matrix error");
         return (Matrix){0, 0, NULL};
     }
 
     B = matrix_unit(A.rows);
-    matrix_sum(B, A, &B);
+    matrix_sum(&B, B, A);
 
     for (size_t i = 2; i < 10; ++i){
         M2 = matrix_mul2(M2, A);
         M1 = M2;
-        matrix_mul((double)(1. / fact(i)), &M1);
-        matrix_sum(B, M1, &B);
+        matrix_mul(&M1, (double)(1. / fact(i)));
+        matrix_sum(&B, B, M1);
         matrix_clear(&M1);
     }
 
