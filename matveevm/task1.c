@@ -48,7 +48,7 @@ void alice_house(const int month, const int year)
 {
     if (month == 12)
     {
-        Alice.house *= 1.08;
+        Alice.house *= 1.09;
     }
     if (month == 9 && year == 2024+30)
     {
@@ -61,7 +61,7 @@ void alice_salary(const int month, const int year)
 {
     if (month == 12)
     {
-        Alice.salary *= 1.06;
+        Alice.salary *= 1.09;
         Alice.account*=Alice.deposit;
     }
 
@@ -73,7 +73,7 @@ void alice_expenses(const int month,const int year)
 {
     if (month == 12)
     {
-        Alice.for_living *=1.08;    
+        Alice.for_living *=1.09;    
     }
 
     Alice.expenses = Alice.for_living + Alice.mortgage;
@@ -86,7 +86,7 @@ void bob_salary(const int month,const int year)
 {
     if (month == 12)
     {
-        Bob.salary *= 1.06; 
+        Bob.salary *= 1.09; 
         Bob.account*=Bob.deposit;
     }
 
@@ -98,8 +98,8 @@ void bob_expenses(const int month,const int year)
 {
     if (month == 12)
     {
-        Bob.for_living *= 1.08; 
-        Bob.house_rent *= 1.08;
+        Bob.for_living *= 1.09; 
+        Bob.house_rent *= 1.09;
     }
 
     Bob.expenses = Bob.for_living + Bob.house_rent;
@@ -131,11 +131,11 @@ void result()
 {
     if (Alice.account > Bob.account)
     {
-        printf("Alice is richer on %lld\n", Alice.account - Bob.account);
+        printf("Алиса богаче на %lld\n", Alice.account - Bob.account);
     }
     else
     {
-        printf("Bob is richer on %lld\n", Bob.account - Alice.account);
+        printf("Боб богаче на %lld\n", Bob.account - Alice.account);
     }
 }
 
