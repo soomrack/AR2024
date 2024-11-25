@@ -1,0 +1,163 @@
+#include <stdio.h>
+
+typedef long long int Money; // RUB
+
+typedef struct {
+    Money salary;
+    Money account;
+    Money food;
+    Money expense;
+    Money rent;
+    Money house_cost;
+    Money deposit;
+    double deposit_rate;
+} Person;
+
+typedef struct {
+    double interest_rate;
+    Money total_credit;
+    Money monthly_payment;
+    Money initial_payment;
+    int term_years;
+} Mortgage;
+
+Person alice, bob;
+Mortgage alice_mortgage;
+
+void initialize_alice();
+void initialize_bob();
+void simulate();
+void process_month_for_alice(int month);
+void process_month_for_bob(int month);
+void update_salary(Person*person, int month);
+void update_food(Person*person, int month);
+void update_expenses(Person*person, int month);
+void update_rent(Person* person);
+void process_mortgage_payment(Person*person, Mortgage*mortgage);
+void update_deposit(Person*person);
+void adjust_house_cost(Person*person, int month);
+void print_financial_status(const char* name, const Person*person);
+
+int main() {
+    initialize_alice();
+    initialize_bob();
+    simulate();
+    print_financial_status("Alice", &alice);
+    print_financial_status("Bob", &bob);
+    return 0;
+}
+
+
+void initialize_alice() {
+    alice.salary = 200000;
+    alice.account = 1000000;
+    alice.food = 30000;
+    alice.expense = 30000;
+    alice.house_cost = 14000000;
+    alice.deposit = 0;
+    alice.deposit_rate = 1.005;
+
+    alice_mortgage.total_credit = 14000000;
+    alice_mortgage.initial_payment = 1400000;
+    alice_mortgage.interest_rate = 9.2;
+    alice_mortgage.term_years = 30;
+    alice_mortgage.monthly_payment = 106762; 
+
+    alice.account -= alice_mortgage.initial_payment;
+}
+
+void initialize_bob() {
+    bob.salary = 200000;
+    bob.account = 1000000;
+    bob.food = 30000;
+    bob.expense = 30000;
+    bob.rent = 30000;
+    bob.deposit = bob.account;
+    bob.deposit_rate = 1.005;
+}
+
+void simulate() {
+    int month = 9;
+    int year = 2020;
+
+    while (!(month == 9 && year == 2050)) {
+        process_month_for_alice(month);
+        process_month_for_bob(month);
+
+        month++;
+        if (month == 13) {
+            month = 1;
+            year++;
+        }
+    }
+
+    alice.account += alice.house_cost;
+    alice.account += alice.deposit;
+    bob.account += bob.deposit;
+}
+
+void process_month_for_alice(int month) {
+    update_salary(&alice, month);
+    update_food(&alice, month);
+    update_expenses(&alice, month);
+    adjust_house_cost(&alice, month);
+    process_mortgage_payment(&alice, &alice_mortgage);
+    update_deposit(&alice);
+}
+
+void process_month_for_bob(int month) {
+    update_salary(&bob, month);
+    update_food(&bob, month);
+    update_expenses(&bob, month);
+    update_rent(&bob);
+    update_deposit(&bob);
+}
+
+void update_salary(Person*person, int month) {
+    if (month == 1) {
+        person->salary *= 1.03;
+    }
+    person->account += person->salary;
+}
+
+void update_food(Person*person, int month) {
+    if (month == 1) {
+        person->food *= 1.07;
+    }
+    person->account -= person->food;
+}
+
+void update_expenses(Person*person, int month) {
+    if (month == 1) {
+        person->account -= 10000;
+    }
+    person->account -= person->expense;
+}
+
+void update_rent(Person*person) {
+    person->account -= person->rent;
+}
+
+void process_mortgage_payment(Person*person, Mortgage*mortgage) {
+    person->account -= mortgage->monthly_payment;
+}
+
+void update_deposit(Person*person) {
+    person->deposit += person->salary;
+    person->deposit -= person->food;
+    person->deposit -= person->expense;
+    if (person->rent > 0) {
+        person->deposit -= person->rent;
+    }
+    person->deposit *= person->deposit_rate;
+}
+
+void adjust_house_cost(Person*person, int month) {
+    if (month == 1) {
+        person->house_cost *= 1.06;
+    }
+}
+
+void print_financial_status(const char* name, const Person* person) {
+    printf("%s account = %lld\n", name, person->account);
+}
