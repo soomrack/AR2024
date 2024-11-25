@@ -1,135 +1,211 @@
 #include<stdio.h>
 #include<math.h>
 
-typedef long long int Money;
-
-struct Mortgage {
-	Money credit;
-	Money platez;
-	Money month_pay;
-	int year = 30;
-	Money payment;
-	int month = 12;
-};
+typedef long long int Money;  // RUB
 
 struct Person {
 	Money salary;
 	Money account;
-	Money expences;
-	struct Mortgage mortgage;
-	Money flat_cost;
-	Money savings;
-	double bank_rate;
-	Money profit;
-	Money profit_savings;
-	Money all_money;
-	Money deposit_account = 1000000;
-
+	Money food;
+	Money expence;
+	Money rent;
+	Money cost_house;
 };
 
-struct Person alice;  // mortgage
+struct Deposite {
+	Money deposite_account;
+	double deposit_procent;
+};
+
+struct Mortgage {
+	double procent;
+	Money summa_credita;
+	Money platez_month;
+	Money first_platez;
+	int tern;
+};
+
+
+struct Person alice;
+struct Mortgage alice__mortgage;
 struct Person bob;
+struct Deposite alice__deposite;
+struct Deposite bob__deposite;
 
-void home_month_pay() {
-	double rate = 0.17;
-	alice.mortgage.year = 30;
-	alice.flat_cost = 14000000;
-	alice.mortgage.payment = 1000000;
-	alice.mortgage.month_pay = (alice.flat_cost - alice.mortgage.payment) * rate / 12 / (1 - pow(1 + rate / 12, -alice.mortgage.year * alice.mortgage.month));
+
+void alice_init()
+{
+	alice.salary = 200 * 1000;
+	alice.account = 1000 * 1000;
+	alice.food = 30 * 1000;
+	alice.expence = 30 * 1000;
+	alice.cost_house = 14 * 1000 * 1000;
+
+	alice__deposite.deposite_account = 0;
+	alice__deposite.deposit_procent = 1.01;
+
+	alice__mortgage.summa_credita = 14 * 1000 * 1000;
+	alice__mortgage.first_platez = 14 * 100 * 10;
+	alice__mortgage.procent = 9.2;
+	alice__mortgage.tern = 30;
+	alice__mortgage.platez_month = (alice__mortgage.summa_credita - alice__mortgage.first_platez) * alice__mortgage.procent/100 / 12 / (1 - pow(1 + alice__mortgage.procent / 100 / 12, -alice__mortgage.tern  * 12));
+
+	alice.account -= alice__mortgage.first_platez;
 }
 
 
-void alice_account_month() {
-	alice.salary = 300000;
-	alice.expences = 50000;
-	alice.account += alice.salary - alice.expences - alice.mortgage.month_pay;
+void alice_salary(const int month)
+{
+	if (month == 1) {
+		alice.salary *= 1.03;
+	}
+	alice.account += alice.salary;
 }
 
 
-void bob_account_month() {
-	bob.salary = 250000;
-	bob.expences = 50000;
-	bob.account += (bob.salary - bob.expences);
-
+void alice_food(const int month)
+{
+	if (month == 1) {
+		alice.food *= 1.07;
+	}
+	alice.account -= alice.food;
 }
 
 
-void bob_savings_bank() {
-	double bank_rate = 0.16;
-	bob.deposit_account *= bank_rate;
-	bob.deposit_account += bob.account;
-
+void alice_expence(const int month)
+{
+	if (month == 1) {
+		alice.account -= 10 * 1000;
+	}
+	alice.account -= alice.expence;
 }
 
 
+void alice_mortgage()
+{
+	alice.account -= alice__mortgage.platez_month;
+}
 
-void simulation() {
+
+void alice_cost_house(const int month)
+{
+	if (month == 1) {
+		alice.cost_house *= 1.06;
+	}
+}
+
+
+void alice_deposite()
+{
+	alice__deposite.deposite_account += alice.account;
+	alice__deposite.deposite_account *= alice__deposite.deposit_procent;
+	alice.account = 0;
+}
+
+
+void bob_init()
+{
+	bob.salary = 200 * 1000;
+	bob.account = 1000 * 1000;
+	bob.food = 30 * 1000;
+	bob.expence = 30 * 1000;
+	bob.rent = 30 * 1000;
+
+	bob__deposite.deposite_account = 0;
+	bob__deposite.deposit_procent = 1.01;
+}
+
+
+void bob_salary(const int month)
+{
+	if (month == 1) {
+		bob.salary *= 1.03;
+	}
+	bob.account += bob.salary;
+}
+
+
+void bob_food(const int month)
+{
+	if (month == 1) {
+		bob.food *= 1.07;
+	}
+	bob.account -= bob.food;
+}
+
+
+void bob_expence(const int month)
+{
+	if (month == 1) {
+		bob.account -= 10 * 1000;
+	}
+	bob.account -= bob.expence;
+}
+
+
+void bob_rent()
+{
+	bob.account -= bob.rent;
+}
+
+
+void bob_deposite()
+{
+	bob__deposite.deposite_account += bob.account;
+	bob__deposite.deposite_account *= bob__deposite.deposit_procent;
+	bob.account = 0;
+}
+
+
+void simulation()
+{
 	int month = 9;
 	int year = 2024;
-	while (!((month == 9) && (year == 2024 + 30))) {
-		bob_account_month();
-		bob_savings_bank();
-		home_month_pay();
-		alice_account_month();
+	while (!((month == 9) && (year == 2024 + 30)))
+	{
+		alice_salary(month);
+		alice_food(month);
+		alice_expence(month);
+		alice_cost_house(month);
+		alice_mortgage();
+		alice_deposite();
+		bob_salary(month);
+		bob_food(month);
+		bob_expence(month);
+		bob_rent();
+		bob_deposite();
 
-		month++;
+		month += 1;
 		if (month == 13) {
 			month = 1;
-			year++;
+			year += 1;
 		}
 	}
+	alice.account += alice.cost_house;
+	alice.account += alice__deposite.deposite_account;
+	bob.account += bob__deposite.deposite_account;
 }
 
 
-void bob_all_money() {
-	bob.all_money = bob.deposit_account;
-}
-
-
-void alice_all_money() {
-	alice.all_money = alice.flat_cost + alice.account;
-}
-
-
-void  print_result()
+void alice_print()
 {
-	if (bob.all_money > alice.all_money)
-	{
-		printf("Bob richer than Alice");
-	}
-	else
-	{
-		printf("Alice richer than bob");
-
-	}
-
+	printf("Alice account = %lld \n", alice.account);
 }
 
-int main() {
-	home_month_pay();
-	alice_account_month();
-	bob_account_month();
-	bob_savings_bank();
+
+void bob_print()
+{
+	printf("Bob account = %lld \n", bob.account);
+}
+
+
+int main()
+{
+	alice_init();
+	bob_init();
 	simulation();
-	bob_all_money();
-	alice_all_money();
-	print_result();
-
+	alice_print();
+	bob_print();
+	
+	
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
