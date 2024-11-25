@@ -33,8 +33,6 @@ struct Chelovek
 
 
 struct Chelovek ALICE;
-
-
 struct Chelovek BOB;
 
 
@@ -66,6 +64,7 @@ void alice_zarplata(const int month, const int year)
     }
 }
 
+
 void alice_rashodi(int month)
 {
 if (month == 1){
@@ -74,13 +73,15 @@ if (month == 1){
     ALICE.account -= ALICE.rashodi;
 }
 
+
 void bob_init()
 {
     BOB.account = 0;
     BOB.zarplata = 200*1000;
     BOB.rashodi = 50*1000;
     BOB.mashina = 10*1000;
-    BOB.Vklad.mesyac_platezh_bob = 120*10000;
+    BOB.kvartira = 40*1000;
+    BOB.Vklad.mesyac_platezh_bob = 100*1000;
 }
 
 
@@ -93,15 +94,6 @@ void bob_zarplata(const int month, const int year)
         BOB.zarplata *= 1.09;
     }
     BOB.account += BOB.zarplata;
-}
-
-
-void Bob_vklad(int deposit)
-{
-    deposit = 20;
-    BOB.Vklad.vkladik = ((deposit/12)*0.01+1);
-    BOB.account -= BOB.Vklad.mesyac_platezh_bob;
-    }
 }
 
 
@@ -119,24 +111,34 @@ void bob_mashina(int year, int month)
 }
 
 
-
 void bob_rashodi(int month)
 {
     if (month == 1){
         BOB.rashodi *= 1.1;
     }
-    BOB.account -= BOB.rashodi;
+    BOB.account -= BOB.rashodi - BOB.Vklad.mesyac_platezh_bob;
 }
+
 
 void bob_kvartira(int year)
 {
+    BOB.account -= BOB.kvartira;
+
     year = 2024;
     if (year== 2034 || year == 2044 || year == 2054) {
         BOB.kvartira += 10000;
     }
 } 
 
-void
+
+void Bob_vklad(int deposit)
+{
+    deposit = 20;
+    BOB.Vklad.vkladik = ((deposit/12)*0.01+1);
+    BOB.Vklad.vkladik += BOB.account;
+}
+
+
 void simulation()
 {
     int month = 9;
@@ -170,7 +172,7 @@ void alice_print()
 
 void bob_print()
 {
-    printf ("BOB = %lld \n", BOB.account);
+    printf ("BOB = %lld \n", BOB.Vklad.vkladik);
 }
 
 
