@@ -145,7 +145,7 @@ void Alice_cat(const int month, const int year) {
         Alice.person_cat.catfood *= 1.06;
     }
 
-    if ((year >= 2027) && (year <= (2027 + Alice.person_cat.life_cat))) {  //др кота в 2027
+    if ((year >= 2027) && (year <= (2027 + Alice.person_cat.life_cat))) {
 
         Alice.account -= Alice.person_cat.catfood;
     }
