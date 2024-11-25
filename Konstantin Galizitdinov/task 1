@@ -43,7 +43,7 @@ struct Individual Bob;
 
 void Alice_money()
 {
-    Alice.status = 1;
+    Alice.status = 0;
     Alice.zarplata = 210 * 1000;
     Alice.rashod = 50 * 1000;
  
