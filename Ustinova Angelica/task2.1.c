@@ -3,6 +3,7 @@
 #include <string.h>
 #include <math.h>
 #include <limits.h>
+
 struct Matrix {
     size_t rows;
     size_t cols;
@@ -55,8 +56,8 @@ Matrix matrix_allocate(const size_t rows, const size_t cols)
 
 void matrix_free(Matrix* A)
 {
-    free(A->data);  // free( (*A).data  )
-    *A = { 0, 0, NULL };
+    free(A->data);  
+    *A = Matrix { 0, 0, NULL };
 }
 
 
@@ -78,9 +79,7 @@ void matrix_print(const Matrix A)
 }
 
 
-
-
-int matrix_add(const Matrix A, const Matrix B, const Matrix C)
+int matrix_sum(const Matrix A, const Matrix B, const Matrix C)
 {
     if (!((A.cols == B.cols) && (A.rows == B.rows))) {
         matrix_exception(ERROR, "matrix_add: incompatible sizes.\n \n");
@@ -93,7 +92,6 @@ int matrix_add(const Matrix A, const Matrix B, const Matrix C)
     printf("A + B =\n");
     return 1;
 }
-
 
 
 int matrix_subtraction(const Matrix A, const Matrix B, const Matrix C)
@@ -110,7 +108,6 @@ int matrix_subtraction(const Matrix A, const Matrix B, const Matrix C)
     printf("A - B =\n");
     return 1;
 }
-
 
 
 int matrix_multiplication(const Matrix A, const Matrix B, Matrix D)
@@ -146,7 +143,7 @@ int matrix_transposition(const Matrix A, const Matrix T)
 
 double matrix_determinant(const Matrix A) {
     if (A.rows != A.cols) {
-        matrix_exception(ERROR, "matrix_determinant: Matrix must be square\n");
+        matrix_exception(ERROR, "matrix_determinant: A.cols must be equal A.rows\n");
         return 0;
     }
 
@@ -181,13 +178,13 @@ double matrix_determinant(const Matrix A) {
 
 int matrix_inverse(const Matrix A, Matrix inverse) {
     if (A.rows != A.cols) {
-        matrix_exception(ERROR, "matrix_inverse: Matrix must be square\n");
+        matrix_exception(ERROR, "matrix_inverse: A.cols must be equal A.rows\n");
         return 0;
     }
 
     double det = matrix_determinant(A);
     if (det == 0) {
-        matrix_exception(ERROR, "matrix_inverse: Matrix is singular (determinant is 0)\n");
+        matrix_exception(ERROR, "matrix_inverse: determinant == 0)\n");
         return 0;
     }
 
@@ -224,7 +221,7 @@ int matrix_inverse(const Matrix A, Matrix inverse) {
 int matrix_exponential(const Matrix A, Matrix expA, int numTerms = 10) {
 
     if (A.rows != A.cols) {
-        matrix_exception(ERROR, "matrix_exponential: Matrix must be square\n");
+        matrix_exception(ERROR, "matrix_exponential: A.cols must be equal A.rows\n");
         return 0;
     }
 
@@ -271,16 +268,16 @@ int main()
     A = matrix_allocate(4, 4);
     B = matrix_allocate(4, 4);
     double valuesA[] = {
-      5., 2., 3., 7.,
-      2., -2., 5., 7.,
-       3., 4., 2., 7.,
-       7., 7., 7., 7.
+      1., 4., -8., 9.,
+      4., 4., 6., 4.,
+      6., -5., 6., 6., 
+      2., 2., -8., 8,
     };
     double valuesB[] = {
-        2., 3., 3., 1.,
-        -3., 2., 1., 2.,
-        -2., 5., 1., 3.,
-        4., 5., 6., 7.
+      -1., 3., 4., 6.,
+      7., -2., 4., 8.,
+      1., 9., 3., -7.,
+      5., -9., 8., 7.
     };
     matrix_set(A, valuesA);
     matrix_set(B, valuesB);
@@ -288,7 +285,7 @@ int main()
     matrix_print(B);
 
     C = matrix_allocate(A.rows, A.cols);
-    matrix_add(A, B, C);
+    matrix_sum(A, B, C);
     matrix_print(C);
     matrix_free(&C);
 
