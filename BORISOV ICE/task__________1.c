@@ -136,7 +136,7 @@ void Bob_vklad(int deposit)
     deposit = 20;
     BOB.Vklad.vkladik = ((deposit/12)*0.01+1);
     BOB.Vklad.vkladik += BOB.account;
-}
+} 
 
 
 void simulation()
