@@ -1,31 +1,238 @@
-﻿
-Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.11.35303.130
-MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Consoleaeeee", "Consoleaeeee\Consoleaeeee.vcxproj", "{390E2B15-9C82-42F6-A8C1-DFF363104329}"
-EndProject
-Global
-	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|x64 = Debug|x64
-		Debug|x86 = Debug|x86
-		Release|x64 = Release|x64
-		Release|x86 = Release|x86
-	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{390E2B15-9C82-42F6-A8C1-DFF363104329}.Debug|x64.ActiveCfg = Debug|x64
-		{390E2B15-9C82-42F6-A8C1-DFF363104329}.Debug|x64.Build.0 = Debug|x64
-		{390E2B15-9C82-42F6-A8C1-DFF363104329}.Debug|x86.ActiveCfg = Debug|Win32
-		{390E2B15-9C82-42F6-A8C1-DFF363104329}.Debug|x86.Build.0 = Debug|Win32
-		{390E2B15-9C82-42F6-A8C1-DFF363104329}.Release|x64.ActiveCfg = Release|x64
-		{390E2B15-9C82-42F6-A8C1-DFF363104329}.Release|x64.Build.0 = Release|x64
-		{390E2B15-9C82-42F6-A8C1-DFF363104329}.Release|x86.ActiveCfg = Release|Win32
-		{390E2B15-9C82-42F6-A8C1-DFF363104329}.Release|x86.Build.0 = Release|Win32
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {D3486AD6-0EDE-44E5-A679-2B93DF43E11F}
-	EndGlobalSection
-EndGlobal
+﻿#include<stdio.h>
+
+typedef long long int Money;  // RUB
+
+struct Yacht {
+	Money price;            
+	Money monthlyCost;      
+};
+
+struct Person {
+	Money salary;
+	Money account;
+	Money food;
+	Money expence;
+	Money rent;
+	Money cost_house;
+	
+};
+
+struct Deposite {
+	Money deposite_account;
+	double deposit_procent;
+};
+
+struct Mortgage {
+	double procent;
+	Money summa_credita;
+	Money platez_month;
+	Money first_platez;
+	int tern;
+};
+
+
+struct Person alice;
+struct Mortgage alice__mortgage;
+struct Person bob;
+struct Deposite alice__deposite;
+struct Deposite bob__deposite;
+struct Yacht bob_yacht;
+
+void alice_init()
+{
+	alice.salary = 200 * 1000;
+	alice.account = 1000 * 1000;
+	alice.food = 30 * 1000;
+	alice.expence = 30 * 1000;
+	alice.cost_house = 14 * 1000 * 1000;
+
+	alice__deposite.deposite_account = 0;
+	alice__deposite.deposit_procent = 1.01;
+
+	alice__mortgage.summa_credita = 14 * 1000 * 1000;
+	alice__mortgage.first_platez = 14 * 100 * 10;
+	alice__mortgage.procent = 9.2;
+	alice__mortgage.tern = 30;
+	alice__mortgage.platez_month = 106762;  //https://www.banki.ru/services/calculators/hypothec/
+	alice.account -= alice__mortgage.first_platez;
+}
+
+
+void alice_salary(const int month)
+{
+	if (month == 1) {
+		alice.salary *= 1.03;
+	}
+	alice.account += alice.salary;
+}
+
+
+void alice_food(const int month)
+{
+	if (month == 1) {
+		alice.food *= 1.07;
+	}
+	alice.account -= alice.food;
+}
+
+
+void alice_expence(const int month)
+{
+	if (month == 1) {
+		alice.account -= 10 * 1000;
+	}
+	alice.account -= alice.expence;
+}
+
+
+void alice_mortgage()
+{
+	alice.account -= alice__mortgage.platez_month;
+}
+
+
+void alice_cost_house(const int month)
+{
+	if (month == 1) {
+		alice.cost_house *= 1.06;
+	}
+}
+
+
+void alice_deposite()
+{
+	alice__deposite.deposite_account += alice.account;
+	alice__deposite.deposite_account *= alice__deposite.deposit_procent;
+	alice.account = 0;
+}
+
+
+void bob_init()
+{
+	bob.salary = 200 * 1000;
+	bob.account = 1000 * 1000;
+	bob.food = 30 * 1000;
+	bob.expence = 30 * 1000;
+	bob.rent = 30 * 1000;
+
+	bob__deposite.deposite_account = 0;
+	bob__deposite.deposit_procent = 1.01;
+
+	bob_yacht.price = 4500000;
+	bob_yacht.monthlyCost = 30000;
+}
+int bob_yacht_purchased = 0; // Флаг: 0 - яхта не куплена, 1 - куплена
+
+void managed_bob_yacht(int month, int year) {
+	if (bob_yacht_purchased && year == 2025 && month == 6) {
+		if (bob.account >= bob_yacht.price) {
+			bob.account -= bob_yacht.price;
+			bob_yacht_purchased = 1; // Яхта куплена
+		}
+	}
+	else if (bob_yacht_purchased) {
+		// Расходы на обслуживание только после покупки
+		bob.account -= bob_yacht.monthlyCost;
+	}
+}
+
+	
+
+void bob_salary(const int month, const int year)
+{
+	if (month == 8 && year == 2025) {
+		bob.account -= bob_yacht.monthlyCost;
+	}
+	else {
+		if (month == 1) {
+			bob.salary *= 1.03;
+		}
+		bob.account += bob.salary;
+	}
+}
+
+
+void bob_food(const int month)
+{
+	if (month == 1) {
+		bob.food *= 1.07;
+	}
+	bob.account -= bob.food; 
+	
+}
+
+
+void bob_expence(const int month)
+{
+	if (month == 1) {
+		bob.account -= 10 * 1000;
+	}
+	bob.account -= bob.expence;
+}
+
+
+void bob_rent()
+{
+	bob.account -= bob.rent;
+}
+
+
+void bob_deposite()
+{
+	bob__deposite.deposite_account += bob.account;
+	bob__deposite.deposite_account *= bob__deposite.deposit_procent;
+	bob.account = 0;
+}
+
+
+void simulation()
+{
+	int month = 9;
+	int year = 2024;
+	while (!((month == 9) && (year == 2024 + 30)))
+	{
+		alice_salary(month);
+		alice_food(month);
+		alice_expence(month);
+		alice_cost_house(month);
+		alice_mortgage();
+		alice_deposite();
+		bob_salary(month, year);
+		bob_food(month);
+		bob_expence(month);
+		bob_rent();
+		bob_deposite();
+		managed_bob_yacht(month,year);
+		month += 1;
+		if (month == 13) {
+			month = 1;
+			year += 1;
+		}
+	}
+	alice.account += alice.cost_house;
+	alice.account += alice__deposite.deposite_account;
+	bob.account += bob__deposite.deposite_account;
+}
+
+
+void alice_print()
+{
+	printf("Alice account = %lld \n", alice.account);
+}
+
+
+void bob_print()
+{
+	printf("Bob account = %lld \n", bob.account);
+}
+
+
+int main()
+{
+	alice_init();
+	bob_init();
+	simulation();
+	alice_print();
+	bob_print();
+	return 1;
+}
