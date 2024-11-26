@@ -30,7 +30,7 @@ void set_matrix_data(Matrix* matrix) {  // заполнение матрицы �
 }
 
 
-void error_size(char* operation_name, char* error) // ошибки
+void error_size(const char* operation_name, const char* error) // ошибки
 {  
 	printf("%s is impossible. %s\n", operation_name, error);
 }
@@ -246,13 +246,14 @@ int main()
 	print_matrix(differenceion);
 	free_matrix(&differenceion);
 
-
 	double determinant;
+
 	determinant = det(m1);
 	printf("%.2f\n\n", determinant);
 
 	determinant = det(m2);
 	printf("%.2f\n\n", determinant);
+
 
 	Matrix multiplication1;
 	multiplication1 = multiply_by_number(m1, 5);
@@ -272,7 +273,6 @@ int main()
 	free_matrix(&trans);
 
 	
-
 	Matrix exponenta;
 	exponenta = expo(m1, 3);
 	print_matrix(exponenta);
