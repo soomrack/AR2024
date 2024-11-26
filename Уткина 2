@@ -1,0 +1,162 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <math.h>
+
+typedef struct {
+    size_t rows;
+    size_t cols;    
+    double* data;     
+} Matrix;
+
+Matrix matrix_create(size_t rows, size_t cols) {
+    Matrix mat;
+    mat.rows = rows;
+    mat.cols = cols;
+
+    if (rows == 0 || cols == 0 || (SIZE_MAX / rows) < cols) {
+        fprintf(stderr, "Error: Invalid matrix size.\n");
+        exit(EXIT_FAILURE);
+    }
+
+    mat.data = (double*)malloc(rows * cols * sizeof(double));
+    if (mat.data == NULL) {
+        fprintf(stderr, "Error: Failed to allocate memory for matrix.\n");
+        exit(EXIT_FAILURE);
+    }
+
+    for (size_t i = 0; i < rows * cols; i++) {
+        mat.data[i] = 0.0;
+    }
+
+    return mat;
+}
+
+// Освобождение памяти матрицы
+void matrix_free(Matrix* mat) {
+    if (mat->data) {
+        free(mat->data);
+        mat->data = NULL;
+    }
+    mat->rows = 0;
+    mat->cols = 0;
+}
+
+// Получение элемента матрицы
+double matrix_get(const Matrix* mat, size_t row, size_t col) {
+    if (row >= mat->rows || col >= mat->cols) {
+        fprintf(stderr, "Error: Index out of range.\n");
+        exit(EXIT_FAILURE);
+    }
+    return mat->data[row * mat->cols + col];
+}
+
+// Установка элемента матрицы
+void matrix_set(Matrix* mat, size_t row, size_t col, double value) {
+    if (row >= mat->rows || col >= mat->cols) {
+        fprintf(stderr, "Error: Index out of range.\n");
+        exit(EXIT_FAILURE);
+    }
+    mat->data[row * mat->cols + col] = value;
+}
+
+// Сложение матриц
+Matrix matrix_sum(const Matrix* A, const Matrix* B) {
+    if (A->rows != B->rows || A->cols != B->cols) {
+        fprintf(stderr, "Error: Matrix sizes do not match for addition.\n");
+        exit(EXIT_FAILURE);
+    }
+
+    Matrix result = matrix_create(A->rows, A->cols);
+    for (size_t i = 0; i < A->rows; i++) {
+        for (size_t j = 0; j < A->cols; j++) {
+            double value = matrix_get(A, i, j) + matrix_get(B, i, j);
+            matrix_set(&result, i, j, value);
+        }
+    }
+    return result;
+}
+
+// Вычитание матриц
+Matrix matrix_sub(const Matrix* A, const Matrix* B) {
+    if (A->rows != B->rows || A->cols != B->cols) {
+        fprintf(stderr, "Error: Matrix sizes do not match for subtraction.\n");
+        exit(EXIT_FAILURE);
+    }
+
+    Matrix result = matrix_create(A->rows, A->cols);
+    for (size_t i = 0; i < A->rows; i++) {
+        for (size_t j = 0; j < A->cols; j++) {
+            double value = matrix_get(A, i, j) - matrix_get(B, i, j);
+            matrix_set(&result, i, j, value);
+        }
+    }
+    return result;
+}
+
+// Умножение матриц
+Matrix matrix_multiply(const Matrix* A, const Matrix* B) {
+    if (A->cols != B->rows) {
+        fprintf(stderr, "Error: It is not possible to multiply matrices with these dimensions.\n");
+        exit(EXIT_FAILURE);
+    }
+
+    Matrix result = matrix_create(A->rows, B->cols);
+    for (size_t i = 0; i < A->rows; i++) {
+        for (size_t j = 0; j < B->cols; j++) {
+            double sum = 0.0;
+            for (size_t k = 0; k < A->cols; k++) {
+                sum += matrix_get(A, i, k) * matrix_get(B, k, j);
+            }
+            matrix_set(&result, i, j, sum);
+        }
+    }
+    return result;
+}
+
+void matrix_print(const Matrix* mat) {
+    for (size_t i = 0; i < mat->rows; i++) {
+        for (size_t j = 0; j < mat->cols; j++) {
+            printf("%8.2f ", matrix_get(mat, i, j));
+        }
+        printf("\n");
+    }
+}
+
+
+int main() {
+    Matrix A = matrix_create(2, 2);
+    Matrix B = matrix_create(2, 2);
+
+    matrix_set(&A, 0, 0, 1.0);
+    matrix_set(&A, 0, 1, 2.0);
+    matrix_set(&A, 1, 0, 3.0);
+    matrix_set(&A, 1, 1, 4.0);
+
+    matrix_set(&B, 0, 0, 5.0);
+    matrix_set(&B, 0, 1, 6.0);
+    matrix_set(&B, 1, 0, 7.0);
+    matrix_set(&B, 1, 1, 8.0);
+
+    printf("matrix A:\n");
+    matrix_print(&A);
+
+    printf("matrix B:\n");
+    matrix_print(&B);
+
+    Matrix C = matrix_sum(&A, &B);
+    printf("Sum of matrices A and B:\n");
+    matrix_print(&C);
+
+    Matrix D = matrix_multiply(&A, &B);
+    printf("Product of matrices A and B:\n");
+    matrix_print(&D);
+
+    // Освобождаем память
+    matrix_free(&A);
+    matrix_free(&B);
+    matrix_free(&C);
+    matrix_free(&D);
+
+    return 0;
+}
