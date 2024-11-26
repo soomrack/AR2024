@@ -1,4 +1,6 @@
+#include<stdlib.h>
 #include<stdio.h>
+#include<time.h>
 #include<math.h>
 
 
@@ -6,7 +8,8 @@ typedef long long int Money;
 
 
 struct Deposits {
-    double protsent;
+    double inflation_rate;
+    Money protsent;
     Money account;
 };
 
@@ -61,8 +64,8 @@ void alice_hypothec(const int month) {
     alice.account -= alice.hypothec.month_pay;
     alice.hypothec.credit -= alice.hypothec.month_pay;
     if (month == 1) {
-        alice.hypothec.month_pay *= 1.04;
-        alice.hypothec.credit *= 1.04;
+        alice.hypothec.month_pay *= 1.09;
+        alice.hypothec.credit *= 1.1;
     }
 }
 
@@ -152,7 +155,7 @@ void alice_salary(int month) {
 
 void bob_exepenses(const int month) {
     if (month == 1) {
-        bob.exepenses *= 1.06;
+        bob.exepenses *= 1.1;
     }
     bob.account -= bob.exepenses;
 }
@@ -160,7 +163,7 @@ void bob_exepenses(const int month) {
 
 void bob_rent(const int month) {
     if (month == 1) {
-        bob.rent *= 1.06;
+        bob.rent *= 1.1;
     }
     bob.account -= bob.rent;
 }
@@ -174,7 +177,7 @@ void bob_food(const int month) {
 }
 
 
-void bob_deposits(const int year, double inflation_rate) {
+void bob_deposits(const int year,const double inflation_rate) {
     if (year % 12 == 0) {
         bob.deposits.account *= (1.0 + bob.deposits.protsent);
     }
@@ -186,21 +189,23 @@ void bob_deposits(const int year, double inflation_rate) {
 
 
 void bob_init() {
-    bob.account = 1000 * 1000;
-    bob.salary = 300 * 1000;
-    bob.food = 10 * 1000;
-    bob.exepenses = 7 * 1000;
-    bob.rent = 32 * 1000;
+    bob.account = 500 * 1000;
+    bob.salary = 250 * 1000;
+    bob.food = 40 * 1000;
+    bob.exepenses = 20 * 1000;
+    bob.rent = 72 * 1000;
 
-    bob.deposits.account = bob.account;
+    bob.deposits.account += bob.account;
+    bob.account -= 500 * 1000;
     bob.deposits.protsent = 0.12;
+    bob.deposits.inflation_rate = 0.5;
 
-    bob.robotics.courses = 5000;
+    bob.robotics.courses = 7000;
     bob.robotics.is_interesting = 0;
 
-    bob.car.petrol = 8000;
-    bob.car.insurance = 3339;
-    bob.car.maintenance = 6000;
+    bob.car.petrol = 10000;
+    bob.car.insurance = 10000;
+    bob.car.maintenance = 15000;
     bob.car.is_car = 0;
 }
 
@@ -271,7 +276,8 @@ void simulation() {
         bob_exepenses(month);
         bob_robotics(month, year);
         bob_car(month, year);
-        bob_deposits(year);
+        bob_deposits(year, bob.deposits.inflation_rate);
+        bob_rent(month);
 
         month++;
         if (month == 13) {
@@ -293,9 +299,6 @@ void bob_print() {
 
 
 void compare_capitals() {
-    printf("Alice's capital: %lld\n", alice.account);
-    printf("Bob's capital: %lld\n", bob.account);
-
     if (alice.account > bob.account) {
         printf("Alice is richer than Bob.\n");
     }
@@ -310,7 +313,7 @@ void compare_capitals() {
 
 int main() {
     simulation();
-
+    
     alice_print();
     
     bob_print();
@@ -319,3 +322,4 @@ int main() {
     
     return 0;
 }
+
