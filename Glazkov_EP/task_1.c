@@ -228,7 +228,7 @@ int main()
     if (Bob.balance > Alice.balance) {
         printf("Bob has a higher balance: %lld\n", Bob.balance);
     } else if (Bob.balance < Alice.balance) {
-        printf("Alice Two has a higher balance: %lld\n", Alice.balance);
+        printf("Alice has a higher balance: %lld\n", Alice.balance);
     } else {
         printf("Both users have the same balance: %lld\n", Bob.balance);
     }
