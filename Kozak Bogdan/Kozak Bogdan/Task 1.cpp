@@ -177,14 +177,14 @@ void bob_food(const int month) {
 }
 
 
-void bob_deposits(const int month,const double inflation_rate) {
-    if (month % 12 == 0) {
-        bob.deposits.account *= (1.0 + bob.deposits.protsent);
-    }
-
+void bob_deposits(const int month) {
     bob.deposits.account += bob.account;
-
-    bob.deposits.account *= (1.0 - inflation_rate);
+    bob.deposits.account *= bob.deposits.protsent;
+    if (month % 12 == 0) 
+    {
+        bob.deposits.account += (1 - bob.deposits.inflation_rate);
+    };
+    bob.account=0;
 }
 
 
@@ -276,7 +276,7 @@ void simulation() {
         bob_exepenses(month);
         bob_robotics(month, year);
         bob_car(month, year);
-        bob_deposits(month, bob.deposits.inflation_rate);
+        bob_deposits(month);
         bob_rent(month);
 
         month++;
