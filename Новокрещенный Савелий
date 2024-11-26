@@ -1,73 +1,168 @@
-#include <stdio.h>
+#include <stdio.h> 
 
-typedef long long Money;
-int month = 9;
-int year = 2024;
+
+typedef long long int Money;
+
 
 struct Person {
     Money salary;
-    Money money_for_living;
-    Money spendings;
-    Money mortgage;
     Money account;
-    Money house;
-    Money house_rent;
+    Money charges;
+    Money food;
+    Money rent;
+    Money flat;
+    Money loan;
+    Money cat_food;
+    Money dog_food;
+    Money unexpected_situations;
+    Money deposit;
+    double deposit_percent;
 };
 
-struct Person Alice = { 300 * 1000, 100 * 1000, 0, 180 * 1000, 0, 14000 * 1000, 400 * 100 };
-struct Person Bob = { 300 * 1000, 100 * 1000, 0, 180 * 1000, 0, 14000 * 1000, 400 * 100 };
 
-void bob_salary(const int month, const int year) {
-    if (month == 12) {
-        Bob.salary *= 1.07;
+struct Loan {
+    Money month_pay;
+};
+
+
+struct Person Alice;
+struct Person Bob;
+struct Loan Alice__loan;
+
+void Bob_init()
+{
+    Bob.salary = 200 * 1000;
+    Bob.account = 1000 * 1000;
+    Bob.charges = 25 * 1000;
+    Bob.rent = 40 * 1000;
+    Bob.flat = 0;
+    Bob.cat_food = 3000;
+    Bob.unexpected_situations = 10 * 1000;
+    Bob.deposit = 0;
+    Bob.deposit_percent = 1.01;    // процент по депозиту //
+}
+
+
+void Alice_init()
+{
+    Alice.salary = 200 * 1000;
+    Alice.account = 1000 * 1000;
+    Alice.charges = 30 * 1000;
+    Alice.rent = 0;
+    Alice.flat = 14000 * 1000;
+    Alice.loan = 100 * 1000;
+    Alice.dog_food = 5000;
+    Alice.unexpected_situations = 10 * 1000;
+    Alice.deposit = 0;
+    Alice.deposit_percent = 1.01;           // процент по депозиту //  
+    Alice__loan.month_pay = 100 * 1000;
+}
+
+
+void Bob_salary(const int month, const int year)
+{
+    if (month == 10) {
+        Bob.salary *= 1.08;                            // 8% инфляция ежегодно //
     }
     Bob.account += Bob.salary;
-}
 
-void bob_spendings(const int month, const int year) {
+
     if (month == 12) {
-        Bob.money_for_living *= 1.08;
-        Bob.house_rent *= 1.08;
+        Bob.account += Bob.salary;
     }
-    Bob.spendings = Bob.money_for_living + Bob.house_rent;
-    Bob.account -= Bob.spendings;
+
 }
 
-void alice_salary(const int month, const int year) {
-    static Money better_salary = Alice.salary * 1.5;
+
+void Bob_charges(const int month, const int year)
+{
     if (month == 12) {
-        Alice.salary *= 1.07;
-        Alice.house *= 1.08;
+        Bob.rent *= 1.08;
+        Bob.unexpected_situations *= 1.08;
+    }
+    Bob.account -= Bob.unexpected_situations + Bob.rent;
+}
+
+
+void Bob_deposit()
+{
+    Bob.deposit *= Bob.deposit_percent;
+}
+
+
+void Bob_food()
+{
+    Bob.account -= Bob.food;
+}
+
+
+
+
+void Alice_salary(const int month, const int year)
+{
+    if (month == 12) {
+        Alice.salary *= 1.08;
     }
     Alice.account += Alice.salary;
-    if (month == 9 && year == 2054) {
-        Alice.account += Alice.house;
-    }
-    if (year == 2028 && month == 3) {
-        Alice.salary = 0;
-    }
-    if (year == 2028 && month == 4) {
-        Alice.salary = 0;
-    }
-    if (year == 2028 && month == 5) {
-        Alice.salary = better_salary;
-    }
 }
 
-void alice_spendings(const int month, const int year) {
+
+void Alice_charges(const int month, const int year)
+{
     if (month == 12) {
-        Alice.money_for_living *= 1.08;
+        Alice.unexpected_situations *= 1.08;
+        Alice.loan *= 1.08;
     }
-    Alice.spendings = Alice.money_for_living + Alice.mortgage;
-    Alice.account -= Alice.spendings;
+    Alice.charges = Alice.unexpected_situations + Alice.loan;
+    Alice.account -= Alice.charges;
 }
 
-void simulation() {
+
+void Alice_deposit()
+{
+    Alice.deposit *= Alice.deposit_percent;
+}
+
+
+void Alice_flat(const int month)
+{
+    if (month == 1) {
+        Alice.flat *= 1.08;
+    }
+}
+
+
+void Alice_loan()
+{
+    Alice.account -= Alice__loan.month_pay;
+}
+
+void Alice_food()
+{
+    Alice.account -= Alice.food;
+}
+
+
+
+
+
+void simulation()
+{
+    int month = 9;
+    int year = 2024;
     while (!(year == 2054 && month == 10)) {
-        alice_salary(month, year);
-        alice_spendings(month, year);
-        bob_salary(month, year);
-        bob_spendings(month, year);
+        Alice_salary(month, year);
+        Alice_charges(month, year);
+        Alice_deposit();
+        Alice_flat(month);
+        Alice_loan();
+        Alice_food();
+
+        Bob_salary(month, year);
+        Bob_charges(month, year);
+        Bob_deposit();
+        Bob_food();
+
         month++;
         if (month == 13) {
             year = year + 1;
@@ -76,17 +171,26 @@ void simulation() {
     }
 }
 
-void result() {
-    if (Alice.account > Bob.account) {
-        printf("\nAlice is richer on: %lld", Alice.account - Bob.account);
-    }
-    else {
-        printf("\nBob is richer on: %lld", Bob.account - Alice.account);
-    }
+
+void Alice_printf()
+{
+    printf("Alice account = %lld \n", Alice.account);
 }
 
+
+void Bob_printf()
+{
+    printf("Bob account = %lld \n", Bob.account);
+};
+
+
 int main() {
+    Alice_init();
+    Bob_init();
+
     simulation();
-    result();
+
+    Alice_printf();
+    Bob_printf();
     return 0;
 }
