@@ -121,17 +121,16 @@ void bob_init()
 	bob_yacht.price = 4500000;
 	bob_yacht.monthlyCost = 30000;
 }
-int bob_yacht_purchased = 0; // Флаг: 0 - яхта не куплена, 1 - куплена
+int bob_yacht_purchased = 0; 
 
 void managed_bob_yacht(int month, int year) {
 	if (bob_yacht_purchased && year == 2025 && month == 6) {
 		if (bob.account >= bob_yacht.price) {
 			bob.account -= bob_yacht.price;
-			bob_yacht_purchased = 1; // Яхта куплена
+			bob_yacht_purchased = 1; 
 		}
 	}
 	else if (bob_yacht_purchased) {
-		// Расходы на обслуживание только после покупки
 		bob.account -= bob_yacht.monthlyCost;
 	}
 }
