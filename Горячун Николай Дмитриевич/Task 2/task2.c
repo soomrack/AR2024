@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
+#include <math.h>
 
 
 struct Matrix {
@@ -27,7 +28,8 @@ void matrix_exception(const enum MatrixException exeption, char *msg)
 }
 
 
-struct Matrix matrix_allocate(const size_t cols, const size_t rows) {
+struct Matrix matrix_allocate(const size_t cols, const size_t rows)
+{
     struct Matrix A = {cols, rows, NULL};
 
     if (cols == 0 && rows == 0) {
@@ -51,10 +53,12 @@ struct Matrix matrix_allocate(const size_t cols, const size_t rows) {
 
 void matrix_free(struct Matrix *F)
 {
-    if (F->data != NULL) {
-        free(F->data);
-        *F = (struct Matrix){0, 0, NULL};
+    if (F == NULL) {
+        return;
     };
+
+    free(F->data);
+    *F = (struct Matrix){0, 0, NULL};
 }
 
 
@@ -70,17 +74,24 @@ void matrix_print(const struct Matrix P)
 };
 
 
-struct Matrix matrixs_multiply(const struct Matrix A, const struct Matrix B) {
+struct Matrix matrix_fill_zero(const size_t cols, const size_t rows)
+{
+    struct Matrix R = matrix_allocate(cols, rows);
+    for (size_t idx_null = 0; idx_null < R.rows * R.cols; idx_null++) {
+        R.data[idx_null] = 0.0;
+    };
+    return R;
+};
+
+
+struct Matrix matrixs_multiply(const struct Matrix A, const struct Matrix B)
+{
     if (A.cols != B.rows) {
         matrix_exception(ERROR, "Количество столбцов первой матрицы не равно количестыу строк второй матрицы.");
         return (struct Matrix) {0, 0, NULL};
     };
 
-    struct Matrix R = matrix_allocate(B.cols, A.rows);
-
-    for (size_t idx_null = 0; idx_null < R.rows * R.cols; idx_null++) {
-        R.data[idx_null] = 0.0;
-    };
+    struct Matrix R = matrix_fill_zero(B.cols, A.rows);
 
     for (size_t row = 0; row < R.rows; row++) {
         for (size_t col = 0; col < R.cols; col++) {
@@ -93,7 +104,8 @@ struct Matrix matrixs_multiply(const struct Matrix A, const struct Matrix B) {
 };
 
 
-struct Matrix matrixs_sum(const struct Matrix A, const struct Matrix B) {
+struct Matrix matrixs_sum(const struct Matrix A, const struct Matrix B)
+{
     if (A.cols != B.cols && A.rows != B.rows) {
         matrix_exception(ERROR, "Порядки матриц не равны.");
         return (struct Matrix){0, 0, NULL};
@@ -107,7 +119,8 @@ struct Matrix matrixs_sum(const struct Matrix A, const struct Matrix B) {
 };
 
 
-struct Matrix matrixs_subtraction(const struct Matrix A, const struct Matrix B) {
+struct Matrix matrixs_subtraction(const struct Matrix A, const struct Matrix B)
+{
     if (A.cols != B.cols && A.rows != B.rows) {
         matrix_exception(ERROR, "Порядки матриц не равны.");
         return (struct Matrix){0, 0, NULL};
@@ -121,7 +134,8 @@ struct Matrix matrixs_subtraction(const struct Matrix A, const struct Matrix B) 
 };
 
 
-struct Matrix matrix_multiply_on_constant(const struct Matrix A, const double constant) {
+struct Matrix matrix_multiply_on_constant(const struct Matrix A, const double constant)
+{
     struct Matrix R = matrix_allocate(A.cols, A.rows);
     for (size_t idx = 0; idx < R.rows * R.cols; idx++) {
         R.data[idx] = A.data[idx] * constant;
@@ -136,8 +150,9 @@ void matrix_fill(const struct Matrix Fill, const double *values)
 };
 
 
-struct Matrix matrix_E(const size_t rows_and_cols) {
-    struct Matrix E = matrix_allocate(rows_and_cols, rows_and_cols);
+struct Matrix matrix_E(const size_t rows_and_cols)
+{
+    struct Matrix E = matrix_fill_zero(rows_and_cols, rows_and_cols);
 
     for (size_t col = 0; col < E.cols; col++) {
         E.data[E.cols * col + col] = 1.0;
@@ -147,7 +162,8 @@ struct Matrix matrix_E(const size_t rows_and_cols) {
 };
 
 
-struct Matrix matrix_power(const struct Matrix A, const size_t n) {
+struct Matrix matrix_power(const struct Matrix A, const size_t n)
+{
     if (A.rows != A.cols) {
         matrix_exception(ERROR, "Матрица не квадратная.");
         return (struct Matrix){0, 0, NULL};
@@ -163,14 +179,13 @@ struct Matrix matrix_power(const struct Matrix A, const size_t n) {
         return R;
     };
 
-    if (n % 1 >= Epselon) {
-        matrix_exception(ERROR, "Степень должна быть натуральной");
-        return (struct Matrix){0, 0, NULL};
-    };
-
-    for (double idx = 1; idx <= n; idx++) {
+    for (size_t idx = 1; idx <= n; idx++) {
         struct Matrix temp = matrix_allocate(R.cols, R.rows);
+        if (temp.data == NULL) {
+            return (struct Matrix){0, 0, NULL};
+        };
         memcpy(temp.data, R.data, R.rows * R.cols * sizeof(double));
+        matrix_free(&R);
         R = matrixs_multiply(temp, A);
         matrix_free(&temp);
     };
@@ -179,20 +194,17 @@ struct Matrix matrix_power(const struct Matrix A, const size_t n) {
 
 double factorial(const size_t n) 
 {
-    if (n <= 0 && n % 1 >= Epselon) {
-        matrix_exception(ERROR, "Нельзя взять факториал не натурального числа.");
-        return (size_t)1;
-    };
 
-    double result = 1.;
-    for (double idx = 2; idx <= n; idx++) {
+    size_t result = 1.;
+    for (size_t idx = 2; idx <= n; idx++) {
         result *= idx;
     };
     return result;
 };
 
 
-struct Matrix matrix_exponent(const struct Matrix A) {
+struct Matrix matrix_exponent(const struct Matrix A)
+{
     if (A.rows != A.cols) {
         matrix_exception(ERROR, "Матрица не квадратная.");
         return (struct Matrix){0, 0, NULL};
@@ -205,10 +217,31 @@ struct Matrix matrix_exponent(const struct Matrix A) {
     };
 
     for (double n = 1; n <= 20.; n++) {
+
+        struct Matrix old_R = matrix_allocate(R.cols, R.rows);
+        if (old_R.data == NULL) {
+            return (struct Matrix){0, 0, NULL};
+        };
+        memcpy(old_R.data, R.data, R.rows * R.cols * sizeof(double));
+
         struct Matrix temp = matrix_allocate(R.cols, R.rows);
+        if (temp.data == NULL) {
+            return (struct Matrix){0, 0, NULL};
+        };
         memcpy(temp.data, R.data, R.rows * R.cols * sizeof(double));
-        R = matrixs_sum(temp, matrix_multiply_on_constant(matrix_power(A, n), 1.0 / factorial(n)));
+        matrix_free(&R);
+        R = matrix_power(A, n);
+        
+
+        memcpy(temp.data, R.data, R.rows * R.cols * sizeof(double));
+        matrix_free(&R);
+        R = matrix_multiply_on_constant(temp, 1.0 / factorial(n));
+
+        memcpy(temp.data, R.data, R.rows * R.cols * sizeof(double));
+        matrix_free(&R);
+        R = matrixs_sum(old_R, temp);
         matrix_free(&temp);
+        matrix_free(&old_R);
     };
 	return R;
 };
@@ -218,13 +251,13 @@ double matrix_minor(const struct Matrix A, const size_t el_col, const size_t el_
 {
     if (A.cols != A.rows) {
         matrix_exception(ERROR, "Матрица должна быть квадратной.");
-        return (size_t)1;
+        return NAN;
     };
 
     struct Matrix M = matrix_allocate(A.cols - 1, A.rows -1);
 
     if (M.data == NULL) {
-        return 0;
+        return NAN;
     };
 
     size_t idx = 0;
@@ -252,6 +285,7 @@ double matrix_minor(const struct Matrix A, const size_t el_col, const size_t el_
             sign = -1.0;
         };
         result += M.data[col] * sign * matrix_minor(M, col, 0);
+        matrix_free(&M);
     };
 
     return result;
@@ -262,7 +296,7 @@ double matrix_det(const struct Matrix A)
 {
     if (A.cols != A.rows) {
         matrix_exception(ERROR, "Матрица должна быть квадратной.");
-        return (size_t)1;
+        return NAN;
     };
 
     double result = 0;
@@ -272,7 +306,14 @@ double matrix_det(const struct Matrix A)
         if (col % 2 != 0) {
             sign = -1.0;
         };
-        result += A.data[col] * sign * matrix_minor(A, col, 0);
+        if (matrix_minor(A, col, 0) == NAN){
+            return NAN;
+        };
+        double minor = matrix_minor(A, col, 0);
+        if (minor == NAN) {
+            return NAN;
+        };
+        result += A.data[col] * sign * minor;
     };
 
     return result;
@@ -287,8 +328,8 @@ struct Matrix matrix_invertible(const struct Matrix A)
     };
 
     double det_result = matrix_det(A);
-    if (det_result == 0) {
-        matrix_exception(ERROR, "Определитель матрицы равен нудю. Найти обратную матрицу невозможно.");
+    if (det_result == NAN || det_result / 1 >= Epselon) {
+        matrix_exception(ERROR, "Определитель матрицы равен нулю. Найти обратную матрицу невозможно.");
         return (struct Matrix){0, 0, NULL};
     };
 
@@ -300,7 +341,11 @@ struct Matrix matrix_invertible(const struct Matrix A)
             if ((col + row) % 2 != 0) {
                 sign = -1.0;
             };
-            R.data[R.cols * col + row] = sign * matrix_minor(A, col, row) / det_result;
+            double minor = matrix_minor(A, col, row);
+            if (minor == NAN) {
+                return (struct Matrix){0, 0, NULL};
+            };
+            R.data[R.cols * col + row] = sign * minor / det_result;
         };
     };
     return R;
