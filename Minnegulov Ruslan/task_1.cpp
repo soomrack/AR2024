@@ -42,7 +42,7 @@ struct Deposite bob__deposite;
 
 void alice_init()
 {
-	alice.salary = 2000 * 1000;
+	alice.salary = 200 * 1000;
 	alice.account = 1000 * 1000;
 	alice.food = 30 * 1000;
 	alice.expence = 30 * 1000;
