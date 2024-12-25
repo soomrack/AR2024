@@ -1,283 +1,381 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
+#include <string.h>
+#include <limits.h>
 #include <math.h>
 
-struct Matrix {
-	int cols;
-	int rows;
-	double* data;
-};
 
-
-const Matrix empty = { 0, 0, NULL };
-
-
-Matrix initialize_matrix(const int cols, const int rows) // создание новой матрицы с выделением памяти
+struct Matrix 
 {
-    Matrix matrix;
-	matrix.cols = cols;
-	matrix.rows = rows;
-    int n_data = matrix.cols * matrix.rows;
-	matrix.data = (double*) malloc(n_data * sizeof(double));
-	return matrix;
-}
+    size_t cols; 
+    size_t rows;  
+    double* data;
+}; 
+typedef struct Matrix Matrix;
 
 
-void set_matrix_data(Matrix* matrix) {  // заполнение матрицы рандомными числами
-    for (int index = 0; index < matrix -> cols * matrix -> rows; ++index) {
-        matrix -> data[index] = (double)rand();
+enum MatrixException {ERROR};
+typedef enum MatrixException MatrixException;
+
+
+void matrix_exception(const MatrixException code, char* msg)
+{
+    if(code == ERROR) {
+        printf("ERROR: %s\n", msg);   
     }
+} 
+
+
+Matrix matrix_allocate(size_t cols, size_t rows) 
+{
+    Matrix A = {cols, rows, NULL};   
+    
+    if (cols == 0 || rows == 0) {
+        matrix_exception(ERROR, "Matrix dimensions must be greater than 0");    
+        return (Matrix){cols, rows, NULL};
+    }
+
+    if (cols > SIZE_MAX / rows || (cols * rows) > SIZE_MAX / sizeof(double)) {
+        matrix_exception(ERROR, "Matrix size exceeds allowable memory limit");  
+        return (Matrix){0, 0, NULL};
+    }
+
+    A.data = (double*)malloc(cols * rows * sizeof(double));
+
+    if (A.data == NULL) {
+        matrix_exception(ERROR, "Unable to allocate memory");  
+        return(Matrix){0, 0, NULL};
+    }
+    
+    return A;
 }
 
 
-void error_size(const char* operation_name, const char* error) // ошибки
-{  
-	printf("%s is impossible. %s\n", operation_name, error);
+void matrix_free(Matrix *A) 
+{
+    if (A == NULL) return;
+    free (A->data);
+    *A = (Matrix){0, 0, NULL};
 }
 
 
-int null_matrix (const Matrix matrix) // нулевая ли матрица
-{ 
-	return matrix.cols == 0 && matrix.rows == 0 ?  1 : 0;
+double matrix_get(const Matrix A, size_t row, size_t col) 
+{
+    return A.data[A.cols * row + col];
 }
 
 
-void print_matrix(const Matrix matrix) { // вывести матрицу в консоль
-	if (null_matrix(matrix)) {
-		printf("The matrix doesn't exist\n");
-		return;
-	}
-	for ( int row = 0; row < matrix.rows; ++row) {
-		for ( int col = 0; col < matrix.cols; ++col) {
-			printf("%.2f ", matrix.data[row * matrix.cols + col]);
-		}
-		printf("\n");
-	}
-	printf("\n");
+void matrix_set_element(const Matrix A, size_t row, size_t col, double value) {
+    if (row >= A.rows || col >= A.cols) {
+        matrix_exception(ERROR, "Invalid index for setting element");
+        return;
+    }
+    A.data[A.cols * row + col] = value;
 }
 
 
-void free_matrix(Matrix* matrix) // отчистить память
-{ 
-	free(matrix->data);
+void matrix_set(const Matrix A, const double *values)
+{
+    memcpy(A.data, values, A.rows * A.cols * sizeof(double));
 }
 
 
-Matrix summ(const Matrix matrix1, const Matrix matrix2) // сумма матриц
-{ 
-	if (matrix1.rows != matrix2.rows || matrix1.cols != matrix2.cols) {
-		error_size("Summation", "Matrixes should have equal sizes");
-		return empty;
-	}
-	Matrix result = initialize_matrix(matrix1.cols, matrix1.rows);
-	 int n_data = result.cols * result.rows;
-	for ( int index = 0; index < n_data; ++index) {
-		result.data[index] = matrix1.data[index] + matrix2.data[index];
-	}
-	return result;
+// return A += B
+Matrix matrix_add(const Matrix A, const Matrix B) 
+{
+    if(A.rows != B.rows || A.cols != B.cols) {
+        matrix_exception (ERROR, "The dimensions of the matrices do not match for addition");   
+        return (Matrix){0, 0, NULL};
+    }
+
+    Matrix result = matrix_allocate (A.cols, A.rows); 
+    
+    for (size_t idx = 0; idx < result.rows * result.cols; ++idx) {
+        result.data[idx] = A.data[idx] + B.data[idx];
+    }
+    return result;
 }
 
 
-Matrix difference(const Matrix matrix1, const Matrix matrix2) // разность матриц 
-{ 
-	if (matrix1.rows != matrix2.rows && matrix1.cols != matrix2.cols) {
-		error_size("Differenceion", "Matrixes should have equal sizes");
-		return empty;
-	}
-	Matrix result = initialize_matrix(matrix1.cols, matrix1.rows);
-	 int n_data = result.cols * result.rows;
-	for ( int index = 0; index < n_data; ++index) {
-		result.data[index] = matrix1.data[index] - matrix2.data[index];
-	}
-	return result;
+// return A -= B
+Matrix matrix_subtract(const Matrix A, const Matrix B) 
+{
+    if (A.rows != B.rows || A.cols != B.cols) {
+        matrix_exception (ERROR, "The sizes of the matrices do not match for subtraction");   
+        return (Matrix){0, 0, NULL};
+    }
+
+    Matrix result = matrix_allocate (A.cols, A.rows);
+
+    for (size_t idx = 0; idx < result.rows * result.cols; ++idx) {
+        result.data[idx] = A.data[idx] - B.data[idx];
+    }
+    return result;
 }
 
 
-Matrix multiply_by_number(const Matrix matrix, double number) // умножение матрицы на число
-{ 
-	Matrix result = initialize_matrix(matrix.cols, matrix.rows);
-	 int n_data = result.cols * result.rows;
-	for ( int index = 0; index < n_data; ++index) {
-		result.data[index] = matrix.data[index] * number;
-	}
-	return result;
+// A * scalar
+Matrix matrix_scalar_multiply(const Matrix A, double scalar) 
+{
+    Matrix result = matrix_allocate (A.cols, A.rows);
+    
+    for (size_t idx = 0; idx < result.rows * result.cols; ++idx) {
+        result.data[idx] = A.data[idx] * scalar;
+    }
+    return result;
 }
 
 
-Matrix multiply(const Matrix matrix1, const Matrix matrix2) // умножение матрицы на матрицу
-{ 
-	if (matrix1.cols != matrix2.rows) {
-		error_size("Multiplication", "Matrixes should have certain sizes");
-		return empty;
-	}
-	 int n_cols = matrix2.cols;
-	 int n_rows = matrix1.rows;
-	Matrix result = initialize_matrix(n_cols, n_rows);
-	for ( int row = 0; row < n_rows; ++row) {
-		for ( int col = 0; col < n_cols; ++col) {
-			double summa = 0.0;
-			for ( int k = 0; k < matrix1.cols; ++k) {
-				summa +=
-					matrix1.data[row * matrix1.cols + k] * 
-					matrix2.data[k * matrix2.cols + col];
-			}
-			result.data[row * n_cols + col] = summa;
-		}
-	}
-	return result;
+// A * B
+Matrix matrix_multiply(const Matrix A, const Matrix B) 
+{
+    if (A.cols != B.rows) {
+        matrix_exception (ERROR, "The number of columns of the first matrix is not equal to the number of rows of the second matrix"); 
+        return (Matrix){0, 0, NULL};
+    }
+
+    Matrix result = matrix_allocate (B.cols, A.rows);
+    
+    for (size_t row = 0; row < result.rows; row++) {
+        for (size_t col = 0; col < result.cols; col++) {
+            result.data[row * result.cols + col] = 0.0; 
+            for (size_t idx = 0; idx < A.cols; idx++) {
+                result.data[row * result.cols + col] += A.data[row * A.cols + idx] * B.data[idx * B.cols  + col]; 
+            }
+        }
+    }
+    return result;
 }
 
 
-double det(const Matrix matrix) // определитель матрицы
-{ 
-	if (matrix.cols != matrix.rows) {
-		error_size("Getting determinant", "Matrix should be square");
-		return 0.;
-	}
-	double result = 0;
-	 int n = matrix.cols;
-	if (n == 1) {
-		result = matrix.data[0];
-		return result;
-	}
-	for ( int row = 0; row < n; ++row) {
-		 int col = 0;
-		Matrix submatrix = initialize_matrix(n - 1, n - 1);
-		 int row_offset = 0;
-		 int col_offset = 0;
-		for ( int sub_row = 0; sub_row < n - 1; ++sub_row) {
-			for ( int sub_col = 0; sub_col < n - 1; ++sub_col) {
-				if (sub_row == row) { row_offset = 1; }
-				if (sub_col == col) { col_offset = 1; }
-				submatrix.data[sub_row * (n - 1) + sub_col] = 
-					matrix.data[(sub_row + row_offset) * n + (sub_col + col_offset)];
-			}
-		}
-		result += pow(-1, row + col) * matrix.data[row * n + col] * det(submatrix);
-		free_matrix(&submatrix);
-		}
-	return result;
+size_t factorial(size_t n) 
+{
+    size_t result = 1;
+    for (size_t i = 2; i <= n; ++i) {
+        result *= i;
+    }
+    return result;
 }
 
 
-Matrix transpose_matrix(const Matrix matrix) // транспонированная матрица
-{ 
-	Matrix result = initialize_matrix(matrix.rows, matrix.cols);
-	for ( int row = 0; row < result.rows; ++row) {
-		for ( int col = 0; col < result.cols; ++col) {
-			result.data[row * result.cols + col] = matrix.data[col * result.rows + row];
-		}
-	}
-	return result;
+Matrix matrix_E(size_t size) 
+{
+    Matrix I = matrix_allocate(size, size);
+    for (size_t idx = 0; idx < size * size; idx += size + 1) {
+        I.data[idx] = 1.0;
+    }
+    return I;
+} 
+
+
+Matrix matrix_exp(const Matrix A) 
+{
+    if (A.cols != A.rows) {
+        matrix_exception(ERROR, "Matrix must be square for exponentiation");
+        return (Matrix){0, 0, NULL};
+    }
+
+    Matrix result = matrix_E(A.cols); // E
+    Matrix term = matrix_E(A.cols);   // A^0 / 0!
+    
+    for (size_t n = 1; n <= 20; ++n) {
+        
+        Matrix old_term = term;
+        term = matrix_multiply(term, A);
+        matrix_free(&old_term);
+
+        Matrix scaled_term = matrix_scalar_multiply(term, 1.0 / factorial(n));
+        
+        Matrix old_result = result;
+        result = matrix_add(result, scaled_term);
+        matrix_free(&old_result);
+
+        matrix_free(&scaled_term);  
+    }
+
+    matrix_free(&term);
+
+    return result;
 }
 
 
-Matrix identity( int dimention) 
-{ 
-	Matrix result = initialize_matrix(dimention, dimention);
-	for ( int row = 0; row < result.rows; ++row) {
-		for ( int col = 0; col < result.cols; ++col) {
-			result.data[row * result.cols + col] = (row == col) ? 1. : 0.;
-		}
-	}
-	return result;
+Matrix matrix_minor(const Matrix A, size_t row, size_t col) 
+{
+    Matrix minor = matrix_allocate(A.cols - 1, A.rows - 1);
+    if (minor.data !=  NULL) {
+    size_t idx = 0;
+    for (size_t rows = 0; rows < A.rows; ++rows) {
+        if (rows == row) continue;
+        for (size_t cols = 0; cols < A.cols; ++cols) {
+            if (cols == col) continue;
+            minor.data[idx++] = A.data[rows * A.cols + cols];
+        }
+        }
+    }
+    
+    return minor;
 }
 
 
-Matrix copy(const Matrix matrix) // копирование матрицы
-{ 
-	Matrix result = initialize_matrix(matrix.cols, matrix.rows);
-	for ( int index = 0; index < matrix.cols * matrix.rows; ++index) {
-		result.data[index] = matrix.data[index];
-	}
-	return result;
+double matrix_determinant(const Matrix A)
+{
+    if (A.cols != A.rows) {
+        matrix_exception(ERROR, "Matrix must be square for determinant calculation");
+        return NAN;
+    }
+
+    if (A.rows == 2 && A.cols == 2) {
+        return A.data[0] * A.data[3] - A.data[1] * A.data[2];
+    }
+
+    double det = 0.0;
+    for (size_t col = 0; col < A.cols; ++col) {
+        Matrix subMatrix = matrix_minor(A, 0, col);
+        double znak = (col % 2 == 0 ? 1 : -1) * A.data[col];
+        det += znak * matrix_determinant(subMatrix);
+        matrix_free(&subMatrix);
+    }
+    return det;
 }
 
 
-Matrix expo(const Matrix matrix, int accuracy) // экспонента
-{ 
-	if (matrix.cols != matrix.rows) {
-		error_size("Exp", "Matrix should be square");
-		return empty;
-	}
-	Matrix new_result, new_powered, multiplied;
-	Matrix result = identity(matrix.rows);
-	Matrix powered = matrix;
-	int factorial = 1;
-	for (int acc = 1; acc <= accuracy; ++acc) {
-		factorial *= acc;
-
-		new_powered = multiply(powered, matrix);
-		powered = copy(new_powered);
-		free_matrix(&new_powered);
-
-		multiplied = multiply_by_number(powered, 1 / factorial);
-
-		new_result = summ(result, multiplied);
-		result = copy(new_result);
-		free_matrix(&new_result);
-
-		free_matrix(&multiplied);
-	}
-	free_matrix(&powered);
-	return result;
+Matrix matrix_T(const Matrix A) 
+{
+    Matrix T = matrix_allocate(A.cols, A.rows);
+    
+    for (size_t row = 0; row < A.rows; ++row) {
+        for (size_t col = 0; col < A.cols; ++col) {
+            Matrix minor = matrix_minor(A, row, col); 
+            matrix_free(&minor);
+        }
+    }
+    
+    return T;
 }
+
+
+double matrix_cofactor(const Matrix m, size_t row, size_t col) 
+{
+    Matrix minor;
+    minor.rows = m.rows - 1;
+    minor.cols = m.cols - 1;
+
+    for (size_t r = 0; r < minor.rows; r++) {
+        for (size_t c = 0; c < minor.cols; c++) {
+            if (row > r && col > c) {
+                matrix_set_element(minor, r, c, matrix_get(m, r, c));
+            } else if (row > r) {
+                matrix_set_element(minor, r, c, matrix_get(m, r+1, c));
+            } else if (col > c) {
+                matrix_set_element(minor, r, c, matrix_get(m, r, c + 1));
+            } else {
+                matrix_set_element(minor, r, c, matrix_get(m, r + 1, c + 1));
+            }
+        }
+    }
+
+    return pow(-1, row + col) * matrix_determinant(minor);
+}
+
+
+Matrix matrix_get_cofactor_(Matrix m) 
+{
+    Matrix cofactor_matrix;
+    cofactor_matrix.rows = m.rows;
+    cofactor_matrix.cols = m.cols;
+
+    for (int row = 0; row < m.rows; row++) {
+        for (int col = 0; col < m.cols; col++) {
+            matrix_set_element(cofactor_matrix, row, col, matrix_cofactor(m, row, col));;
+        }
+    }
+
+    return cofactor_matrix;
+}
+
+
+Matrix matrix_inverse_a(const Matrix m) 
+{
+    Matrix inv_adj;
+    inv_adj.rows = m.rows;
+    inv_adj.cols = m.cols;
+
+    Matrix inv_m = matrix_get_cofactor_(m);
+    Matrix transpose_inv_m = matrix_T(inv_m);
+    Matrix scalar_inverse = matrix_scalar_multiply(transpose_inv_m, 1 / matrix_determinant(m));
+
+    return scalar_inverse;
+}
+
+
+void matrix_print(const Matrix A) 
+{
+    for (size_t row = 0; row < A.rows; row++) {
+        for (size_t col = 0; col < A.cols; col++) {
+            printf ("%2.1f ", matrix_get(A, row, col));
+        }
+        printf ("\n");
+    }
+} 
 
 
 int main() 
 {
-	Matrix m1, m2;
+    Matrix A, B;
+    A = matrix_allocate(2, 2);
+    B = matrix_allocate(2, 2);
+    
+    matrix_set(A, (double[]) {
+        17., 39.,
+        98., 75.
+    });
+    matrix_set(B, (double[]) {
+        93., 5.,
+        8., 89.
+    });
 
-	m1 = initialize_matrix(3, 3);
-	set_matrix_data(&m1);
-	print_matrix(m1);
+    printf("Matrix A:\n");
+    matrix_print(A);
 
-	m2 = initialize_matrix(3, 3);
-	set_matrix_data(&m2);
-	print_matrix(m2);
+    printf("Matrix B:\n");
+    matrix_print(B);
 
-	Matrix summition;
-	summition = summ(m1, m2);
-	print_matrix(summition);
-	free_matrix(&summition);
+    Matrix C = matrix_add (A, B);
+    printf("A + B:\n");
+    matrix_print(C);
 
-	Matrix differenceion;
-	differenceion = difference(m1, m2);
-	print_matrix(differenceion);
-	free_matrix(&differenceion);
+    Matrix D = matrix_subtract (A, B);
+    printf("A - B:\n");
+    matrix_print(D);
 
-	double determinant;
+    Matrix E = matrix_scalar_multiply (A, 2.0);
+    printf("A * scalar:\n");
+    matrix_print(E);
 
-	determinant = det(m1);
-	printf("%.2f\n\n", determinant);
+    Matrix F = matrix_multiply (A, B);
+    printf("A * B:\n");
+    matrix_print(F);
 
-	determinant = det(m2);
-	printf("%.2f\n\n", determinant);
+    Matrix expA = matrix_exp(A);
+    printf("e^A:\n");
+    matrix_print(expA);
 
+    double detA = matrix_determinant(A);
+    printf("Determinant of A: %f\n", detA);
 
-	Matrix multiplication1;
-	multiplication1 = multiply_by_number(m1, 5);
-	print_matrix(multiplication1);
-	free_matrix(&multiplication1);
+    Matrix invA = matrix_inverse_a(A);
+    printf("Inverse of A: \n");
+    matrix_print(invA);
 
+    matrix_free(&A);
+    matrix_free(&B);
+    matrix_free(&C);
+    matrix_free(&D);
+    matrix_free(&E);
+    matrix_free(&F);
+    matrix_free(&expA);
+    matrix_free(&invA);
 
-	Matrix multiplication2;
-	multiplication2 = multiply(m1, m2);
-	print_matrix(multiplication2);
-	free_matrix(&multiplication2);
-
-
-	Matrix trans;
-	trans = transpose_matrix(m1);
-	print_matrix(trans);
-	free_matrix(&trans);
-
-	
-	Matrix exponenta;
-	exponenta = expo(m1, 3);
-	print_matrix(exponenta);
-	free_matrix(&exponenta);
-
-	free_matrix(&m1);
-	free_matrix(&m2);
-}
+    return 0;
+} 
