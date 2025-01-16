@@ -1,0 +1,25 @@
+﻿  源.cpp
+D:\task02\task02\源.cpp(34,16): error C4576: 后跟初始值设定项列表的带圆括号类型是一个非标准的显式类型转换语法
+D:\task02\task02\源.cpp(37,20): error C2440: “=”: 无法从“void *”转换为“double *”
+      D:\task02\task02\源.cpp(37,20):
+      从“void*”到指向非“void”的指针的强制转换要求显式类型强制转换
+  
+D:\task02\task02\源.cpp(39,9): error C2664: “void matrix_exception(const MatrixExceptionLevel,char *)”: 无法将参数 2 从“const char [24]”转换为“char *”
+      D:\task02\task02\源.cpp(39,33):
+      从字符串文本转换将丢失 const 限定符(请参阅 /Zc:strictStrings)
+      D:\task02\task02\源.cpp(17,6):
+      参见“matrix_exception”的声明
+      D:\task02\task02\源.cpp(39,9):
+      尝试匹配参数列表“(MatrixExceptionLevel, const char [24])”时
+  
+D:\task02\task02\源.cpp(52,10): error C4576: 后跟初始值设定项列表的带圆括号类型是一个非标准的显式类型转换语法
+D:\task02\task02\源.cpp(79,9): error C2664: “void matrix_exception(const MatrixExceptionLevel,char *)”: 无法将参数 1 从“int”转换为“const MatrixExceptionLevel”
+      D:\task02\task02\源.cpp(79,26):
+      转换为枚举类型需要显式强制转换(static_cast、C 样式强制转换或带圆括号函数样式强制转换)
+      D:\task02\task02\源.cpp(17,6):
+      参见“matrix_exception”的声明
+      D:\task02\task02\源.cpp(79,9):
+      尝试匹配参数列表“(int, const char [32])”时
+  
+D:\task02\task02\源.cpp(95,19): error C4576: 后跟初始值设定项列表的带圆括号类型是一个非标准的显式类型转换语法
+D:\task02\task02\源.cpp(99,19): error C4576: 后跟初始值设定项列表的带圆括号类型是一个非标准的显式类型转换语法
