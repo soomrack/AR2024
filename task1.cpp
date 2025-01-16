@@ -1,193 +1,184 @@
-ï»¿#include<stdio.h>
+#include <stdio.h>
 
-typedef long long int Money;  // RUB
+typedef long long int Money;
 
-struct Person {
-	Money salary;
-	Money account;
-	Money food;
-	Money expence;
-	Money renta;
-	Money cost_house;
-	Money deposit;
-	double deposit_procent;
+// Ã¨µÄ½á¹¹Ìå
+struct Cat {
+    Money catfood;
+    int life_cat;
 };
 
+// µÖÑº´û¿î½á¹¹Ìå
 struct Mortgage {
-	double procent;
-	Money summa_credita;
-	Money platez_month;
-	Money perviy_platez;
-	int tern;
+    Money mortgage;
+    Money month_mortgage;
 };
 
+// ÈËÔ±½á¹¹Ìå
+struct Person {
+    Money salary;
+    Money expenses;
+    Money flat;
+    Money rent_flat;
+    Money account;
+    struct Cat person_cat;
+    struct Mortgage person_mortgage;
+};
 
-struct Person alice;
-struct Mortgage alice__mortgage;
-struct Person bob;
+struct Person Bob;
+struct Person Alice;
 
-
-void alice_init()
+// ³õÊ¼»¯ Bob µÄÐÅÏ¢
+void Bob_init()
 {
-	alice.salary = 200 * 1000;
-	alice.account = 1000 * 1000;
-	alice.food = 30 * 1000;
-	alice.expence = 30 * 1000;
-	alice.cost_house = 14 * 1000 * 1000;
-
-	alice.deposit = 0;
-	alice.deposit_procent = 1.005;
-
-	alice__mortgage.summa_credita = 14 * 1000 * 1000;
-	alice__mortgage.perviy_platez = 14 * 100 * 10;
-	alice__mortgage.procent = 9.2;
-	alice__mortgage.tern = 30;
-	alice__mortgage.platez_month = 106762;  //https://www.banki.ru/services/calculators/hypothec/
-	alice.account -= alice__mortgage.perviy_platez;
-}
-
-void alice_salary(const int month)
-{
-	if (month == 1) {
-		alice.salary *= 1.03;
-	}
-	alice.account += alice.salary;
-}
-
-void alice_food(const int month)
-{
-	if (month == 1) {
-		alice.food *= 1.07;
-	}
-	alice.account -= alice.food;
-}
-
-void alice_expence(const int month)
-{
-	if (month == 1) {
-		alice.account -= 10 * 1000;
-	}
-	alice.account -= alice.expence;
-}
-
-void alice_mortgage()
-{
-	alice.account -= alice__mortgage.platez_month;
-}
-
-void alice_cost_house(const int month)
-{
-	if (month == 1) {
-		alice.cost_house *= 1.06;
-	}
-}
-void alise_deposite()
-{
-	alice.deposit += alice.salary;
-	alice.deposit -= alice.food;
-	alice.deposit -= alice.expence;
-	alice.deposit -= alice__mortgage.platez_month;
-	alice.deposit *= alice.deposit_procent;
+    // ³õÊ¼»¯ Bob µÄÕË»§Óà¶î¡¢¹¤×Ê¡¢ÈÕ³£¿ªÏúºÍ×â·¿·ÑÓÃ
+    Bob.account = 1200000;
+    Bob.salary = 300000;
+    Bob.expenses = 40000;
+    Bob.rent_flat = 35000;
+    // ÎªÁË±ÜÃâÎ´¶¨ÒåÐÐÎª£¬½«Î´Ê¹ÓÃµÄ³ÉÔ±³õÊ¼»¯Îª 0
+    Bob.flat = 0;
+    Bob.person_cat.catfood = 0;
+    Bob.person_cat.life_cat = 0;
+    Bob.person_mortgage.mortgage = 0;
+    Bob.person_mortgage.month_mortgage = 0;
 }
 
 
-void bob_init()
+// ³õÊ¼»¯ Alice µÄÐÅÏ¢
+void Alice_init()
 {
-	bob.salary = 200 * 1000;
-	bob.account = 1000 * 1000;
-	bob.food = 30 * 1000;
-	bob.expence = 30 * 1000;
-	bob.renta = 30 * 1000;
+    // ³õÊ¼»¯ Alice µÄÕË»§Óà¶î¡¢¹¤×Ê¡¢ÈÕ³£¿ªÏú¡¢·¿²ú¼ÛÖµµÈ
+    Alice.account = 1200000;
+    Alice.salary = 300000;
+    Alice.expenses = 40000;
+    Alice.flat = 13000000;
+    Alice.person_cat.catfood = 7000;
+    Alice.person_cat.life_cat = 15;
 
-	bob.deposit = bob.account;
-	bob.deposit_procent = 1.005;
-}
-
-void bob_salary(const int month)
-{
-	if (month == 1) {
-		bob.salary *= 1.03;
-	}
-	bob.account += bob.salary;
-}
-
-void bob_food(const int month)
-{
-	if (month == 1) {
-		bob.food *= 1.07;
-	}
-	bob.account -= bob.food;
-}
-
-void bob_expence(const int month)
-{
-	if (month == 1) {
-		bob.account -= 10 * 1000;
-	}
-	bob.account -= bob.expence;
-}
-
-void bob_renta()
-{
-	bob.account -= bob.renta;
-}
-
-void bob_deposite()
-{
-	bob.deposit += bob.salary;
-	bob.deposit -= bob.food;
-	bob.deposit -= bob.expence;
-	bob.deposit -= bob.renta;
-	bob.deposit *= bob.deposit_procent;
+    // ¼ÆËãµÖÑº´û¿î½ð¶îºÍÃ¿ÔÂ»¹¿î¶î
+    Alice.person_mortgage.mortgage = Alice.flat;
+    Alice.person_mortgage.mortgage -= Alice.account;
+    Alice.person_mortgage.mortgage *= 1.2;
+    Alice.account = 0;
+    Alice.person_mortgage.month_mortgage = Alice.person_mortgage.mortgage / (30 * 12);
 }
 
 
+// ¸üÐÂÈËÔ±µÄ¹¤×Ê
+void update_salary(struct Person* person, const int month, const int year)
+{
+    person->account += person->salary;
+    if (month == 1) {
+        person->salary *= 1.06;
+    }
+}
+
+
+// ¸üÐÂÈËÔ±µÄÈÕ³£¿ªÏú
+void update_expenses(struct Person* person, const int month, const int year)
+{
+    person->account -= person->expenses;
+    if (month == 1) {
+        person->expenses *= 1.06;
+    }
+}
+
+
+// ¸üÐÂÈËÔ±µÄ×â·¿·ÑÓÃ
+void update_rent_flat(struct Person* person, const int month, const int year)
+{
+    if (person->rent_flat != 0) {
+        person->account -= person->rent_flat;
+        if (month == 1) {
+            person->rent_flat *= 1.06;
+        }
+    }
+}
+
+
+// ¸üÐÂÈËÔ±µÄ´æ¿î
+void update_deposit(struct Person* person, const int month, const int year)
+{
+    person->account *= 1 + (0.2 / 12);
+}
+
+
+// ¸üÐÂ Alice µÄ·¿²ú¼ÛÖµ
+void update_flat(struct Person* person, const int month, const int year)
+{
+    if (month == 1) {
+        person->flat *= 1.06;
+    }
+}
+
+
+// ¸üÐÂ Alice µÄµÖÑº´û¿î»¹¿î
+void update_mortgage(struct Person* person)
+{
+    person->account -= person->person_mortgage.month_mortgage;
+}
+
+
+// ¸üÐÂ Alice µÄÑøÃ¨·ÑÓÃ
+void update_cat(struct Person* person, const int month, const int year)
+{
+    if (month == 1) {
+        person->person_cat.catfood *= 1.06;
+    }
+    if ((year >= 2027) && (year <= (2027 + person->person_cat.life_cat))) {
+        person->account -= person->person_cat.catfood;
+    }
+}
+
+
+// Ä£Äâ²ÆÎñ×´¿ö
 void simulation()
 {
-	int month = 9;
-	int year = 2020;
-	while (!((month == 9) && (year == 2020 + 30)))
-	{
-		alice_salary(month);
-		alice_food(month);
-		alice_expence(month);
-		alice_cost_house(month);
-		alice_mortgage();
-		alise_deposite();
-		bob_salary(month);
-		bob_food(month);
-		bob_expence(month);
-		bob_renta();
-		bob_deposite();
+    int month = 1;
+    int year = 2024;
+    // ´Ó 2024 Äê 1 ÔÂ¿ªÊ¼Ä£Äâ£¬Ö±µ½ 2054 Äê 1 ÔÂ
+    while (!(month == 1 && year == 2054)) {
+        update_salary(&Bob, month, year);
+        update_expenses(&Bob, month, year);
+        update_rent_flat(&Bob, month, year);
+        update_deposit(&Bob, month, year);
 
-		month += 1;
-		if (month == 13) {
-			month = 1;
-			year += 1;
-		}
-	}
-	alice.account += alice.cost_house;
-	alice.account += alice.deposit;
-	bob.account += bob.deposit;
+        update_salary(&Alice, month, year);
+        update_expenses(&Alice, month, year);
+        update_flat(&Alice, month, year);
+        update_mortgage(&Alice);
+        update_deposit(&Alice, month, year);
+        update_cat(&Alice, month, year);
 
+        month++;
+        if (month == 13) {
+            month = 1;
+            year++;
+        }
+    }
 }
 
-void alice_print()
+
+// ´òÓ¡±È½Ï½á¹û
+void print()
 {
-	printf("Alice account = %lld \n", alice.account);
+    if (Alice.account + Alice.flat < Bob.account) {
+        printf("Bob will save up for a flat faster");
+    }
+    else {
+        printf("Alice will pay off the mortgage faster");
+    }
 }
 
-void bob_print()
-{
-	printf("Bob account = %lld \n", bob.account);
-}
 
 int main()
 {
-	alice_init();
-	bob_init();
-	simulation();
-	alice_print();
-	bob_print();
-	return 1;
+    Alice_init();
+    Bob_init();
+
+    simulation();
+
+    print();
+    return 0;
 }
