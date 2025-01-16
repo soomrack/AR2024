@@ -51,7 +51,7 @@ void alice_init() {
 
 
 void bob_init() {
-    bob.deposit.oda = 1000 * 1000; // Начальный капитал на депозитном счету (как alice.account, но с %)
+    bob.deposit.oda = 1000 * 1000; // Начальный капитал на депозитном счету (как alice.account), но с %)
     bob.salary = 300 * 1000; // Зарплата в месяц
     bob.food = 30 * 1000; // Расходы на еду в месяц
     bob.expences = 15 * 1000; // Другие расходы в месяц
@@ -62,24 +62,28 @@ void bob_init() {
 }
 
 
-void alice_mortgage() {
-    alice.account -= alice.mortgage.month_pay;  // Уменьшает счет Алисы на сумму ее ежемесячного платежа по ипотеке   
-}
-
-
-void alice_food(const int month) {
+void food(const int month) {
     if (month == 1) {
         alice.food += alice.food * inflation;  // Каждый год (в его начале) еда дорожает на % инфляции
+        bob.food += bob.food * inflation;  // Каждый год (в его начале) еда дорожает на % инфляции
     }
     alice.account -= alice.food;
+    bob.deposit.oda -= bob.food;
 }
 
 
-void alice_expences(const int month) {
+void expences(const int month) {
     if (month == 1) {
         alice.expences += alice.expences * inflation; // Каждый год (в его начале) прочие расходы дорожают на % инфляции
+        bob.expences += bob.expences * inflation; // Каждый год (в его начале) прочие расходы дорожают на % инфляции
     }
     alice.account -= alice.expences;
+    bob.deposit.oda -= bob.expences;
+}
+
+
+void alice_mortgage() {
+    alice.account -= alice.mortgage.month_pay;  // Уменьшает счет Алисы на сумму ее ежемесячного платежа по ипотеке   
 }
 
 
@@ -89,22 +93,6 @@ void bob_rent(const int month) {
     }
    bob.deposit.oda -= bob.rent;
 } 
-
-
-void bob_food(const int month) {
-    if (month == 1) {
-        bob.food += bob.food * inflation;  // Каждый год (в его начале) еда дорожает на % инфляции
-    }
-    bob.deposit.oda -= bob.food;
-}
-
-
-void bob_expences(const int month) {
-    if (month == 1) {
-        bob.expences += bob.expences * inflation; // Каждый год (в его начале) прочие расходы дорожают на % инфляции
-    }
-    bob.deposit.oda -= bob.expences;
-}
 
 
 void bob_apartment_price(const int month) {
@@ -140,25 +128,17 @@ void print() {
 }
 
 
-void alice_salary(const int month, const int year) {
+void salary(const int month, const int year) {
     if (month == 12) {
         alice.account += alice.salary;
-    }
-    if (month == 1) {
-        alice.salary += alice.salary * inflation;  // Зарплата Алисы повышается на инфляцию
-    }
-    alice.account += alice.salary;    
-}
-
-
-void bob_salary(const int month, const int year) {
-    if (month == 12) {
         bob.deposit.oda += bob.salary;
     }
     if (month == 1) {
-        bob.salary += bob.salary * inflation;  // Зарплата Боба повышается на инфляцию
+        alice.salary += alice.salary * inflation;  // Зарплата Алисы повышается на инфляцию
+        bob.salary += bob.salary * inflation;
     }
-    bob.deposit.oda += bob.salary;    
+    alice.account += alice.salary;    
+    bob.deposit.oda += bob.salary;
 }
 
 
@@ -169,15 +149,14 @@ void simulation() {
     int year = 2024;  // Начало симуляции
 
     while (!(month == 9 && year == 2024 + 30)) {  // Обновляет разные параметры на значения конца симуляции
-        alice_salary(month, year); 
         alice_mortgage();
-        alice_food(month);
-        alice_expences(month);  
+        
+
+        salary(month, year); 
+        food(month);
+        expences(month);
        
 
-        bob_salary(month, year);
-        bob_food(month);
-        bob_expences(month);
         bob_deposit(month);
         bob_apartment_price(month);
         bob_rent(month);
