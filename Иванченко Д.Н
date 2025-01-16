@@ -1,0 +1,211 @@
+#include <stdio.h>
+
+// Определение типа Money для хранения больших чисел
+typedef long long int Money;
+
+// Структура для хранения информации о человеке
+struct Person {
+    Money salary;
+    Money account;
+    Money charges;
+    Money food;
+    Money rent;
+    Money flat;
+    Money loan;
+    Money cat_food;
+    Money dog_food;
+    Money unexpected_situations;
+    Money deposit;
+    Money praze;
+    double deposit_percent;
+};
+
+// Структура для хранения информации о кредите
+struct Loan {
+    Money month_pay;
+};
+
+// Глобальные переменные для Алисы и Боба
+struct Person Alice;
+struct Person Bob;
+struct Loan Alice__loan;
+
+// Инициализация начальных данных для Боба
+void Bob_init() {
+    Bob.salary = 200 * 1000;
+    Bob.account = 1000 * 1000;
+    Bob.charges = 25 * 1000;
+    Bob.rent = 40 * 1000;
+    Bob.flat = 0;
+    Bob.cat_food = 3000;
+    Bob.unexpected_situations = 10 * 1000;
+    Bob.deposit = 0;
+    Bob.deposit_percent = 1.01; // Процент по депозиту
+}
+
+// Инициализация начальных данных для Алисы
+void Alice_init() {
+    Alice.salary = 200 * 1000;
+    Alice.account = 1000 * 1000;
+    Alice.charges = 30 * 1000;
+    Alice.rent = 0;
+    Alice.flat = 14000 * 1000;
+    Alice.loan = 100 * 1000;
+    Alice.dog_food = 5000;
+    Alice.unexpected_situations = 10 * 1000;
+    Alice.deposit = 0;
+    Alice.deposit_percent = 1.01; // Процент по депозиту
+    Alice__loan.month_pay = 100 * 1000;
+    Alice.praze = 200 * 1000;
+}
+
+// Обработка зарплаты Боба
+void Bob_salary(const int month, const int year) {
+    if (month == 10) {
+        Bob.salary *= 1.08; // 8% инфляция ежегодно
+    }
+    Bob.account += Bob.salary;
+
+    if (month == 12) {
+        Bob.account += Bob.salary;
+    }
+}
+
+// Обработка затрат Боба
+void Bob_charges(const int month, const int year) {
+    if (month == 12) {
+        Bob.rent *= 1.08;
+        Bob.unexpected_situations *= 1.08;
+    }
+    Bob.account -= Bob.rent + Bob.unexpected_situations;
+}
+
+// Обработка депозита Боба
+void Bob_deposit() {
+    Bob.deposit *= Bob.deposit_percent;
+}
+
+// Обработка еды для кота Боба
+void Bob_food() {
+    Bob.account -= Bob.cat_food;
+}
+
+// Специальная обработка для кота Боба
+void Bob_cat(const int month, const int year) {
+    static int cat_alive = 0;
+
+    if (month == 11 && year == 2024) {
+        Bob.account -= 17000;
+        cat_alive = 1;
+    }
+    if (month == 11 && year == 2026) {
+        Bob.account -= 2000;
+    }
+
+    if (cat_alive == 1) {
+        Bob.account -= Bob.cat_food;
+    }
+    if (month == 11 && year == 2039) {
+        cat_alive = 0;
+    }
+    if (month == 12) {
+        Bob.cat_food *= 1.08;
+    }
+}
+
+// Обработка зарплаты Алисы
+void Alice_salary(const int month, const int year) {
+    if (month == 12) {
+        Alice.salary *= 1.08;
+    }
+
+    if (month == 9) {
+        Alice.account += Alice.praze;
+    }
+    if (month == 12) {
+        Alice.praze *= 1.08;
+    }
+
+    Alice.account += Alice.salary;
+}
+
+// Обработка затрат Алисы
+void Alice_charges(const int month, const int year) {
+    if (month == 12) {
+        Alice.unexpected_situations *= 1.08;
+        Alice.loan *= 1.08;
+    }
+    Alice.charges = Alice.unexpected_situations + Alice.loan;
+    Alice.account -= Alice.charges;
+}
+
+// Обработка депозита Алисы
+void Alice_deposit() {
+    Alice.deposit *= Alice.deposit_percent;
+}
+
+// Обработка стоимости квартиры Алисы
+void Alice_flat(const int month) {
+    if (month == 1) {
+        Alice.flat *= 1.08;
+    }
+}
+
+// Обработка кредита Алисы
+void Alice_loan() {
+    Alice.account -= Alice__loan.month_pay;
+}
+
+// Обработка еды для собаки Алисы
+void Alice_food() {
+    Alice.account -= Alice.dog_food;
+}
+
+// Главная функция симуляции
+void simulation() {
+    int month = 11;
+    int year = 2024;
+    while (!(year == 2054 && month == 11)) {
+        Alice_salary(month, year);
+        Alice_charges(month, year);
+        Alice_deposit();
+        Alice_flat(month);
+        Alice_loan();
+        Alice_food();
+
+        Bob_salary(month, year);
+        Bob_charges(month, year);
+        Bob_deposit();
+        Bob_food();
+        Bob_cat(month, year); // Добавляем обработку кота Боба
+
+        month++;
+        if (month == 13) {
+            year = year + 1;
+            month = 1;
+        }
+    }
+}
+
+// Печать состояния счета Алисы
+void Alice_printf() {
+    printf("Alice account = %lld \n", Alice.account);
+}
+
+// Печать состояния счета Боба
+void Bob_printf() {
+    printf("Bob account = %lld \n", Bob.account);
+}
+
+// Главная функция программы
+int main() {
+    Alice_init(); // Инициализация данных Алисы
+    Bob_init();   // Инициализация данных Боба
+
+    simulation(); // Запуск симуляции
+
+    Alice_printf(); // Печать результата для Алисы
+    Bob_printf();   // Печать результата для Боба
+
+    return 0;
+}
