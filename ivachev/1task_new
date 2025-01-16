@@ -1,0 +1,139 @@
+#include <stdio.h>
+
+typedef unsigned long long int Money;
+
+typedef enum Name {
+    BOB,
+    ALICE
+} Name;
+
+typedef struct Mortgage {
+    double rate;
+    Money credit;
+} Mortgage;
+
+typedef struct Person {
+    Name name;
+    Money account;
+    Money eats;
+    Money salary;
+    union {
+        struct {
+            Money rent;
+        };
+        struct {
+            Money utilities;
+            Mortgage mortgage;
+        };
+    };
+} Person;
+
+Person rent_payment(int month, Person person) {   
+    if (month == 1) {
+        person.rent *= 1.1; 
+    }
+    person.account -= person.rent;
+    return person;
+}
+
+Person eats_payment(int month, Person person) {
+    if (month == 1) {
+        person.eats *= 1.1;
+    }
+    person.account -= person.eats;
+    return person;
+}
+
+Person account_rise(int month, Person person) {
+    if (month == 1) {
+        person.salary *= 1.07;
+    }
+    person.account += person.salary;
+    return person;
+}
+
+Money calculate_month_payment_for_mortgage(int months_left, const Mortgage mortgage) {
+    return (Money)(mortgage.credit / (months_left + mortgage.credit * mortgage.rate / 12));
+}
+
+Person account_add_percent(Person person) {
+    person.account *= 1.15;
+    return person;
+}
+
+Person utilities_payment(int month, Person person) {
+    if (month == 1) {
+        person.utilities *= 1.1;
+    }
+    person.account -= person.utilities;
+    return person;
+}
+
+Person mortgage_payment(int months_left, Person person) {
+    Money payment = calculate_month_payment_for_mortgage(months_left, person.mortgage);
+    person.account -= payment;
+    person.mortgage.credit -= payment;
+    return person;
+}
+
+void print_result(const Person alice, const Person bob) {
+    if (bob.account <= alice.account) {
+        printf("%llu vs %llu, Alice won!\n", alice.account, bob.account);
+    } else {
+        printf("%llu vs %llu, Bob won!\n", alice.account, bob.account);
+    }
+}
+
+void initialize_persons(Person* alice, Person* bob) {
+    alice->name = ALICE;
+    alice->account = 13 * 1000 * 1000;
+    alice->eats = 30 * 1000;
+    alice->salary = 200 * 1000;
+    alice->utilities = 10 * 1000;
+
+    Mortgage m;
+    m.rate = 1.17;
+    m.credit = 13 * 1000 * 1000;
+    alice->mortgage = m;
+
+    bob->name = BOB;
+    bob->account = 0;
+    bob->eats = 30 * 1000;
+    bob->salary = 200 * 1000;
+    bob->rent = 30 * 1000;
+}
+
+int main() {
+    Person Alice, Bob;
+    initialize_persons(&Alice, &Bob);
+    
+    int start_year = 2025;
+    int start_month = 9; // Сентябрь
+    int years = 30; // Установлено количество лет для отсчета
+    
+    int months = 0; // Начинаем с сентября 2025 года
+    int mod_months;
+    while (months < years * 12) {
+        mod_months = (months % 12) + 1;
+        
+        if (mod_months == 1) {
+            Alice = account_add_percent(Alice);
+            Bob = account_add_percent(Bob);
+        }
+        
+        Alice = account_rise(mod_months, Alice);
+        Alice = eats_payment(mod_months, Alice);
+        Alice = utilities_payment(mod_months, Alice);
+        Alice = mortgage_payment(years * 12 - months, Alice);
+        
+        Bob = account_rise(mod_months, Bob);
+        Bob = eats_payment(mod_months, Bob);
+        Bob = rent_payment(mod_months, Bob);
+        
+        months++;
+    }
+    
+    print_result(Alice, Bob);
+    
+    return 0;
+}
