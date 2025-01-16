@@ -1,0 +1,145 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+// 定义矩阵结构体
+struct Matrix {
+    size_t rows; // 矩阵的行数
+    size_t cols; // 矩阵的列数
+    int **data;  // 指向二维数组的指针，用于存储矩阵元素
+};
+typedef struct Matrix Matrix;
+
+// 定义异常级别枚举
+enum MatrixExceptionLevel {ERROR, WARNING, INFO, DEBUG};
+
+// 异常处理函数
+void matrix_exception(const enum MatrixExceptionLevel level, const char *msg) {
+    switch (level) {
+        case ERROR:
+            printf("错误: %s\n", msg); // 打印错误级别的异常信息
+            break;
+        case WARNING:
+            printf("警告: %s\n", msg); // 打印警告级别的异常信息
+            break;
+        case INFO:
+            printf("信息: %s\n", msg); // 打印信息级别的异常信息
+            break;
+        case DEBUG:
+            printf("调试: %s\n", msg); // 打印调试级别的异常信息
+            break;
+    }
+}
+
+// 矩阵内存分配函数
+Matrix matrix_allocate(const size_t rows, const size_t cols) {
+    Matrix A = {0, 0, NULL}; // 初始化一个空矩阵
+
+    if (rows == 0 || cols == 0) {
+        return A; // 如果行数或列数为0，直接返回空矩阵
+    }
+
+    // 为存储行指针分配内存
+    A.data = (int **)malloc(rows * sizeof(int *));
+    if (A.data == NULL) {
+        matrix_exception(ERROR, "分配行内存失败。"); // 如果分配失败，打印错误信息并返回
+        return A;
+    }
+
+    // 为每一行分配内存来存储列元素
+    for (size_t i = 0; i < rows; i++) {
+        A.data[i] = (int *)malloc(cols * sizeof(int));
+        if (A.data[i] == NULL) {
+            // 如果某一行分配失败，释放之前已分配的行内存
+            for (size_t j = 0; j < i; j++) {
+                free(A.data[j]);
+            }
+            free(A.data);
+            matrix_exception(ERROR, "分配列内存失败。"); // 打印错误信息并返回
+            return A;
+        }
+    }
+
+    A.rows = rows; // 设置矩阵的行数
+    A.cols = cols; // 设置矩阵的列数
+    return A; // 返回分配好内存的矩阵
+}
+
+// 矩阵内存释放函数
+void matrix_free(Matrix *A) {
+    if (A->data!= NULL) {
+        // 释放每一行的内存
+        for (size_t i = 0; i < A->rows; i++) {
+            free(A->data[i]);
+        }
+        // 释放存储行指针的内存
+        free(A->data);
+    }
+    A->rows = 0; // 重置行数为0
+    A->cols = 0; // 重置列数为0
+    A->data = NULL; // 重置数据指针为NULL
+}
+
+// 设置矩阵元素函数
+void matrix_set(const Matrix A, const int *values) {
+    size_t index = 0; // 用于遍历一维数组的索引
+    for (size_t i = 0; i < A.rows; i++) {
+        for (size_t j = 0; j < A.cols; j++) {
+            A.data[i][j] = values[index++]; // 将一维数组的值按顺序赋给矩阵元素
+        }
+    }
+}
+
+// 矩阵打印函数
+void matrix_print(const Matrix A) {
+    for (size_t i = 0; i < A.rows; i++) {
+        for (size_t j = 0; j < A.cols; j++) {
+            printf("%4d ", A.data[i][j]); // 按宽度为4打印矩阵元素
+        }
+        printf("\n"); // 每行结束后换行
+    }
+    printf("\n"); // 打印完矩阵后再换行
+}
+
+// 矩阵加法函数
+int matrix_add(Matrix *A, const Matrix B) {
+    if (A->rows!= B.rows || A->cols!= B.cols) {
+        matrix_exception(WARNING, "矩阵大小不兼容，无法进行加法运算。"); // 如果矩阵大小不一致，打印警告信息并返回0
+        return 0;
+    }
+
+    // 对矩阵对应元素进行加法运算
+    for (size_t i = 0; i < A->rows; i++) {
+        for (size_t j = 0; j < A->cols; j++) {
+            A->data[i][j] += B.data[i][j];
+        }
+    }
+    return 1; // 加法运算成功，返回1
+}
+
+int main() {
+    Matrix A = matrix_allocate(2, 2); // 分配一个2x2的矩阵A
+    if (A.data == NULL) {
+        return 1; // 如果分配失败，程序返回1
+    }
+
+    Matrix B = matrix_allocate(2, 2); // 分配一个2x2的矩阵B
+    if (B.data == NULL) {
+        matrix_free(&A); // 如果B分配失败，释放A的内存
+        return 1; // 程序返回1
+    }
+
+    matrix_set(A, (int[]){1, 2, 3, 4}); // 设置矩阵A的元素
+    matrix_set(B, (int[]){5, 6, 7, 8}); // 设置矩阵B的元素
+
+    matrix_print(A); // 打印矩阵A
+    matrix_print(B); // 打印矩阵B
+
+    if (matrix_add(&A, B)) {
+        matrix_print(A); // 如果加法运算成功，打印运算后的矩阵A
+    }
+
+    matrix_free(&A); // 释放矩阵A的内存
+    matrix_free(&B); // 释放矩阵B的内存
+    return 0; // 程序正常结束，返回0
+}
