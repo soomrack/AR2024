@@ -2,17 +2,17 @@
 #include <stdlib.h>
 #include <string.h>
 
-// ¶¨ÒåÏòÁ¿½á¹¹Ìå
+// å®šä¹‰å‘é‡ç»“æ„ä½“
 struct Vector {
     size_t size;
     double* data;
 };
 typedef struct Vector Vector;
 
-// ¶¨ÒåÒì³£¼¶±ğÃ¶¾ÙÀàĞÍ
+// å®šä¹‰å¼‚å¸¸çº§åˆ«æšä¸¾ç±»å‹
 enum VectorExceptionLevel { ERROR, WARNING, INFO, DEBUG };
 
-// ÏòÁ¿Òì³£´¦Àíº¯Êı
+// å‘é‡å¼‚å¸¸å¤„ç†å‡½æ•°
 void vector_exception(const enum VectorExceptionLevel level, const char* msg)
 {
     if (level == ERROR) {
@@ -23,7 +23,7 @@ void vector_exception(const enum VectorExceptionLevel level, const char* msg)
     }
 }
 
-// ·ÖÅäÖ¸¶¨´óĞ¡µÄÏòÁ¿ÄÚ´æ¿Õ¼ä
+// åˆ†é…æŒ‡å®šå¤§å°çš„å‘é‡å†…å­˜ç©ºé—´
 Vector vector_allocate(const size_t size)
 {
     Vector v = { 0, NULL };
@@ -39,7 +39,7 @@ Vector vector_allocate(const size_t size)
     return v;
 }
 
-// ÊÍ·ÅÏòÁ¿ÄÚ´æ¿Õ¼ä
+// é‡Šæ”¾å‘é‡å†…å­˜ç©ºé—´
 void vector_free(Vector* v)
 {
     free(v->data);
@@ -47,15 +47,15 @@ void vector_free(Vector* v)
     v->data = NULL;
 }
 
-// ÉèÖÃÏòÁ¿ÔªËØÖµ£¬Ìí¼ÓºÏ·¨ĞÔ¼ì²é
+// è®¾ç½®å‘é‡å…ƒç´ å€¼ï¼Œæ·»åŠ åˆæ³•æ€§æ£€æŸ¥
 void vector_set(Vector v, const double* values)
 {
-    if (v.size > 0 && values != NULL) {
+    if (v.size > 0 && values!= NULL) {
         memcpy(v.data, values, v.size * sizeof(double));
     }
 }
 
-// ´òÓ¡ÏòÁ¿ÔªËØ
+// æ‰“å°å‘é‡å…ƒç´ 
 void vector_print(const Vector v)
 {
     for (size_t i = 0; i < v.size; ++i) {
@@ -64,10 +64,10 @@ void vector_print(const Vector v)
     printf("\n");
 }
 
-// ÏòÁ¿Ïà¼Ó£¬v1 += v2
+// å‘é‡ç›¸åŠ ï¼Œv1 += v2
 int vector_add(Vector v1, Vector v2)
 {
-    if (v1.size != v2.size) {
+    if (v1.size!= v2.size) {
         vector_exception(ERROR, "vector_add: Incompatible sizes.");
         return 0;
     }
@@ -75,6 +75,19 @@ int vector_add(Vector v1, Vector v2)
         v1.data[i] += v2.data[i];
     }
     return 1;
+}
+
+// è®¡ç®—å‘é‡ç‚¹ç§¯çš„å‡½æ•°
+double vector_dot_product(Vector v1, Vector v2) {
+    if (v1.size!= v2.size ) {
+        vector_exception(ERROR, "vector_dot_product: Incompatible sizes.");
+        return NAN;
+    }
+    double result = 0.0;
+    for (size_t i = 0; i < v1.size; ++i) {
+        result += v1.data[i] * v2.data[i];
+    }
+    return result;
 }
 
 int main()
@@ -91,6 +104,9 @@ int main()
 
     vector_add(v1, v2);
     vector_print(v1);
+
+    double dotProductResult = vector_dot_product(v1, v2);
+    printf("The dot product of the two vectors is: %2.3f\n", dotProductResult);
 
     vector_free(&v1);
     return 1;
