@@ -36,8 +36,13 @@ void Alice_init(){
     Alice.expense = 50 * 1000;
 
     Alice.mortgage.rate = 17 * 0.01;
-    Alice.mortgage.credit = 13 * 1000 * 1000;
+    
     Alice.mortgage.month_pay = 150 * 1000;
+}
+void Alice_credit()
+{
+    Alice.mortgage.credit -= Alice.saving;
+    Alice.saving = 0;
 }
 
 void Alice_mortgage()
@@ -53,7 +58,7 @@ void Alice_salary(int const month)
     Alice.saving += Alice.salary;
 }
 
-void Alice_expense(int year, int const month)
+void Alice_expense()
 {
     Alice.saving -= Alice.expense;
 }
@@ -77,23 +82,37 @@ void Bob_Bank()
     Bob.Bank.deposit *= Bob.Bank.rate;
     Bob.Bank.deposit += Bob.saving;
     Bob.saving = 0;
-
-    while(!((month == 8) && (year == 2054))){
-        Bob.Bank.deposit += (Bob.salary - Bob.apartment - Bob.expense);
+}
+void Bob_cat(year)
+{
+    Bob.expense += 5000;
+    if(year == 2036){
+        Bob.expense -= 5000;
     }
 }
-
-void Bob_apartment(int start_year, int year, int const month)
+void Bob_d_cat(year)
 {
-    Bob.saving -= Bob.Bank.month_pay;
-    if (((year - start_year) % 5 == 0) && (month == 8)) {
-        Bob.Bank.month_pay += 5000;
+    if(year == 2036){
+        Bob.saving -= 5000;
+    }
+}
+void Bob_saving()
+{
+    Bob.saving += Bob.salary;
+    Bob.saving -= Bob.apartment;
+    Bob.saving -= Bob.expense;
+}
+
+void Bob_apartment(const int month)
+{
+    if(month == 12){
+    Bob.apartment *= infliation;
     }
 }
 
 void Bob_salary(const int month)
 {
-    if(month == 12) {
+    if(month == 12){
         Bob.salary *= infliation;
     }
 }
@@ -108,12 +127,17 @@ void simulation()
 
     while(!((month == 9) && (year == end_year))) {
 
+        Alice_credit();
         Alice_salary(month);
         Alice_mortgage();
+        Alice_expense();
         
-        Bob_salary(month);
-        Bob_apartment(start_year, year, month);
+        Bob_saving();
         Bob_Bank();
+        Bob_salary(month);
+        Bob_apartment(month);
+        Bob_cat(year);
+        Bob_d_cat(year);
         
         month++;
         if(month == 13) {
@@ -124,6 +148,10 @@ void simulation()
 }
 void Bob_print()
 {
+    if (Alice.saving < Bob.Bank.deposit) {
+        printf ("\n Bob has more money than Alice on %i", Bob.Bank.deposit - Alice.saving);
+    }
+    
     printf ("\n Bob capital = %i", Bob.Bank.deposit);
 }
 
@@ -131,10 +159,6 @@ void Alice_print()
 {
     if (Alice.saving > Bob.Bank.deposit) {
         printf ("\n Alice has more money than Bob on %i", Alice.saving - Bob.Bank.deposit);
-    }
-
-    if (Alice.saving < Bob.Bank.deposit) {
-        printf ("\n Bob has more money than Alice on %i", Bob.Bank.deposit - Alice.saving);
     }
 
     printf (" \n Alice capital = %i", Alice.saving);
