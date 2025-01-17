@@ -2,19 +2,19 @@
 
 typedef long long int Money;
 
-// Ã¨µÄ½á¹¹Ìå
+// çŒ«çš„ç»“æ„ä½“
 struct Cat {
     Money catfood;
     int life_cat;
 };
 
-// µÖÑº´û¿î½á¹¹Ìå
+// æŠµæŠ¼è´·æ¬¾ç»“æ„ä½“
 struct Mortgage {
     Money mortgage;
     Money month_mortgage;
 };
 
-// ÈËÔ±½á¹¹Ìå
+// äººå‘˜ç»“æ„ä½“
 struct Person {
     Money salary;
     Money expenses;
@@ -28,15 +28,15 @@ struct Person {
 struct Person Bob;
 struct Person Alice;
 
-// ³õÊ¼»¯ Bob µÄĞÅÏ¢
+// åˆå§‹åŒ– Bob çš„ä¿¡æ¯
 void Bob_init()
 {
-    // ³õÊ¼»¯ Bob µÄÕË»§Óà¶î¡¢¹¤×Ê¡¢ÈÕ³£¿ªÏúºÍ×â·¿·ÑÓÃ
+    // åˆå§‹åŒ– Bob çš„è´¦æˆ·ä½™é¢ã€å·¥èµ„ã€æ—¥å¸¸å¼€é”€å’Œç§Ÿæˆ¿è´¹ç”¨
     Bob.account = 1200000;
     Bob.salary = 300000;
     Bob.expenses = 40000;
     Bob.rent_flat = 35000;
-    // ÎªÁË±ÜÃâÎ´¶¨ÒåĞĞÎª£¬½«Î´Ê¹ÓÃµÄ³ÉÔ±³õÊ¼»¯Îª 0
+    // ä¸ºäº†é¿å…æœªå®šä¹‰è¡Œä¸ºï¼Œå°†æœªä½¿ç”¨çš„æˆå‘˜åˆå§‹åŒ–ä¸º 0
     Bob.flat = 0;
     Bob.person_cat.catfood = 0;
     Bob.person_cat.life_cat = 0;
@@ -45,10 +45,10 @@ void Bob_init()
 }
 
 
-// ³õÊ¼»¯ Alice µÄĞÅÏ¢
+// åˆå§‹åŒ– Alice çš„ä¿¡æ¯
 void Alice_init()
 {
-    // ³õÊ¼»¯ Alice µÄÕË»§Óà¶î¡¢¹¤×Ê¡¢ÈÕ³£¿ªÏú¡¢·¿²ú¼ÛÖµµÈ
+    // åˆå§‹åŒ– Alice çš„è´¦æˆ·ä½™é¢ã€å·¥èµ„ã€æ—¥å¸¸å¼€é”€ã€æˆ¿äº§ä»·å€¼ç­‰
     Alice.account = 1200000;
     Alice.salary = 300000;
     Alice.expenses = 40000;
@@ -56,7 +56,7 @@ void Alice_init()
     Alice.person_cat.catfood = 7000;
     Alice.person_cat.life_cat = 15;
 
-    // ¼ÆËãµÖÑº´û¿î½ğ¶îºÍÃ¿ÔÂ»¹¿î¶î
+    // è®¡ç®—æŠµæŠ¼è´·æ¬¾é‡‘é¢å’Œæ¯æœˆè¿˜æ¬¾é¢
     Alice.person_mortgage.mortgage = Alice.flat;
     Alice.person_mortgage.mortgage -= Alice.account;
     Alice.person_mortgage.mortgage *= 1.2;
@@ -65,17 +65,20 @@ void Alice_init()
 }
 
 
-// ¸üĞÂÈËÔ±µÄ¹¤×Ê
-void update_salary(struct Person* person, const int month, const int year)
-{
-    person->account += person->salary;
-    if (month == 1) {
-        person->salary *= 1.06;
+// æ›´æ–°äººå‘˜çš„å·¥èµ„
+void Alice_salary(const int month, const int year) {
+    if (month == 12) {
+        Alice.account += Alice.salary; // å¥–é‡‘ï¼Œæ•°é¢ç­‰äºå·¥èµ„
     }
+    if (month == 1) {
+        Alice.salary *= 1.05;  // 1æœˆå·¥èµ„ä¸Šæ¶¨5%
+    }
+    Alice.account += Alice.salary;
 }
 
 
-// ¸üĞÂÈËÔ±µÄÈÕ³£¿ªÏú
+
+// æ›´æ–°äººå‘˜çš„æ—¥å¸¸å¼€é”€
 void update_expenses(struct Person* person, const int month, const int year)
 {
     person->account -= person->expenses;
@@ -85,7 +88,7 @@ void update_expenses(struct Person* person, const int month, const int year)
 }
 
 
-// ¸üĞÂÈËÔ±µÄ×â·¿·ÑÓÃ
+// æ›´æ–°äººå‘˜çš„ç§Ÿæˆ¿è´¹ç”¨
 void update_rent_flat(struct Person* person, const int month, const int year)
 {
     if (person->rent_flat != 0) {
@@ -97,14 +100,14 @@ void update_rent_flat(struct Person* person, const int month, const int year)
 }
 
 
-// ¸üĞÂÈËÔ±µÄ´æ¿î
+// æ›´æ–°äººå‘˜çš„å­˜æ¬¾
 void update_deposit(struct Person* person, const int month, const int year)
 {
     person->account *= 1 + (0.2 / 12);
 }
 
 
-// ¸üĞÂ Alice µÄ·¿²ú¼ÛÖµ
+// æ›´æ–° Alice çš„æˆ¿äº§ä»·å€¼
 void update_flat(struct Person* person, const int month, const int year)
 {
     if (month == 1) {
@@ -113,14 +116,14 @@ void update_flat(struct Person* person, const int month, const int year)
 }
 
 
-// ¸üĞÂ Alice µÄµÖÑº´û¿î»¹¿î
+// æ›´æ–° Alice çš„æŠµæŠ¼è´·æ¬¾è¿˜æ¬¾
 void update_mortgage(struct Person* person)
 {
     person->account -= person->person_mortgage.month_mortgage;
 }
 
 
-// ¸üĞÂ Alice µÄÑøÃ¨·ÑÓÃ
+// æ›´æ–° Alice çš„å…»çŒ«è´¹ç”¨
 void update_cat(struct Person* person, const int month, const int year)
 {
     if (month == 1) {
@@ -132,12 +135,12 @@ void update_cat(struct Person* person, const int month, const int year)
 }
 
 
-// Ä£Äâ²ÆÎñ×´¿ö
+// æ¨¡æ‹Ÿè´¢åŠ¡çŠ¶å†µ
 void simulation()
 {
     int month = 1;
     int year = 2024;
-    // ´Ó 2024 Äê 1 ÔÂ¿ªÊ¼Ä£Äâ£¬Ö±µ½ 2054 Äê 1 ÔÂ
+    // ä» 2024 å¹´ 1 æœˆå¼€å§‹æ¨¡æ‹Ÿï¼Œç›´åˆ° 2054 å¹´ 1 æœˆ
     while (!(month == 1 && year == 2054)) {
         update_salary(&Bob, month, year);
         update_expenses(&Bob, month, year);
@@ -160,7 +163,7 @@ void simulation()
 }
 
 
-// ´òÓ¡±È½Ï½á¹û
+// æ‰“å°æ¯”è¾ƒç»“æœ
 void print()
 {
     if (Alice.account + Alice.flat < Bob.account) {
