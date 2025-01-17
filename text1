@@ -1,0 +1,151 @@
+
+#include<stdio.h>
+
+//定义Money类型为long long int，用于表示金钱
+typedef long long int Money；
+
+//狗结构体，包含狗的食物支出和存活状态
+结构狗{
+货币食品；
+int为活的(_L)；
+};
+
+//租金结构体，包含房租相关信息
+结构租金{
+月租金；
+int租金_增加_年；
+双倍租金_增加_费率；
+};
+
+//投资结构体，包含投资相关信息
+结构投资{
+资金初始_金额；
+双倍年收益率；
+货币现值；
+};
+
+//人结构体，包含个人的财务和狗的信息
+结构人员{
+货币工资；
+货币账户；
+每日货币_费用；
+结构租金租金；
+结构投资投资；
+结构狗狗；
+};
+
+结构人查理；
+
+//从查理的账户中减去每月房租
+作废charlie_pay_rent(){
+charlie.Account-=charlie.rent.monthly_rent；
+}
+
+//处理查理的日常开销
+作废charlie_daily_expenses(){
+charlie.Account-=charlie.daily_expensures；
+}
+
+//处理查理的投资收益
+作废charlie_investment_update(年度常数){
+if(年>=charlie.investment.initial_amount/1000){
+charlie.investment.current_value=charlie.investment.initial_amount*(1+charlie.投资年收益率)；
+charlie.Account+=charlie.investment.current_value-charlie.investment.initial_amount；
+charlie.investment.initial_amount=charlie.investment.current_value；
+    }
+}
+
+//初始化查理的各项信息
+void charlie_init(){
+charlie.account=500000；
+charlie.salary=150000；
+charlie.daily_expensions=30000；
+
+charlie.rent.monthly_rent=50000；
+charlie.rent.rent_increement_year=2027；
+charlie.rent.rent_increase_rate=1.05；
+
+charlie.investment.initial_amount=100000；
+charlie.investment.arnual_return_rate=0.08；
+charlie.investment.current_value=100000；
+
+charlie.dog.food=2000；
+charlie.dog.is_alive=0；
+}
+
+// 处理与狗相关的财务变化
+void charlie_dog(const int month，const int year){
+// 2025年5月购买狗
+if((月==5)&&(年==2025)){
+charlie.account-=15000；
+charlie.dog.is_alive=1；
+    }
+    // 2035年8月狗去世
+    if ((year == 2035) && (month == 8)) {
+        charlie.dog.is_alive = 0;
+        charlie.account -= 5000;
+    }
+    if (month == 1) {
+        charlie.dog.food *= 1.05;
+    }
+    if (charlie.dog.is_alive == 1) {
+        charlie.account -= charlie.dog.food;
+    }
+}
+
+// 打印Charlie的账户余额
+void charlie_print() {
+    printf("Charlie account = %lld \n", charlie.account);
+}
+
+// 处理Charlie的工资增长
+void charlie_salary(const int year) {
+    if (year % 3 == 0) {
+        charlie.salary *= 1.1;
+    }
+    charlie.account += charlie.salary;
+}
+
+// 模拟Charlie的财务状况变化
+void charlie_simulation() {
+    int month = 1;
+    int year = 2024;
+
+    while (!(month == 1 && year == 2024 + 20)) {
+        charlie_salary(year);
+        charlie_pay_rent();
+        charlie_daily_expenses();
+        charlie_investment_update(year);
+        charlie_dog(month, year);
+
+        if (year == charlie.rent.rent_increase_year) {
+            charlie.rent.monthly_rent *= charlie.rent.rent_increase_rate;
+        }
+
+        month++;
+        if (month == 13) {
+            month = 1;
+            year++;
+        }
+    }
+}
+
+int main() {
+    charlie_init();
+    charlie_simulation();
+    charlie_print();
+    return 0;
+}    // 打印每月余额
+    for (int i = 0; i < balanceIndex; i++) {
+        printf("第 %d 个月的余额: %lld\n", i + 1, monthlyBalances[i]);
+    }
+
+    free(monthlyBalances);
+}
+
+int main() {
+    charlie_init();
+    charlie_simulation();
+    charlie_print();
+    return 0;
+}
