@@ -1,0 +1,86 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+// 定义二维向量结构体
+struct Vector2D {
+    size_t size;
+    double *data;
+};
+typedef struct Vector2D Vector2D;
+
+// 定义异常级别枚举
+enum VectorExceptionLevel {ERROR, WARNING, INFO, DEBUG};
+
+// 异常处理函数
+void vector_exception(const enum VectorExceptionLevel level, char *msg) {
+    if (level == ERROR) {
+        printf("ERROR: %s", msg);
+    }
+    if (level == WARNING) {
+        printf("WARNING: %s", msg);
+    }
+}
+
+// 分配二维向量内存
+Vector2D vector_allocate(const size_t size) {
+    Vector2D vec = {0, NULL};
+    if (size == 0) {
+        return (Vector2D){size, NULL};
+    }
+    vec.data = malloc(size * sizeof(double));
+    if (vec.data == NULL) {
+        vector_exception(ERROR, "Allocation memory fail.");
+        return vec;
+    }
+    vec.size = size;
+    return vec;
+}
+
+// 释放二维向量内存
+void vector_free(Vector2D *vec) {
+    free(vec->data);
+    *vec = (Vector2D){0, NULL};
+}
+
+// 设置二维向量元素值
+void vector_set(const Vector2D vec, const double *values) {
+    memcpy(vec.data, values, vec.size * sizeof(double));
+}
+
+// 打印二维向量
+void vector_print(const Vector2D vec) {
+    for (size_t i = 0; i < vec.size; ++i) {
+        printf("%2.3f ", vec.data[i]);
+    }
+    printf("\n");
+}
+
+// 二维向量加法：vec1 += vec2
+int vector_add(const Vector2D vec1, const Vector2D vec2) {
+    if (vec1.size!= vec2.size) {
+        vector_exception(ERROR, "vector_add: incompatible sizes.");
+        return 0;
+    }
+    for (size_t idx = 0; idx < vec1.size; ++idx) {
+        vec1.data[idx] += vec2.data[idx];
+    }
+    return 1;
+}
+
+int main() {
+    Vector2D vec1, vec2;
+    vec1 = vector_allocate(3);
+    vec2 = vector_allocate(3);
+    vector_set(vec1, (double[]){1.1, 2.2, 3.3});
+    vector_set(vec2, (double[]){0.1, 0.2, 0.3});
+    vector_print(vec1);
+    vector_print(vec2);
+
+    vector_add(vec1, vec2);
+    vector_print(vec1);
+
+    vector_free(&vec1);
+    vector_free(&vec2);
+    return 1;
+}
