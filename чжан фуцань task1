@@ -31,23 +31,40 @@ struct Person jane;
 
 // 处理车贷还款的函数
 void jane_carLoan() {
-    jane.savings -= jane.carLoan.monthlyPayment;
+    if (jane.savings >= jane.carLoan.monthlyPayment) {
+        jane.savings -= jane.carLoan.monthlyPayment;
+    } else {
+        printf("Insufficient savings for car loan payment.\n");
+    }
 }
 
 // 根据月份处理食物开支的函数
 void jane_food(const int month) {
+    Money tempExpense = jane.foodExpense;
     if (month == 5) {
-        jane.foodExpense *= 1.2;
+        tempExpense *= 1.2;
     }
-    jane.savings -= jane.foodExpense;
+    if (month == 12) {
+        jane.savings -= 5000;
+    }
+    if (jane.savings >= tempExpense) {
+        jane.savings -= tempExpense;
+    } else {
+        printf("Insufficient savings for food expense.\n");
+    }
 }
 
 // 根据月份处理其他开支的函数
 void jane_otherExpenses(const int month) {
+    Money tempExpense = jane.otherExpenses;
     if (month == 7) {
-        jane.savings -= 8000;
+        tempExpense += 8000;
     }
-    jane.savings -= jane.otherExpenses;
+    if (jane.savings >= tempExpense) {
+        jane.savings -= tempExpense;
+    } else {
+        printf("Insufficient savings for other expenses.\n");
+    }
 }
 
 // 初始化 jane 各项财务和宠物数据的函数
@@ -61,7 +78,11 @@ void jane_init() {
     jane.carLoan.loanAmount = 800000;
     jane.carLoan.downPayment = 200000;
     jane.carLoan.monthlyPayment = 70000;
-    jane.savings -= jane.carLoan.downPayment;
+    if (jane.savings >= jane.carLoan.downPayment) {
+        jane.savings -= jane.carLoan.downPayment;
+    } else {
+        printf("Insufficient savings for car down payment.\n");
+    }
 
     jane.dog.foodCost = 8000;
     jane.dog.isHealthy = 1;
@@ -70,18 +91,28 @@ void jane_init() {
 // 根据月份和年份处理与狗相关事务的函数
 void jane_dog(const int month, const int year) {
     if ((month == 10) && (year == 2027)) {
-        jane.savings -= 25000;
-        jane.dog.isHealthy = 0;
+        if (jane.savings >= 25000) {
+            jane.savings -= 25000;
+            jane.dog.isHealthy = 0;
+        } else {
+            printf("Insufficient savings for dog - related expense in 2027 October.\n");
+        }
     }
     if ((year == 2030) && (month == 2)) {
-        jane.dog.isHealthy = 1;
-        jane.savings -= 12000;
+        if (jane.savings >= 12000) {
+            jane.dog.isHealthy = 1;
+            jane.savings -= 12000;
+        } else {
+            printf("Insufficient savings for dog - related expense in 2030 February.\n");
+        }
     }
     if (month == 3) {
         jane.dog.foodCost *= 1.1;
     }
-    if (jane.dog.isHealthy == 1) {
+    if (jane.dog.isHealthy == 1 && jane.savings >= jane.dog.foodCost) {
         jane.savings -= jane.dog.foodCost;
+    } else if (jane.dog.isHealthy == 1 && jane.savings < jane.dog.foodCost) {
+        printf("Insufficient savings for dog food.\n");
     }
 }
 
@@ -94,11 +125,107 @@ void jane_print() {
 void jane_salary(const int month, const int year) {
     if (month == 12) {
         jane.savings += jane.salary;
+    } else {
+        Money monthlySalary = jane.salary / 12;
+        if (month == 1 && year % 3 == 0) {
+            monthlySalary *= 1.05;
+        }
+        jane.savings += monthlySalary;
     }
-    if (month == 1 && year % 3 == 0) {
-        jane.salary *= 1.05;
+}
+
+// 模拟函数
+void simulation() {
+    int month = 11;
+    int year = 2023;
+    while (!((month == 11) && (year == 2023 + 10))) {
+        jane_salary(month, year);
+        jane_carLoan();
+        jane_food(month);
+        jane_otherExpenses(month);
+        jane_dog(month, year);
+        month++;
+        if (month == 13) {
+          }
+
+// 根据月份处理其他开支的函数
+void jane_otherExpenses(const int month) {
+    Money tempExpense = jane.otherExpenses;
+    if (month == 7) {
+        tempExpense += 8000;
     }
-    jane.savings += jane.salary;
+    if (jane.savings >= tempExpense) {
+        jane.savings -= tempExpense;
+    } else {
+        printf("Insufficient savings for other expenses.\n");
+    }
+}
+
+// 初始化 jane 各项财务和宠物数据的函数
+void jane_init() {
+    jane.savings = 150000;
+    jane.salary = 180000;
+    jane.foodExpense = 15000;
+    jane.otherExpenses = 60000;
+
+    jane.carLoan.interestRate = 0.12;
+    jane.carLoan.loanAmount = 800000;
+    jane.carLoan.downPayment = 200000;
+    jane.carLoan.monthlyPayment = 70000;
+    if (jane.savings >= jane.carLoan.downPayment) {
+        jane.savings -= jane.carLoan.downPayment;
+    } else {
+        printf("Insufficient savings for car down payment.\n");
+    }
+
+    jane.dog.foodCost = 8000;
+    jane.dog.isHealthy = 1;
+}
+
+// 根据月份和年份处理与狗相关事务的函数
+void jane_dog(const int month, const int year) {
+    if ((month == 10) && (year == 2027)) {
+        if (jane.savings >= 25000) {
+            jane.savings -= 25000;
+            jane.dog.isHealthy = 0;
+        } else {
+            printf("Insufficient savings for dog - related expense in 2027 October.\n");
+        }
+    }
+    if ((year == 2030) && (month == 2)) {
+        if (jane.savings >= 12000) {
+            jane.dog.isHealthy = 1;
+            jane.savings -= 12000;
+        } else {
+            printf("Insufficient savings for dog - related expense in 2030 February.\n");
+        }
+    }
+    if (month == 3) {
+        jane.dog.foodCost *= 1.1;
+    }
+    if (jane.dog.isHealthy == 1 && jane.savings >= jane.dog.foodCost) {
+        jane.savings -= jane.dog.foodCost;
+    } else if (jane.dog.isHealthy == 1 && jane.savings < jane.dog.foodCost) {
+        printf("Insufficient savings for dog food.\n");
+    }
+}
+
+// 打印 jane 储蓄的函数
+void jane_print() {
+    printf("Jane's savings = %lld\n", jane.savings);
+}
+
+// 根据月份和年份处理工资的函数
+void jane_salary(const int month, const int year) {
+    if (month == 12) {
+        jane.savings += jane.salary;
+    } else {
+        Money monthlySalary = jane.salary / 12;
+        if (month == 1 && year % 3 == 0) {
+            monthlySalary *= 1.05;
+        }
+        jane.savings += monthlySalary;
+    }
 }
 
 // 模拟函数
@@ -114,6 +241,15 @@ void simulation() {
         month++;
         if (month == 13) {
             month = 1;
+            year++;
+        }
+    }
+}
+
+// 主函数
+int main() {
+    jane_init();
+  month = 1;
             year++;
         }
     }
