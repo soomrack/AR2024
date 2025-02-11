@@ -7,7 +7,8 @@
 //мб поменять будет(расположение моторов)
 #define PIN_BUTTON 8
 
-void setup() 
+
+void pins_stats() 
 {
     pinMode(PIN_BUTTON, INPUT_PULLUP);
     
@@ -18,4 +19,84 @@ void setup()
     pinMode(LEFT_MOTOR_BACKWARD, OUTPUT);
     pinMode(RIGHT_MOTOR_FORWARD, OUTPUT);
     pinMode(RIGHT_MOTOR_BACKWARD, OUTPUT);
+}
+
+
+void sensors ()
+{
+    int leftState = digitalRead(LEFT_SENSOR);   
+    int rightState = digitalRead(RIGHT_SENSOR); 
+}
+
+
+void ride ()
+{
+    if (leftState == HIGH && rightState == HIGH) {
+        moveForward();
+    }
+    else if (leftState == LOW && rightState == HIGH) {
+        turnRight();
+    }
+    else if (leftState == HIGH && rightState == LOW) {
+        turnLeft();
+    }
+    else {
+        moveInCircle();
+    }
+}
+
+
+void moveForward() 
+{
+    digitalWrite(LEFT_MOTOR_FORWARD, HIGH);
+    digitalWrite(LEFT_MOTOR_BACKWARD, LOW);
+    digitalWrite(RIGHT_MOTOR_FORWARD, HIGH);
+    digitalWrite(RIGHT_MOTOR_BACKWARD, LOW);
+}
+
+
+void moveBackward() 
+{
+    digitalWrite(LEFT_MOTOR_FORWARD, LOW);
+    digitalWrite(LEFT_MOTOR_BACKWARD, HIGH);
+    digitalWrite(RIGHT_MOTOR_FORWARD, LOW);
+    digitalWrite(RIGHT_MOTOR_BACKWARD, HIGH);
+}
+
+
+void turnLeft() 
+{
+    digitalWrite(LEFT_MOTOR_FORWARD, LOW);
+    digitalWrite(LEFT_MOTOR_BACKWARD, HIGH);
+    digitalWrite(RIGHT_MOTOR_FORWARD, HIGH);
+    digitalWrite(RIGHT_MOTOR_BACKWARD, LOW);
+}
+
+
+void turnRight() 
+{
+    digitalWrite(LEFT_MOTOR_FORWARD, HIGH);
+    digitalWrite(LEFT_MOTOR_BACKWARD, LOW);
+    digitalWrite(RIGHT_MOTOR_FORWARD, LOW);
+    digitalWrite(RIGHT_MOTOR_BACKWARD, HIGH);
+}
+
+void moveInCircle() 
+{
+    digitalWrite(LEFT_MOTOR_FORWARD, HIGH);
+    digitalWrite(LEFT_MOTOR_BACKWARD, LOW);
+    digitalWrite(RIGHT_MOTOR_FORWARD, LOW);
+    digitalWrite(RIGHT_MOTOR_BACKWARD, HIGH);
+}
+
+
+void setup ()
+{
+    pins_stats ();
+}
+
+
+void loop ()
+{
+    sensors();
 }
