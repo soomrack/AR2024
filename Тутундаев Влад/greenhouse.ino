@@ -74,14 +74,14 @@ void system_control()
   lamp_control();
   fan_control();
 
-  if (heater) pinMode(PIN_HEATER, INPUT);
-  else pinMode(PIN_HEATER, OUTPUT);
-  if (pump) pinMode(PIN_PUMP, INPUT);
-  else pinMode(PIN_PUMP, OUTPUT);
-  if (lamp) pinMode(PIN_LAMP, INPUT);
-  else pinMode(PIN_LAMP, OUTPUT);
-  if (fan) pinMode(PIN_FAN, INPUT);
-  else pinMode(PIN_FAN, OUTPUT);
+  if (heater) digitalWrite(PIN_HEATER, HIGH);
+  else digitalWrite(PIN_HEATER, LOW);
+  if (pump) digitalWrite(PIN_PUMP, HIGH);
+  else digitalWrite(PIN_PUMP, LOW);
+  if (lamp) digitalWrite(PIN_LAMP, HIGH);
+  else digitalWrite(PIN_LAMP, LOW);
+  if (fan) digitalWrite(PIN_FAN, HIGH);
+  else digitalWrite(PIN_FAN, LOW);
 }
 
 void print_sensor_indicators()
