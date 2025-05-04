@@ -4,7 +4,7 @@
 #define ANALOG_PIN_SOILHUMIDITY A1
 #define PIN_HEATER 4
 #define PIN_PUMP 5
-#define PIN_LIGHT 6
+#define PIN_LAMP 6
 #define PIN_FAN 7
 
 DHT11 PIN_DHT(12);
@@ -27,7 +27,7 @@ void init_data()
   pinMode(ANALOG_PIN_SOILHUMIDITY, INPUT);
   pinMode(PIN_HEATER, OUTPUT);
   pinMode(PIN_PUMP, OUTPUT);
-  pinMode(PIN_LIGHT, OUTPUT);
+  pinMode(PIN_LAMP, OUTPUT);
   pinMode(PIN_FAN, OUTPUT);
 }
 
@@ -73,6 +73,15 @@ void system_control()
   pump_control();
   lamp_control();
   fan_control();
+
+  if (heater) pinMode(PIN_HEATER, INPUT);
+  else pinMode(PIN_HEATER, OUTPUT);
+  if (pump) pinMode(PIN_PUMP, INPUT);
+  else pinMode(PIN_PUMP, OUTPUT);
+  if (lamp) pinMode(PIN_LAMP, INPUT);
+  else pinMode(PIN_LAMP, OUTPUT);
+  if (fan) pinMode(PIN_FAN, INPUT);
+  else pinMode(PIN_FAN, OUTPUT);
 }
 
 void print_sensor_indicators()
