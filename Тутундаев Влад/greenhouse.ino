@@ -23,7 +23,7 @@ bool fan;
 
 void init_data()
 {
-  t2 = 0;
+  t1 = 0;
   pinMode(ANALOG_PIN_PHOTO_SENSOR, INPUT);
   pinMode(ANALOG_PIN_SOILHUMIDITY, INPUT);
   pinMode(PIN_HEATER, OUTPUT);
