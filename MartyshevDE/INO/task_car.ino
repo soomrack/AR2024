@@ -1,102 +1,131 @@
-#define LEFT_SENSOR A2
-#define RIGHT_SENSOR A3
-#define LEFT_MOTOR_FORWARD 6
-#define LEFT_MOTOR_BACKWARD 7
-#define RIGHT_MOTOR_FORWARD 5
-#define RIGHT_MOTOR_BACKWARD 4
-//мб поменять будет(расположение моторов)
-#define PIN_BUTTON 8
+#define RIGHT_SPEED 5
+#define LEFT_SPEED 6
+#define RIGHT_DIR 4
+#define LEFT_DIR 7
+#define SENSOR_RIGHT A0
+#define SENSOR_LEFT A1
+#define BUTTON_PIN A2
 
+const int SENSOR_THRESHOLD = 500; 
+const int BASE_SPEED = 150;       
+const int BACK_TIME = 200;        
 
-void pins_stats() 
+bool isActive = false;
+bool isSearching = false;
+unsigned long lostTime = 0;
+
+void setup() 
 {
-    pinMode(PIN_BUTTON, INPUT_PULLUP);
+    pinMode(RIGHT_DIR, OUTPUT);
+    pinMode(LEFT_DIR, OUTPUT);
+    pinMode(BUTTON_PIN, INPUT_PULLUP);
+}
+
+void loop()
+{
+    handleButton();
     
-    pinMode(LEFT_SENSOR, INPUT);
-    pinMode(RIGHT_SENSOR, INPUT);
+    if(isActive) {
+        if(isSearching) {
+            handleSearch();
+        } else {
+            followLine();
+        }
+    } else {
+        stopMotors();
+    }
+}
+
+void followLine() 
+{
+    bool right = digitalReadSensor(SENSOR_RIGHT);
+    bool left = digitalReadSensor(SENSOR_LEFT);
+
+    if(right && left) {       
+        moveForward(BASE_SPEED);
+    } 
+    else if(right) {          
+        turnRight(BASE_SPEED);
+    } 
+    else if(left) {           
+        turnLeft(BASE_SPEED);
+    } 
+    else {                    
+        startSearch();
+    }
+}
+
+
+void startSearch() 
+{
+    isSearching = true;
+    lostTime = millis();
+    moveBackward(BASE_SPEED);
+}
+
+
+void handleSearch() 
+{
+    if(millis() - lostTime > BACK_TIME) {
+        isSearching = false;
+        moveForward(BASE_SPEED);
+    }
     
-    pinMode(LEFT_MOTOR_FORWARD, OUTPUT);
-    pinMode(LEFT_MOTOR_BACKWARD, OUTPUT);
-    pinMode(RIGHT_MOTOR_FORWARD, OUTPUT);
-    pinMode(RIGHT_MOTOR_BACKWARD, OUTPUT);
-}
-
-
-void sensors ()
-{
-    int leftState = digitalRead(LEFT_SENSOR);   
-    int rightState = digitalRead(RIGHT_SENSOR); 
-}
-
-
-void ride ()
-{
-    if (leftState == HIGH && rightState == HIGH) {
-        moveForward();
-    }
-    else if (leftState == LOW && rightState == HIGH) {
-        turnRight();
-    }
-    else if (leftState == HIGH && rightState == LOW) {
-        turnLeft();
-    }
-    else {
-        moveInCircle();
+    if(digitalReadSensor(SENSOR_RIGHT) || digitalReadSensor(SENSOR_LEFT)) {
+        isSearching = false;
     }
 }
 
 
-void moveForward() 
+void moveBackward(int speed) 
 {
-    digitalWrite(LEFT_MOTOR_FORWARD, HIGH);
-    digitalWrite(LEFT_MOTOR_BACKWARD, LOW);
-    digitalWrite(RIGHT_MOTOR_FORWARD, HIGH);
-    digitalWrite(RIGHT_MOTOR_BACKWARD, LOW);
+    digitalWrite(RIGHT_DIR, HIGH);  
+    digitalWrite(LEFT_DIR, HIGH);
+    analogWrite(RIGHT_SPEED, speed);
+    analogWrite(LEFT_SPEED, speed);
 }
 
 
-void moveBackward() 
+void handleButton() 
 {
-    digitalWrite(LEFT_MOTOR_FORWARD, LOW);
-    digitalWrite(LEFT_MOTOR_BACKWARD, HIGH);
-    digitalWrite(RIGHT_MOTOR_FORWARD, LOW);
-    digitalWrite(RIGHT_MOTOR_BACKWARD, HIGH);
+    static unsigned long lastPress = 0;
+    if(millis() - lastPress > 200 && digitalRead(BUTTON_PIN) == LOW) {
+        isActive = !isActive;
+        lastPress = millis();
+    }
 }
 
-
-void turnLeft() 
+bool digitalReadSensor(int pin) 
 {
-    digitalWrite(LEFT_MOTOR_FORWARD, LOW);
-    digitalWrite(LEFT_MOTOR_BACKWARD, HIGH);
-    digitalWrite(RIGHT_MOTOR_FORWARD, HIGH);
-    digitalWrite(RIGHT_MOTOR_BACKWARD, LOW);
+    return analogRead(pin) > SENSOR_THRESHOLD ? 1 : 0;
 }
 
-
-void turnRight() 
+void moveForward(int speed) 
 {
-    digitalWrite(LEFT_MOTOR_FORWARD, HIGH);
-    digitalWrite(LEFT_MOTOR_BACKWARD, LOW);
-    digitalWrite(RIGHT_MOTOR_FORWARD, LOW);
-    digitalWrite(RIGHT_MOTOR_BACKWARD, HIGH);
+    digitalWrite(RIGHT_DIR, LOW);
+    digitalWrite(LEFT_DIR, LOW);
+    analogWrite(RIGHT_SPEED, speed);
+    analogWrite(LEFT_SPEED, speed);
 }
 
-void moveInCircle() 
+void turnRight(int speed) 
 {
-    digitalWrite(LEFT_MOTOR_FORWARD, HIGH);
-    digitalWrite(LEFT_MOTOR_BACKWARD, LOW);
-    digitalWrite(RIGHT_MOTOR_FORWARD, LOW);
-    digitalWrite(RIGHT_MOTOR_BACKWARD, HIGH);
+    digitalWrite(RIGHT_DIR, HIGH);
+    digitalWrite(LEFT_DIR, LOW);
+    analogWrite(RIGHT_SPEED, speed);
+    analogWrite(LEFT_SPEED, speed);
 }
 
-
-void setup ()
+void turnLeft(int speed) 
 {
-    pins_stats ();
+    digitalWrite(RIGHT_DIR, LOW);
+    digitalWrite(LEFT_DIR, HIGH);
+    analogWrite(RIGHT_SPEED, speed);
+    analogWrite(LEFT_SPEED, speed);
 }
 
-
-void loop ()
+void stopMotors() 
 {
-    sensors();
+    analogWrite(RIGHT_SPEED, 0);
+    analogWrite(LEFT_SPEED, 0);
 }
