@@ -13,6 +13,8 @@ int temperature;
 int humidity;
 int soilhumidity;
 int light;
+int t1;
+int t2;
 
 bool heater;
 bool pump;
@@ -21,6 +23,7 @@ bool fan;
 
 void init_data()
 {
+  t2 = 0;
   pinMode(ANALOG_PIN_PHOTO_SENSOR, INPUT);
   pinMode(ANALOG_PIN_SOILHUMIDITY, INPUT);
   pinMode(PIN_HEATER, OUTPUT);
@@ -47,7 +50,16 @@ void heater_control()
 
 void pump_control()
 {
-  if (soilhumidity < 70) pump = true;
+  t2 = mills();
+  
+  if (t1 > t2){
+    t1 -= 4 294 967 295;
+  }
+
+  if (soilhumidity < 70 && t2 - t1 >= 20000){
+   pump = true;
+   t1 = t2; 
+  }
   else pump = false;
 }
 
@@ -75,13 +87,8 @@ void setup()
 
 void system_regulator()
 {
-  if (pump){
-    digitalWrite(PIN_PUMP, HIGH);
-    delay(5000);
-    digitalWrite(PIN_PUMP, LOW);
-  } else {
-    digitalWrite(PIN_PUMP, LOW);
-  }
+  if (pump) digitalWrite(PIN_PUMP, HIGH);
+  else digitalWrite(PIN_PUMP, LOW);
   if (heater) digitalWrite(PIN_HEATER, HIGH);
   else digitalWrite(PIN_HEATER, LOW);
   if (lamp) digitalWrite(PIN_LAMP, HIGH);
