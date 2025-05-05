@@ -14,12 +14,10 @@ int humidity;
 int soilhumidity;
 int light;
 
-
 bool heater;
 bool pump;
 bool lamp;
 bool fan;
-
 
 void init_data()
 {
@@ -31,6 +29,7 @@ void init_data()
   pinMode(PIN_FAN, OUTPUT);
 }
 
+
 void sensor_check() 
  {
    PIN_DHT.readTemperatureHumidity(temperature, humidity);
@@ -38,22 +37,27 @@ void sensor_check()
    soilhumidity = analogRead(ANALOG_PIN_SOILHUMIDITY);
  }
 
+
 void heater_control()
 {
   if (temperature < 27 ) heater = true;
   else heater = false;
 }
 
+
 void pump_control()
 {
   if (soilhumidity < 70) pump = true;
   else pump = false;
 }
+
+
 void lamp_control()
 {
   if (light < 700) lamp = true;
   else lamp = false;
 }
+
 
 void fan_control()
 {
@@ -61,28 +65,31 @@ void fan_control()
   else fan = false;
 }
 
+
 void setup() 
 {
   init_data();
   Serial.begin(9600);
 }
 
-void system_control()
-{
-  heater_control();
-  pump_control();
-  lamp_control();
-  fan_control();
 
+void system_regulator()
+{
+  if (pump){
+    digitalWrite(PIN_PUMP, HIGH);
+    delay(5000);
+    digitalWrite(PIN_PUMP, LOW);
+  } else {
+    digitalWrite(PIN_PUMP, LOW);
+  }
   if (heater) digitalWrite(PIN_HEATER, HIGH);
   else digitalWrite(PIN_HEATER, LOW);
-  if (pump) digitalWrite(PIN_PUMP, HIGH);
-  else digitalWrite(PIN_PUMP, LOW);
   if (lamp) digitalWrite(PIN_LAMP, HIGH);
   else digitalWrite(PIN_LAMP, LOW);
   if (fan) digitalWrite(PIN_FAN, HIGH);
   else digitalWrite(PIN_FAN, LOW);
 }
+
 
 void print_sensor_indicators()
 {
@@ -96,9 +103,14 @@ void print_sensor_indicators()
   Serial.println(soilhumidity);
 }
 
+
 void loop() {
   sensor_check();
+  heater_control();
+  pump_control();
+  lamp_control();
+  fan_control();
   print_sensor_indicators();
-  system_control();
+  system_regulator();
   delay(10000);
 };
