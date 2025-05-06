@@ -1,211 +1,139 @@
-#include<stdio.h>
-#include<math.h>
+#include <dht.h>
 
-typedef long long int Money;  // RUB
+dht envSensor;
 
-struct Person {
-	Money salary;
-	Money account;
-	Money food;
-	Money expence;
-	Money rent;
-	Money cost_house;
-};
+// Pin definitions
+#define DHT_PIN         8
+#define LIGHT_SENSOR    A0
+#define MOISTURE_SENSOR A1
 
-struct Deposite {
-	Money deposite_account;
-	double deposit_procent;
-};
+#define LED_GROW        6
+#define WATER_PUMP      5 
+#define HEATER          3 
+#define FAN             7
 
-struct Mortgage {
-	double procent;
-	Money summa_credita;
-	Money platez_month;
-	Money first_platez;
-	int tern;
-};
+// Optimal values
+#define OPT_HUMIDITY    50
+#define OPT_TEMP        25
+#define OPT_MOISTURE    400
+#define OPT_LIGHT       500
 
+// Safety timers (seconds)
+#define PUMP_SAFETIME   30
+#define HEATER_SAFETIME 60
+#define FAN_SAFETIME    120
 
-struct Person alice;
-struct Mortgage alice__mortgage;
-struct Person bob;
-struct Deposite alice__deposite;
-struct Deposite bob__deposite;
+// Control thresholds
+#define LIGHT_THRESHOLD 2
+#define TEMP_THRESHOLD  2
+#define HUMID_THRESHOLD 2
+#define MOIST_THRESHOLD 2
 
+// System state
+struct {
+  int temp;
+  int humidity;
+  int moisture;
+  int light;
+  
+  bool isLightOn;
+  bool isPumpOn;
+  bool isHeating;
+  bool isFanOn;
+  
+  uint32_t lightTimer;
+  uint32_t pumpTimer;
+  uint32_t heatTimer;
+  uint32_t fanTimer;
+} greenhouse;
 
-void alice_init()
-{
-	alice.salary = 200 * 1000;
-	alice.account = 1000 * 1000;
-	alice.food = 30 * 1000;
-	alice.expence = 30 * 1000;
-	alice.cost_house = 14 * 1000 * 1000;
-
-	alice__deposite.deposite_account = 0;
-	alice__deposite.deposit_procent = 1.01;
-
-	alice__mortgage.summa_credita = 14 * 1000 * 1000;
-	alice__mortgage.first_platez = 14 * 100 * 10;
-	alice__mortgage.procent = 9.2;
-	alice__mortgage.tern = 30;
-	alice__mortgage.platez_month = (alice__mortgage.summa_credita - alice__mortgage.first_platez) * alice__mortgage.procent/100 / 12 / (1 - pow(1 + alice__mortgage.procent / 100 / 12, -alice__mortgage.tern  * 12));
-
-	alice.account -= alice__mortgage.first_platez;
+void setup() {
+  Serial.begin(115200);
+  
+  pinMode(LED_GROW, OUTPUT);
+  pinMode(WATER_PUMP, OUTPUT);
+  pinMode(HEATER, OUTPUT);
+  pinMode(FAN, OUTPUT);
+  
+  digitalWrite(LED_GROW, LOW);
+  digitalWrite(WATER_PUMP, HIGH); // Pump off (active low)
+  digitalWrite(HEATER, LOW);
+  digitalWrite(FAN, LOW);
 }
 
-
-void alice_salary(const int month)
-{
-	if (month == 1) {
-		alice.salary *= 1.03;
-	}
-	alice.account += alice.salary;
+void readSensors() {
+  envSensor.read11(DHT_PIN);
+  greenhouse.temp = envSensor.temperature;
+  greenhouse.humidity = envSensor.humidity;
+  greenhouse.light = analogRead(LIGHT_SENSOR);
+  greenhouse.moisture = analogRead(MOISTURE_SENSOR);
 }
 
-
-void alice_food(const int month)
-{
-	if (month == 1) {
-		alice.food *= 1.07;
-	}
-	alice.account -= alice.food;
+void controlLight() {
+  if (abs(greenhouse.light - OPT_LIGHT) >= LIGHT_THRESHOLD && 
+      millis() - greenhouse.lightTimer >= 1500) {
+    greenhouse.isLightOn = greenhouse.light < OPT_LIGHT;
+    digitalWrite(LED_GROW, greenhouse.isLightOn);
+    greenhouse.lightTimer = millis();
+  }
 }
 
-
-void alice_expence(const int month)
-{
-	if (month == 1) {
-		alice.account -= 10 * 1000;
-	}
-	alice.account -= alice.expence;
+void controlWater() {
+  if (greenhouse.moisture > OPT_MOISTURE + MOIST_THRESHOLD) {
+    digitalWrite(WATER_PUMP, LOW); // Turn pump on
+    greenhouse.isPumpOn = true;
+    
+    if (millis() - greenhouse.pumpTimer >= 5000) {
+      digitalWrite(WATER_PUMP, HIGH); // Turn pump off
+      greenhouse.isPumpOn = false;
+      greenhouse.pumpTimer = millis();
+    }
+  } 
+  else if (greenhouse.moisture < OPT_MOISTURE - MOIST_THRESHOLD) {
+    digitalWrite(WATER_PUMP, HIGH); // Ensure pump is off
+    greenhouse.isPumpOn = false;
+  }
 }
 
-
-void alice_mortgage()
-{
-	alice.account -= alice__mortgage.platez_month;
+void controlTemperature() {
+  greenhouse.isHeating = greenhouse.temp < OPT_TEMP - TEMP_THRESHOLD;
+  digitalWrite(HEATER, greenhouse.isHeating);
 }
 
-
-void alice_cost_house(const int month)
-{
-	if (month == 1) {
-		alice.cost_house *= 1.06;
-	}
+void controlVentilation() {
+  bool needCooling = greenhouse.humidity > OPT_HUMIDITY + HUMID_THRESHOLD ||
+                    greenhouse.isHeating || 
+                    greenhouse.temp > OPT_TEMP + 1;
+  
+  bool canTurnOff = greenhouse.humidity < OPT_HUMIDITY - HUMID_THRESHOLD &&
+                   !greenhouse.isHeating && 
+                   greenhouse.temp < OPT_TEMP + 3;
+  
+  greenhouse.isFanOn = needCooling || !canTurnOff;
+  digitalWrite(FAN, greenhouse.isFanOn);
 }
 
-
-void alice_deposite()
-{
-	alice__deposite.deposite_account += alice.account;
-	alice__deposite.deposite_account *= alice__deposite.deposit_procent;
-	alice.account = 0;
+void logData() {
+  Serial.print("H: "); Serial.print(greenhouse.humidity); Serial.print("% ");
+  Serial.print("T: "); Serial.print(greenhouse.temp); Serial.print("C ");
+  Serial.print("L: "); Serial.print(greenhouse.light); Serial.print(" ");
+  Serial.print("M: "); Serial.print(greenhouse.moisture); Serial.print(" ");
+  Serial.print("STATUS: ");
+  Serial.print(greenhouse.isLightOn ? "L_ON " : "L_OFF ");
+  Serial.print(greenhouse.isPumpOn ? "P_ON " : "P_OFF ");
+  Serial.print(greenhouse.isHeating ? "H_ON " : "H_OFF ");
+  Serial.println(greenhouse.isFanOn ? "F_ON" : "F_OFF");
 }
 
-
-void bob_init()
-{
-	bob.salary = 200 * 1000;
-	bob.account = 1000 * 1000;
-	bob.food = 30 * 1000;
-	bob.expence = 30 * 1000;
-	bob.rent = 30 * 1000;
-
-	bob__deposite.deposite_account = 0;
-	bob__deposite.deposit_procent = 1.01;
-}
-
-
-void bob_salary(const int month)
-{
-	if (month == 1) {
-		bob.salary *= 1.03;
-	}
-	bob.account += bob.salary;
-}
-
-
-void bob_food(const int month)
-{
-	if (month == 1) {
-		bob.food *= 1.07;
-	}
-	bob.account -= bob.food;
-}
-
-
-void bob_expence(const int month)
-{
-	if (month == 1) {
-		bob.account -= 10 * 1000;
-	}
-	bob.account -= bob.expence;
-}
-
-
-void bob_rent()
-{
-	bob.account -= bob.rent;
-}
-
-
-void bob_deposite()
-{
-	bob__deposite.deposite_account += bob.account;
-	bob__deposite.deposite_account *= bob__deposite.deposit_procent;
-	bob.account = 0;
-}
-
-
-void simulation()
-{
-	int month = 9;
-	int year = 2024;
-	while (!((month == 9) && (year == 2024 + 30)))
-	{
-		alice_salary(month);
-		alice_food(month);
-		alice_expence(month);
-		alice_cost_house(month);
-		alice_mortgage();
-		alice_deposite();
-		bob_salary(month);
-		bob_food(month);
-		bob_expence(month);
-		bob_rent();
-		bob_deposite();
-
-		month += 1;
-		if (month == 13) {
-			month = 1;
-			year += 1;
-		}
-	}
-	alice.account += alice.cost_house;
-	alice.account += alice__deposite.deposite_account;
-	bob.account += bob__deposite.deposite_account;
-}
-
-
-void alice_print()
-{
-	printf("Alice account = %lld \n", alice.account);
-}
-
-
-void bob_print()
-{
-	printf("Bob account = %lld \n", bob.account);
-}
-
-
-int main()
-{
-	alice_init();
-	bob_init();
-	simulation();
-	alice_print();
-	bob_print();
-	
-	
+void loop() {
+  readSensors();
+  
+  controlLight();
+  controlWater();
+  controlTemperature();
+  controlVentilation();
+  
+  logData();
+  
+  delay(100); // Reduced from original 100ms delay
 }
