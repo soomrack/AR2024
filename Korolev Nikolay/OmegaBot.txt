@@ -1,0 +1,102 @@
+void setup()
+{
+  pinMode(12, INPUT);
+}
+
+void forward(bool status)
+{ 
+  if (status)
+  {
+    digitalWrite(4, HIGH);
+    digitalWrite(5, HIGH);
+    digitalWrite(7, HIGH);
+    digitalWrite(6, HIGH);
+  }
+  else
+  {
+    digitalWrite(4, LOW);
+    digitalWrite(5, LOW);
+    digitalWrite(7, LOW);
+    digitalWrite(6, LOW);
+  }
+
+}
+
+void left(bool status)
+{
+  if (status)
+  {
+    digitalWrite(6, HIGH);
+  }
+  else
+  {
+    digitalWrite(6, LOW);
+  }
+  
+}
+
+void right(bool status)
+{
+  if (status)
+  {
+    digitalWrite(5, HIGH);
+  }
+  else
+  {
+    digitalWrite(5, LOW);
+  }
+  
+}
+
+void back(bool status)
+{
+  if(status)
+  {
+    digitalWrite(5, HIGH);
+    digitalWrite(6, HIGH);
+  }
+  else
+  {
+    digitalWrite(5, LOW);
+    digitalWrite(6, LOW);
+  }
+  
+}
+
+void slalom()
+{
+  if (analogRead(A0) > analogRead(A1))
+  {
+    forward(false);
+    right(false);
+    left(true);
+  }
+  if (analogRead(A0) < analogRead(A1))
+  {
+    forward(false);
+    right(true);
+    left(false);
+  }
+  if ((analogRead(A0)+25 >= analogRead(A1))||(analogRead(A0) <= analogRead(A1)+25))
+  {
+    right(false);
+    left(false);
+    forward(true);
+  }
+}
+
+
+void loop()
+{
+  if (digitalRead(11))
+  { 
+    do
+    {
+      slalom();
+    }
+    while (!(digitalRead(12)));
+    left(false);
+    right(false);
+    forward(false);
+  }
+}
