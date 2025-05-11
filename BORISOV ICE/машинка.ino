@@ -7,9 +7,9 @@
 #define PIN_BUTTON A2         
 
 
-#define SENSOR_TRESHOLD 500   // Порог срабатывания датчиков (0-1023)
-#define MOTOR_SPEED 150       // Скорость моторов (0-255)
-#define BACKUP_TIME 200       // Время движения назад при потере линии (мс)
+#define SENSOR_TRESHOLD 500   
+#define MOTOR_SPEED 150      
+#define BACKUP_TIME 200      
 
 
 boolean carActive = false;    
