@@ -12,18 +12,22 @@ DHT envSensor(DHT_PIN, DHT11);
 #define HEATER_PIN          3
 #define FAN_PIN             7
 
+// Оптимальные значения
 #define OPT_TEMP        25
 #define OPT_HUMIDITY    50
-#define OPT_MOISTURE    400
+#define OPT_MOISTURE    400   // Ниже этого значения - почва сухая
 #define OPT_LIGHT       500
 
+// Допуски
 #define TEMP_TOLERANCE  2
 #define HUMID_TOLERANCE 2
-#define MOIST_TOLERANCE 2
+#define MOIST_TOLERANCE 50    // Увеличенный допуск для влажности почвы
 #define LIGHT_TOLERANCE 2
 
-#define PUMP_RUN_DURATION  5000
-#define PUMP_PAUSE_DURATION 30000
+// Настройки насоса
+#define PUMP_RUN_DURATION   5000    // 5 секунд работы
+#define PUMP_PAUSE_DURATION 30000   // 30 секунд паузы
+#define MOISTURE_SAMPLES    5       // Количество измерений для усреднения
 
 bool pumpIsOn = false;
 unsigned long pumpCycleStart = 0;
@@ -37,103 +41,24 @@ void setup(void) {
   pinMode(HEATER_PIN, OUTPUT);
   pinMode(FAN_PIN, OUTPUT);
 
+  // Инициализация в выключенном состоянии
   digitalWrite(LED_GROW_PIN, LOW);
-  digitalWrite(WATER_PUMP_PIN, HIGH);
+  digitalWrite(WATER_PUMP_PIN, HIGH);  // HIGH - насос выключен (если используем реле)
   digitalWrite(HEATER_PIN, LOW);
   digitalWrite(FAN_PIN, LOW);
+
+  envSensor.begin();
+  Serial.println("System initialized");
 }
 
-void readSensors(int *temp, int *humidity, int *light, int *moisture) {
-  envSensor.read();
-  *temp = envSensor.readTemperature();
-  *humidity = envSensor.readHumidity();
-  *light = analogRead(LIGHT_SENSOR_PIN);
-  *moisture = analogRead(MOISTURE_SENSOR_PIN);
-}
-
-void controlLight(int light) {
-  if (light < OPT_LIGHT - LIGHT_TOLERANCE) {
-    digitalWrite(LED_GROW_PIN, HIGH);
+// Функция для стабильного чтения влажности почвы
+int readMoisture() {
+  int sum = 0;
+  for (int i = 0; i < MOISTURE_SAMPLES; i++) {
+    sum += analogRead(MOISTURE_SENSOR_PIN);
+    delay(10);
   }
-  else if (light > OPT_LIGHT + LIGHT_TOLERANCE) {
-    digitalWrite(LED_GROW_PIN, LOW);
-  }
+  return sum / MOISTURE_SAMPLES;
 }
 
-void controlWater(int moisture) {
-  if (moisture > OPT_MOISTURE + MOIST_TOLERANCE) {
-    if (!pumpIsOn) {
-      if ((pumpPauseStart == 0) || (millis() - pumpPauseStart >= PUMP_PAUSE_DURATION)) {
-        digitalWrite(WATER_PUMP_PIN, LOW);
-        pumpIsOn = true;
-        pumpCycleStart = millis();
-        Serial.println("Pump ON");
-      }
-    }
-    else {
-      if (millis() - pumpCycleStart >= PUMP_RUN_DURATION) {
-        digitalWrite(WATER_PUMP_PIN, HIGH);
-        pumpIsOn = false;
-        pumpPauseStart = millis();
-        Serial.println("Pump OFF");
-      }
-    }
-  }
-  else {
-    digitalWrite(WATER_PUMP_PIN, HIGH);
-    pumpIsOn = false;
-    pumpCycleStart = 0;
-    pumpPauseStart = 0;
-  }
-}
-
-void controlTemperature(int temp) {
-  if (temp < OPT_TEMP - TEMP_TOLERANCE) {
-    digitalWrite(HEATER_PIN, HIGH);
-  }
-  else if (temp >= OPT_TEMP) {
-    digitalWrite(HEATER_PIN, LOW);
-  }
-}
-
-void controlVentilation(int temp, int humidity) {
-  if (humidity > OPT_HUMIDITY + HUMID_TOLERANCE || temp > OPT_TEMP + 1 || digitalRead(HEATER_PIN) == HIGH)
-    digitalWrite(FAN_PIN, HIGH);
-  else
-    digitalWrite(FAN_PIN, LOW);
-}
-
-void logData(int temp, int humidity, int light, int moisture) {
-  Serial.print("T: ");
-  Serial.print(temp);
-  Serial.print("C, H: ");
-  Serial.print(humidity);
-  Serial.print("%, Light: ");
-  Serial.print(light);
-  Serial.print(", Moisture: ");
-  Serial.println(moisture);
-}
-
-void loop(void) {
-  int temp, humidity, light, moisture;
-  
-  readSensors(&temp, &humidity, &light, &moisture);
-  
-  controlLight(light);
-  controlWater(moisture);
-  controlTemperature(temp);
-  controlVentilation(temp, humidity);
-  
-  logData(temp, humidity, light, moisture);
-  
-  delay(1000);
-}
-
-int main(void) {
-  init();
-  setup();
-  for (;;) {
-    loop();
-  }
-  return 0;
-}
+void readSensors(int *temp, int *humidity, int 
