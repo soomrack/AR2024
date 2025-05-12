@@ -1,9 +1,9 @@
-#include <dht.h>
+#include <DHT.h>
 #include <Arduino.h>
 
-dht envSensor;
-
 #define DHT_PIN             8
+DHT envSensor(DHT_PIN, DHT11);
+
 #define LIGHT_SENSOR_PIN    A0
 #define MOISTURE_SENSOR_PIN A1
 
@@ -44,10 +44,10 @@ void setup(void) {
 }
 
 void readSensors(int *temp, int *humidity, int *light, int *moisture) {
-  envSensor.read11(DHT_PIN);
-  *temp     = envSensor.temperature;
-  *humidity = envSensor.humidity;
-  *light    = analogRead(LIGHT_SENSOR_PIN);
+  envSensor.read(); // вызываем чтение датчика
+  *temp = envSensor.readTemperature(); // получаем температуру через метод
+  *humidity = envSensor.readHumidity(); // получаем влажность
+  *light = analogRead(LIGHT_SENSOR_PIN);
   *moisture = analogRead(MOISTURE_SENSOR_PIN);
 }
 
@@ -136,4 +136,5 @@ int main(void) {
     loop();
   }
   return 0;
+}
 }
