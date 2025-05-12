@@ -1,12 +1,13 @@
+#define Left_motor_dir 4
 #define Left_motor_speed 5
 #define Right_motor_dir 7
 #define Right_motor_speed 6
 
 #define Sensor_left A0
-#define Sensor_right A1 
+#define Sensor_right A1
 #define Button_pin 12
 
-const int Base_speed = 150; 
+const int Base_speed = 150;
 const int Sensor_diff_tol = 25;
 
 bool active = false;
