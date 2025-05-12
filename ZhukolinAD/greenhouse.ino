@@ -22,8 +22,8 @@ DHT envSensor(DHT_PIN, DHT11);
 #define MOIST_TOLERANCE 2
 #define LIGHT_TOLERANCE 2
 
-#define PUMP_RUN_DURATION  5000
-#define PUMP_PAUSE_DURATION 30000
+#define PUMP_RUN_DURATION  10000
+#define PUMP_PAUSE_DURATION 1000
 
 bool pumpIsOn = false;
 unsigned long pumpCycleStart = 0;
@@ -44,19 +44,18 @@ void setup(void) {
 }
 
 void readSensors(int *temp, int *humidity, int *light, int *moisture) {
-  envSensor.read(); // вызываем чтение датчика
-  *temp = envSensor.readTemperature(); // получаем температуру через метод
-  *humidity = envSensor.readHumidity(); // получаем влажность
+  *temp = envSensor.readTemperature();
+  *humidity = envSensor.readHumidity();
   *light = analogRead(LIGHT_SENSOR_PIN);
   *moisture = analogRead(MOISTURE_SENSOR_PIN);
 }
 
 void controlLight(int light) {
   if (light < OPT_LIGHT - LIGHT_TOLERANCE) {
-    digitalWrite(LED_GROW_PIN, HIGH);
+    digitalWrite(LED_GROW_PIN, LOW);
   }
   else if (light > OPT_LIGHT + LIGHT_TOLERANCE) {
-    digitalWrite(LED_GROW_PIN, LOW);
+    digitalWrite(LED_GROW_PIN, HIGH);
   }
 }
 
