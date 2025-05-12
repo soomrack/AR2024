@@ -1,9 +1,9 @@
 #include <DHT.h>
 #include <Arduino.h>
 
-DHT envSensor;
-
 #define DHT_PIN             8
+DHT envSensor(DHT_PIN, DHT11);
+
 #define LIGHT_SENSOR_PIN    A0
 #define MOISTURE_SENSOR_PIN A1
 
@@ -44,10 +44,10 @@ void setup(void) {
 }
 
 void readSensors(int *temp, int *humidity, int *light, int *moisture) {
-  envSensor.read11(DHT_PIN);
-  *temp     = envSensor.temperature;
-  *humidity = envSensor.humidity;
-  *light    = analogRead(LIGHT_SENSOR_PIN);
+  envSensor.read();
+  *temp = envSensor.readTemperature();
+  *humidity = envSensor.readHumidity();
+  *light = analogRead(LIGHT_SENSOR_PIN);
   *moisture = analogRead(MOISTURE_SENSOR_PIN);
 }
 
