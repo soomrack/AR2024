@@ -1,139 +1,129 @@
 #include <dht.h>
+#include <Arduino.h>
 
 dht envSensor;
 
-// Pin definitions
-#define DHT_PIN         8
-#define LIGHT_SENSOR    A0
-#define MOISTURE_SENSOR A1
+#define DHT_PIN           8
+#define LIGHT_SENSOR_PIN  A0
+#define MOISTURE_SENSOR_PIN A1
 
-#define LED_GROW        6
-#define WATER_PUMP      5 
-#define HEATER          3 
-#define FAN             7
+#define LED_GROW_PIN      6 
+#define WATER_PUMP_PIN    5 
+#define HEATER_PIN        3 
+#define FAN_PIN           7  
+#define OPT_TEMP          25
+#define OPT_HUMIDITY      50
+#define OPT_MOISTURE      400 
+#define OPT_LIGHT         500  
 
-// Optimal values
-#define OPT_HUMIDITY    50
-#define OPT_TEMP        25
-#define OPT_MOISTURE    400
-#define OPT_LIGHT       500
+#define TEMP_TOLERANCE    2
+#define HUMID_TOLERANCE   2
+#define MOIST_TOLERANCE   2
+#define LIGHT_TOLERANCE   2
 
-// Safety timers (seconds)
-#define PUMP_SAFETIME   30
-#define HEATER_SAFETIME 60
-#define FAN_SAFETIME    120
+#define PUMP_RUN_DURATION 5000
 
-// Control thresholds
-#define LIGHT_THRESHOLD 2
-#define TEMP_THRESHOLD  2
-#define HUMID_THRESHOLD 2
-#define MOIST_THRESHOLD 2
+unsigned long pumpTimer = 0;
 
-// System state
-struct {
-  int temp;
-  int humidity;
-  int moisture;
-  int light;
-  
-  bool isLightOn;
-  bool isPumpOn;
-  bool isHeating;
-  bool isFanOn;
-  
-  uint32_t lightTimer;
-  uint32_t pumpTimer;
-  uint32_t heatTimer;
-  uint32_t fanTimer;
-} greenhouse;
-
-void setup() {
+void setup(void) {
   Serial.begin(115200);
   
-  pinMode(LED_GROW, OUTPUT);
-  pinMode(WATER_PUMP, OUTPUT);
-  pinMode(HEATER, OUTPUT);
-  pinMode(FAN, OUTPUT);
-  
-  digitalWrite(LED_GROW, LOW);
-  digitalWrite(WATER_PUMP, HIGH); // Pump off (active low)
-  digitalWrite(HEATER, LOW);
-  digitalWrite(FAN, LOW);
+  pinMode(LED_GROW_PIN, OUTPUT);
+  pinMode(WATER_PUMP_PIN, OUTPUT);
+  pinMode(HEATER_PIN, OUTPUT);
+  pinMode(FAN_PIN, OUTPUT);
+
+  digitalWrite(LED_GROW_PIN, LOW);
+  digitalWrite(WATER_PUMP_PIN, HIGH);
+  digitalWrite(HEATER_PIN, LOW);
+  digitalWrite(FAN_PIN, LOW);
 }
 
-void readSensors() {
+void readSensors(int *temp, int *humidity, int *light, int *moisture) {
   envSensor.read11(DHT_PIN);
-  greenhouse.temp = envSensor.temperature;
-  greenhouse.humidity = envSensor.humidity;
-  greenhouse.light = analogRead(LIGHT_SENSOR);
-  greenhouse.moisture = analogRead(MOISTURE_SENSOR);
+  *temp     = envSensor.temperature;
+  *humidity = envSensor.humidity;
+  *light    = analogRead(LIGHT_SENSOR_PIN);
+  *moisture = analogRead(MOISTURE_SENSOR_PIN);
 }
 
-void controlLight() {
-  if (abs(greenhouse.light - OPT_LIGHT) >= LIGHT_THRESHOLD && 
-      millis() - greenhouse.lightTimer >= 1500) {
-    greenhouse.isLightOn = greenhouse.light < OPT_LIGHT;
-    digitalWrite(LED_GROW, greenhouse.isLightOn);
-    greenhouse.lightTimer = millis();
+
+void controlLight(int light) {
+  if (light < OPT_LIGHT - LIGHT_TOLERANCE) {
+    digitalWrite(LED_GROW_PIN, HIGH);
+  }
+  else if (light > OPT_LIGHT + LIGHT_TOLERANCE) {
+    digitalWrite(LED_GROW_PIN, LOW);
   }
 }
 
-void controlWater() {
-  if (greenhouse.moisture > OPT_MOISTURE + MOIST_THRESHOLD) {
-    digitalWrite(WATER_PUMP, LOW); // Turn pump on
-    greenhouse.isPumpOn = true;
-    
-    if (millis() - greenhouse.pumpTimer >= 5000) {
-      digitalWrite(WATER_PUMP, HIGH); // Turn pump off
-      greenhouse.isPumpOn = false;
-      greenhouse.pumpTimer = millis();
+void controlWater(int moisture) {
+
+  if (moisture > OPT_MOISTURE + MOIST_TOLERANCE) {
+    if (digitalRead(WATER_PUMP_PIN) != LOW) {
+      digitalWrite(WATER_PUMP_PIN, LOW);
+      pumpTimer = millis();
+      Serial.println("Pump ON");
     }
-  } 
-  else if (greenhouse.moisture < OPT_MOISTURE - MOIST_THRESHOLD) {
-    digitalWrite(WATER_PUMP, HIGH); // Ensure pump is off
-    greenhouse.isPumpOn = false;
+
+    if (millis() - pumpTimer >= PUMP_RUN_DURATION) {
+      digitalWrite(WATER_PUMP_PIN, HIGH);
+      Serial.println("Pump OFF");
+    }
+  }
+  else if (moisture < OPT_MOISTURE - MOIST_TOLERANCE) {
+    digitalWrite(WATER_PUMP_PIN, HIGH);
   }
 }
 
-void controlTemperature() {
-  greenhouse.isHeating = greenhouse.temp < OPT_TEMP - TEMP_THRESHOLD;
-  digitalWrite(HEATER, greenhouse.isHeating);
+void controlTemperature(int temp) {
+  if (temp < OPT_TEMP - TEMP_TOLERANCE) {
+    digitalWrite(HEATER_PIN, HIGH);
+  }
+  else if (temp >= OPT_TEMP) {
+    digitalWrite(HEATER_PIN, LOW);
+  }
 }
 
-void controlVentilation() {
-  bool needCooling = greenhouse.humidity > OPT_HUMIDITY + HUMID_THRESHOLD ||
-                    greenhouse.isHeating || 
-                    greenhouse.temp > OPT_TEMP + 1;
-  
-  bool canTurnOff = greenhouse.humidity < OPT_HUMIDITY - HUMID_THRESHOLD &&
-                   !greenhouse.isHeating && 
-                   greenhouse.temp < OPT_TEMP + 3;
-  
-  greenhouse.isFanOn = needCooling || !canTurnOff;
-  digitalWrite(FAN, greenhouse.isFanOn);
+void controlVentilation(int temp, int humidity) {
+
+  if (humidity > OPT_HUMIDITY + HUMID_TOLERANCE || temp > OPT_TEMP + 1 || digitalRead(HEATER_PIN) == HIGH)
+    digitalWrite(FAN_PIN, HIGH);
+  else
+    digitalWrite(FAN_PIN, LOW);
 }
 
-void logData() {
-  Serial.print("H: "); Serial.print(greenhouse.humidity); Serial.print("% ");
-  Serial.print("T: "); Serial.print(greenhouse.temp); Serial.print("C ");
-  Serial.print("L: "); Serial.print(greenhouse.light); Serial.print(" ");
-  Serial.print("M: "); Serial.print(greenhouse.moisture); Serial.print(" ");
-  Serial.print("STATUS: ");
-  Serial.print(greenhouse.isLightOn ? "L_ON " : "L_OFF ");
-  Serial.print(greenhouse.isPumpOn ? "P_ON " : "P_OFF ");
-  Serial.print(greenhouse.isHeating ? "H_ON " : "H_OFF ");
-  Serial.println(greenhouse.isFanOn ? "F_ON" : "F_OFF");
+void logData(int temp, int humidity, int light, int moisture) {
+  Serial.print("T: ");
+  Serial.print(temp);
+  Serial.print("C, H: ");
+  Serial.print(humidity);
+  Serial.print("%, Light: ");
+  Serial.print(light);
+  Serial.print(", Moisture: ");
+  Serial.println(moisture);
 }
 
-void loop() {
-  readSensors();
+void loop(void) {
+  int temp, humidity, light, moisture;
   
-  controlLight();
-  controlWater();
-  controlTemperature();
-  controlVentilation();
+  readSensors(&temp, &humidity, &light, &moisture);
   
-  logData();
+  controlLight(light);
+  controlWater(moisture);
+  controlTemperature(temp);
+  controlVentilation(temp, humidity);
   
-  delay(100); // Reduced from original 100ms delay
+  logData(temp, humidity, light, moisture);
+  
+  delay(1000);
+}
+
+int main(void) {
+  init();
+  setup();
+  for (;;) {
+    loop();
+  }
+  return 0;
 }
