@@ -1,7 +1,7 @@
-#include <dht.h>
+#include <DHT.h>
 #include <Arduino.h>
 
-dht envSensor;
+DHT envSensor;
 
 #define DHT_PIN             8
 #define LIGHT_SENSOR_PIN    A0
