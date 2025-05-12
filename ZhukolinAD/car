@@ -5,7 +5,7 @@
 
 #define Sensor_left A0
 #define Sensor_right A1
-#define Button_pin 12
+#define Button_pin A2
 
 const int Base_speed = 150;
 const int Sensor_diff_tol = 25;
