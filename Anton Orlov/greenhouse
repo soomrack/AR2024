@@ -3,24 +3,24 @@
 
 // Пины подключения
 #define DHT_PIN             8
-#define LIGHT_SENSOR_PIN    A0
-#define MOISTURE_SENSOR_PIN A1
-#define LED_GROW_PIN        5
-#define WATER_PUMP_PIN      6
+#define LIGHT_SENSOR_PIN    A0    // Только для света
+#define MOISTURE_SENSOR_PIN A1    // Только для насоса
+#define LED_GROW_PIN        5     // Управление светом
+#define WATER_PUMP_PIN      6     // Управление насосом
 #define HEATER_PIN          3
 #define FAN_PIN             7
 
 // Оптимальные параметры
 #define OPT_TEMP        25.0
 #define OPT_HUMIDITY    50.0
-#define OPT_MOISTURE    400   // Ниже этого значения - почва сухая
-#define OPT_LIGHT       500
+#define OPT_MOISTURE    400     // Порог сухости почвы (0-1023)
+#define OPT_LIGHT       500     // Порог освещенности (0-1023)
 
 // Допустимые отклонения
 #define TEMP_TOLERANCE  2.0
 #define HUMID_TOLERANCE 5.0
-#define MOIST_TOLERANCE 50
-#define LIGHT_TOLERANCE 50
+#define MOIST_TOLERANCE 50      // Допуск влажности почвы
+#define LIGHT_TOLERANCE 50      // Допуск освещенности
 
 // Настройки насоса
 #define PUMP_RUN_DURATION    3000    // 3 секунды работы
@@ -38,8 +38,8 @@ struct SystemState {
   unsigned long pumpPauseTime = 0;
   float temperature = 0;
   float humidity = 0;
-  int lightLevel = 0;
-  int moistureLevel = 0;
+  int lightLevel = 0;        // Только для света
+  int moistureLevel = 0;     // Только для насоса
 };
 
 SystemState state;
@@ -47,11 +47,13 @@ SystemState state;
 void setup() {
   Serial.begin(115200);
   
+  // Настройка пинов
   pinMode(LED_GROW_PIN, OUTPUT);
   pinMode(WATER_PUMP_PIN, OUTPUT);
   pinMode(HEATER_PIN, OUTPUT);
   pinMode(FAN_PIN, OUTPUT);
 
+  // Инициализация устройств
   digitalWrite(LED_GROW_PIN, LOW);
   digitalWrite(WATER_PUMP_PIN, HIGH);  // HIGH - насос выключен
   digitalWrite(HEATER_PIN, LOW);
@@ -59,7 +61,9 @@ void setup() {
 
   envSensor.begin();
   
-  Serial.println("System initialized - Pump fixed");
+  Serial.println("System started");
+  Serial.println("Light depends ONLY on light sensor");
+  Serial.println("Pump depends ONLY on soil moisture");
 }
 
 int readStableMoisture() {
@@ -72,14 +76,17 @@ int readStableMoisture() {
 }
 
 void readSensors() {
+  // Полностью независимое чтение датчиков
   state.temperature = envSensor.readTemperature();
   state.humidity = envSensor.readHumidity();
-  state.lightLevel = analogRead(LIGHT_SENSOR_PIN);
-  state.moistureLevel = readStableMoisture();
+  state.lightLevel = analogRead(LIGHT_SENSOR_PIN);      // Только для света
+  state.moistureLevel = readStableMoisture();          // Только для насоса
 }
 
 void controlLight() {
+  // Управление светом ТОЛЬКО по датчику освещенности
   bool needLight = (state.lightLevel < OPT_LIGHT - LIGHT_TOLERANCE);
+  
   if (needLight != state.lightIsOn) {
     digitalWrite(LED_GROW_PIN, needLight ? HIGH : LOW);
     state.lightIsOn = needLight;
@@ -89,11 +96,12 @@ void controlLight() {
 }
 
 void controlWater() {
+  // Управление насосом ТОЛЬКО по датчику влажности почвы
   bool soilIsDry = (state.moistureLevel < OPT_MOISTURE - MOIST_TOLERANCE);
   
   if (soilIsDry) {
     if (!state.pumpIsOn) {
-      // Проверяем, прошла ли пауза
+      // Проверка паузы между включениями
       if (millis() - state.pumpPauseTime >= PUMP_PAUSE_DURATION) {
         digitalWrite(WATER_PUMP_PIN, LOW);  // Включаем насос
         state.pumpIsOn = true;
@@ -101,9 +109,9 @@ void controlWater() {
         Serial.println("Pump ON (soil dry)");
       }
     } else {
-      // Проверяем, не пора ли выключить
+      // Проверка времени работы
       if (millis() - state.pumpStartTime >= PUMP_RUN_DURATION) {
-        digitalWrite(WATER_PUMP_PIN, HIGH); // Выключаем насос
+        digitalWrite(WATER_PUMP_PIN, HIGH);  // Выключаем насос
         state.pumpIsOn = false;
         state.pumpPauseTime = millis();
         Serial.println("Pump OFF (timer)");
@@ -143,19 +151,22 @@ void controlVentilation() {
 }
 
 void logSystemState() {
-  Serial.println("\n==== Status ====");
-  Serial.print("Temp: "); Serial.print(state.temperature); Serial.print("C | ");
-  Serial.print("Hum: "); Serial.print(state.humidity); Serial.print("% | ");
-  Serial.print("Light: "); Serial.print(state.lightLevel); Serial.print(" | ");
-  Serial.print("Moisture: "); Serial.println(state.moistureLevel);
-  Serial.println("================");
+  Serial.println("\n==== System Status ====");
+  Serial.print("Temperature: "); Serial.print(state.temperature); Serial.println("°C");
+  Serial.print("Humidity: "); Serial.print(state.humidity); Serial.println("%");
+  Serial.print("Light: "); Serial.print(state.lightLevel); 
+  Serial.print(" ("); Serial.print(state.lightIsOn ? "ON" : "OFF"); Serial.println(")");
+  Serial.print("Soil Moisture: "); Serial.print(state.moistureLevel);
+  Serial.print(" ("); Serial.print(state.pumpIsOn ? "PUMPING" : "OK"); Serial.println(")");
+  Serial.println("======================");
 }
 
 void loop() {
   readSensors();
   
-  controlLight();
-  controlWater();  // Исправленная функция управления насосом
+  // Абсолютно независимое управление:
+  controlLight();     // Только от датчика света
+  controlWater();     // Только от датчика влажности почвы
   controlTemperature();
   controlVentilation();
   
