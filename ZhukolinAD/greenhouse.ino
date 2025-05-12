@@ -3,7 +3,6 @@
 
 #define DHT_PIN             8
 DHT envSensor(DHT_PIN, DHT11);
-
 #define LIGHT_SENSOR_PIN    A0
 #define MOISTURE_SENSOR_PIN A1
 
@@ -22,8 +21,8 @@ DHT envSensor(DHT_PIN, DHT11);
 #define MOIST_TOLERANCE 2
 #define LIGHT_TOLERANCE 2
 
-#define PUMP_RUN_DURATION  10000
-#define PUMP_PAUSE_DURATION 1000
+#define PUMP_RUN_DURATION  5000
+#define PUMP_PAUSE_DURATION 20000
 
 bool pumpIsOn = false;
 unsigned long pumpCycleStart = 0;
@@ -79,7 +78,7 @@ void controlWater(int moisture) {
     }
   }
   else {
-    digitalWrite(WATER_PUMP_PIN, HIGH);
+    digitalWrite(WATER_PUMP_PIN, LOW);
     pumpIsOn = false;
     pumpCycleStart = 0;
     pumpPauseStart = 0;
@@ -96,7 +95,7 @@ void controlTemperature(int temp) {
 }
 
 void controlVentilation(int temp, int humidity) {
-  if (humidity > OPT_HUMIDITY + HUMID_TOLERANCE || temp > OPT_TEMP + 1 || digitalRead(HEATER_PIN) == HIGH)
+  if (humidity > OPT_HUMIDITY + HUMID_TOLERANCE  temp > OPT_TEMP + 1  digitalRead(HEATER_PIN) == HIGH)
     digitalWrite(FAN_PIN, HIGH);
   else
     digitalWrite(FAN_PIN, LOW);
