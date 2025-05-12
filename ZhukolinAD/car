@@ -1,0 +1,97 @@
+#define Left_motor_speed 5
+#define Right_motor_dir 7
+#define Right_motor_speed 6
+
+#define Sensor_left A0
+#define Sensor_right A1 
+#define Button_pin 12
+
+const int Base_speed = 150; 
+const int Sensor_diff_tol = 25;
+
+bool active = false;
+
+void setMotor(int dirPin, int speedPin, int speed) {
+  if (speed >= 0) {
+    digitalWrite(dirPin, HIGH);
+    analogWrite(speedPin, speed);
+  } else {
+    digitalWrite(dirPin, LOW);
+    analogWrite(speedPin, -speed);
+  }
+}
+
+void moveForward(int speed) {
+  setMotor(Left_motor_dir, Left_motor_speed, speed);
+  setMotor(Right_motor_dir, Right_motor_speed, speed);
+}
+
+void moveBackward(int speed) {
+  setMotor(Left_motor_dir, Left_motor_speed, -speed);
+  setMotor(Right_motor_dir, Right_motor_speed, -speed);
+}
+
+void turnLeft(int speed) {
+  setMotor(Left_motor_dir, Left_motor_speed, -speed);
+  setMotor(Right_motor_dir, Right_motor_speed, speed);
+}
+
+void turnRight(int speed) {
+  setMotor(Left_motor_dir, Left_motor_speed, speed);
+  setMotor(Right_motor_dir, Right_motor_speed, -speed);
+}
+
+void stopMotors() {
+  analogWrite(Left_motor_speed, 0);
+  analogWrite(Right_motor_speed, 0);
+}
+
+void followLine() {
+  int sensorLeftValue = analogRead(Sensor_left);
+  int sensorRightValue = analogRead(Sensor_right);
+  
+  Serial.print("Левый датчик: ");
+  Serial.print(sensorLeftValue);
+  Serial.print("Правый датчик: ");
+  Serial.println(sensorRightValue);
+  
+  if (abs(sensorLeftValue - sensorRightValue) < Sensor_diff_tol) {
+    moveForward(Base_speed);
+  } else if (sensorLeftValue > sensorRightValue) {
+    turnLeft(Base_speed);
+  } else {
+    turnRight(Base_speed);
+  }
+}
+
+void checkButton() {
+  bool currentButtonState = digitalRead(Button_pin);
+  static bool lastButtonState = HIGH;
+
+  if (currentButtonState != lastButtonState) {
+    if (currentButtonState == LOW) {
+      active = !active;
+    }
+    lastButtonState = currentButtonState;
+  }
+}
+
+void setup() {
+  pinMode(Left_motor_dir, OUTPUT);
+  pinMode(Left_motor_speed, OUTPUT);
+  pinMode(Right_motor_dir, OUTPUT);
+  pinMode(Right_motor_speed, OUTPUT);
+  
+  pinMode(Button_pin, INPUT_PULLUP);
+  
+  Serial.begin(9600);
+}
+
+void loop() {
+  checkButton();  
+  if (active) {
+    followLine();
+  } else {
+    stopMotors();
+  }
+}
