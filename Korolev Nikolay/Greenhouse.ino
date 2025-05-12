@@ -44,9 +44,9 @@ void setup(void) {
 }
 
 void readSensors(int *temp, int *humidity, int *light, int *moisture) {
-  envSensor.read(); // вызываем чтение датчика
-  *temp = envSensor.readTemperature(); // получаем температуру через метод
-  *humidity = envSensor.readHumidity(); // получаем влажность
+  envSensor.read();
+  *temp = envSensor.readTemperature();
+  *humidity = envSensor.readHumidity();
   *light = analogRead(LIGHT_SENSOR_PIN);
   *moisture = analogRead(MOISTURE_SENSOR_PIN);
 }
