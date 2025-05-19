@@ -1,8 +1,8 @@
 // Пины подключения
 #define MOTOR_L 5    // Левый мотор (PWM скорость)
 #define MOTOR_R 6    // Правый мотор (PWM скорость)
-#define DIR_L 4      // Направление левого мотора
-#define DIR_R 7      // Направление правого мотора
+#define DIR_L 10      // Направление левого мотора
+#define DIR_R 9      // Направление правого мотора
 #define SENSOR_L A1  // Левый датчик
 #define SENSOR_R A0  // Правый датчик
 #define BUTTON A2    // Кнопка старта/стопа
