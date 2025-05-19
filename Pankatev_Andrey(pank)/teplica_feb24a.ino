@@ -11,10 +11,13 @@ iarduino_DHT sensor(13);
 
 
 struct Data_parameters { 
-  int min_sol = 200; // минимальное значение влажности почвы
+  int min_sol = 770; 
   int min_lum = 300;
-  int sol = analogRead(pin_sol);
-  int lum = analogRead(pin_ill);
+  int sol;
+  int lum;
+  unsigned long pumpTimer = 0;
+  bool pumpActive = false;
+  bool pumpOnPhase = false;
 }; 
  
  
@@ -34,6 +37,13 @@ void setup()
   pinMode(pin_sol, INPUT);
   pinMode(pin_ill, INPUT);
 } 
+
+
+void parametr()
+{
+  Parameters.sol = analogRead(pin_sol);
+  Parameters.lum = analogRead(pin_ill);
+}
 
 void data(){
     Serial.print ("CEHCOP B KOMHATE: ");
@@ -86,20 +96,31 @@ void air_hum_regul()
   }; 
 } 
  
- 
-void soil_hum_regul() 
-{ 
-  if (Parameters.sol >= Parameters.min_sol) { 
-    digitalWrite(pin_pump, HIGH);
-    delay(7000);
-    digitalWrite(pin_pump, LOW);
-    delay(3000);
+void soil_hum_regul() {
+  if (Parameters.sol >= Parameters.min_sol) {
+    unsigned long currentTime = millis();
+
+    if (!Parameters.pumpActive) {
+      digitalWrite(pin_pump, HIGH);
+      Parameters.pumpTimer = currentTime;
+      Parameters.pumpActive = true;
+      Parameters.pumpOnPhase = true;
+    } else {
+      if (Parameters.pumpOnPhase && currentTime - Parameters.pumpTimer >= 7000) {
+        digitalWrite(pin_pump, LOW);
+        Parameters.pumpTimer = currentTime;
+        Parameters.pumpOnPhase = false;
+      }
     }
+  } else {
+    digitalWrite(pin_pump, LOW);
+    Parameters.pumpActive = false;
+    Parameters.pumpOnPhase = false;
+  }
 }
- 
 void ill_regul() 
 { 
-  if (Parameters.lum <= Parameters.min_lum) { 
+  if (Parameters.lum >= Parameters.min_lum) { 
     digitalWrite(pin_led, HIGH); 
   } else { 
     digitalWrite(pin_led, LOW); 
@@ -116,6 +137,8 @@ void pause()
 void loop() 
 { 
   data();
+
+  parametr();
  
   termoregul(); 
  
@@ -125,6 +148,7 @@ void loop()
  
   ill_regul(); 
  
-  pause(); 
+  pause();
+
 }
 
