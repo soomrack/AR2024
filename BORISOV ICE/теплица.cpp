@@ -1,30 +1,30 @@
 #include <iarduino_DHT.h> 
 iarduino_DHT dhtSensor(13);
-#define LIGHT_SENSOR_PIN A0 // датчик освещенности
-#define SOIL_MOISTURE_PIN A1 // датчик влажности почвы
-#define LED_PIN 13 // порт для подключения светодиода
-#define FAN_PIN 7 // порт для подключения вентилятора
-#define GROW_LIGHT_PIN 6 // порт для освещения растений
-#define WATER_PUMP_PIN 5 // порт для помпы
-#define HEATER_PIN 4 // порт для нагревателя (работает только с вентилятором)
-#define DHT_PIN 9 // датчик температуры и влажности (не используется, так как датчик подключен к пину 13)
+#define LIGHT_SENSOR_PIN A0 
+#define SOIL_MOISTURE_PIN A1 
+#define LED_PIN 13 
+#define FAN_PIN 7 
+#define GROW_LIGHT_PIN 6
+#define WATER_PUMP_PIN 5 
+#define HEATER_PIN 4
+#define DHT_PIN 9 
 
 
 struct GreenhouseParameters { 
-  int minSoilMoisture = 770; // минимальный порог влажности почвы
-  int minLightLevel = 300; // минимальный порог освещенности
-  int soilMoisture; // текущая влажность почвы
-  int lightLevel; // текущий уровень освещенности
-  unsigned long pumpTimer = 0; // таймер для работы помпы
-  bool isPumpActive = false; // флаг активности помпы
-  bool isPumpOnPhase = false; // флаг фазы работы помпы (включена/выключена)
+  int minSoilMoisture = 770; 
+  int minLightLevel = 300; 
+  int soilMoisture; 
+  int lightLevel; 
+  unsigned long pumpTimer = 0; 
+  bool isPumpActive = false;
+  bool isPumpOnPhase = false; 
 }; 
  
  
 struct GreenhouseParameters parameters; 
-int temperatureFlag = 0; // флаг состояния температуры
-int humidityFlag = 0; // флаг состояния влажности воздуха
-int delayTime = 1000; // время задержки между измерениями 
+int temperatureFlag = 0; 
+int humidityFlag = 0;
+int delayTime = 1000; 
  
  
 void setup() 
@@ -47,7 +47,7 @@ void readParameters()
 
 void printSensorData(){
   Serial.print("Датчик в комнате: ");
-  switch(dhtSensor.read()){ // Читаем показания датчика температуры и влажности
+  switch(dhtSensor.read()){ 
     case DHT_OK:             Serial.println((String) dhtSensor.hum + "% - " + dhtSensor.tem + "*C"); break;
     case DHT_ERROR_CHECKSUM: Serial.println("Ошибка контрольной суммы"); break;
     case DHT_ERROR_DATA:     Serial.println("Ответ не соответствует датчику 'DHT'"); break;
