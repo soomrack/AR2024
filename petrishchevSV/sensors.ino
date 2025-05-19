@@ -1,8 +1,5 @@
-void sensors_read() 
+void readsens()
 {
-light = analogRead(svet);
-ground_hum = analogRead(humid);
-vlazh.read();
-humo = vlazh.hum;
-temp = vlazh.tem;
+  left = analogRead(A3);
+  right = analogRead(A2);
 }
