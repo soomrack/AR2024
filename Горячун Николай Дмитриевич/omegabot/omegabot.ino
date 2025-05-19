@@ -1,10 +1,10 @@
-#define L_MOTOR 4
-#define L_SWITCH 5
-#define R_MOTOR 7
-#define R_SWITCH 6
-#define L_SENSOR A0
-#define R_SENSOR A1
-#define BUZZER 9
+#define PIN_L_MOTOR 4
+#define PIN_L_SWITCH 5
+#define PIN_R_MOTOR 7
+#define PIN_R_SWITCH 6
+#define PIN_L_SENSOR A0
+#define PIN_R_SENSOR A1
+#define PIN_BUZZER 9
 
 
 struct Data_sensors {
@@ -19,39 +19,39 @@ struct Data_sensors Sensors;
 
 void setup()
 {
-  pinMode(L_MOTOR, OUTPUT);
-  pinMode(L_SWITCH, OUTPUT);
-  pinMode(R_MOTOR, OUTPUT);
-  pinMode(R_SWITCH, OUTPUT);
-  pinMode(L_SENSOR, INPUT);
-  pinMode(R_SENSOR, INPUT);
-  pinMode(BUZZER, OUTPUT);
+  pinMode(PIN_L_MOTOR, OUTPUT);
+  pinMode(PIN_L_SWITCH, OUTPUT);
+  pinMode(PIN_R_MOTOR, OUTPUT);
+  pinMode(PIN_R_SWITCH, OUTPUT);
+  pinMode(PIN_L_SENSOR, INPUT);
+  pinMode(PIN_R_SENSOR, INPUT);
+  pinMode(PIN_BUZZER, OUTPUT);
 }
 
 
 void init_data()
 {
-  Sensors.left_sensor = analogRead(L_SENSOR);
-  Sensors.right_sensor = analogRead(R_SENSOR);
+  Sensors.left_sensor = analogRead(PIN_L_SENSOR);
+  Sensors.right_sensor = analogRead(PIN_R_SENSOR);
 }
 
 
 void configuration_of_motors(int speed_l, int speed_r)
 {
   if (speed_l > 0){
-    digitalWrite(L_SWITCH, 1);
-    analogWrite(L_MOTOR, speed_l);
+    digitalWrite(PIN_L_SWITCH, 1);
+    analogWrite(PIN_L_MOTOR, speed_l);
   } else {
-    digitalWrite(L_SWITCH, 0);
-    analogWrite(L_MOTOR, -speed_l);
+    digitalWrite(PIN_L_SWITCH, 0);
+    analogWrite(PIN_L_MOTOR, -speed_l);
   };
 
   if (speed_r > 0){
-    digitalWrite(R_SWITCH, 1);
-    analogWrite(R_MOTOR, speed_r);
+    digitalWrite(PIN_R_SWITCH, 1);
+    analogWrite(PIN_R_MOTOR, speed_r);
   } else {
-    digitalWrite(R_SWITCH, 0);
-    analogWrite(R_MOTOR, -speed_r);
+    digitalWrite(PIN_R_SWITCH, 0);
+    analogWrite(PIN_R_MOTOR, -speed_r);
   };
 }
 
@@ -83,9 +83,9 @@ void turn_left()
 void check_of_line_loss() 
 {
   if (500 <= Sensors.left_sensor <= 700 and 500 <= Sensors.right_sensor <= 700){
-    digitalWrite(BUZZER, 1);
+    digitalWrite(PIN_BUZZER, 1);
     delay(500);
-    digitalWrite(BUZZER, 0);
+    digitalWrite(PIN_BUZZER, 0);
     delay(500);
   };
 }
@@ -103,3 +103,31 @@ void loop()
 
   turn_left();
 }
+
+
+/*
+void loop() 
+{
+  int left_sensor = analogRead(PIN_L_SENSOR);
+  int right_sensor = analogRead(PIN_R_SENSOR);
+
+  if (500 <= left_sensor <= 700 and 500 <= right_sensor <= 700){
+    digitalWrite(PIN_BUZZER, 1);
+    delay(500);
+    digitalWrite(PIN_BUZZER, 0);
+    delay(500);
+  };
+
+  if (900 <= left_sensor <= 1000 and 900 <= right_sensor <= 1000){
+    forward(100);
+  };
+  
+  if (500 <= left_sensor <= 700){
+    right(100);
+  };
+  
+  if (500 <= right_sensor <= 700){
+    left(100);
+  };
+}
+*/
