@@ -1,0 +1,90 @@
+constexpr int MOTOR1_DIR_PIN = 4;
+constexpr int MOTOR1_PWM_PIN = 5;
+constexpr int MOTOR2_DIR_PIN = 7;
+constexpr int MOTOR2_PWM_PIN = 6;
+constexpr int BUTTON_PIN = 12;
+
+constexpr int MAX_SPEED = 255;
+constexpr int MIN_SPEED = -255;
+
+constexpr int LINE_SENSOR_LEFT = A2;
+constexpr int LINE_SENSOR_RIGHT = A3;
+
+int readButton(int pin) {
+  int state = digitalRead(pin);
+  return (pin == BUTTON_PIN) ? !state : state;
+}
+
+void initializeMotors() {
+  pinMode(MOTOR1_DIR_PIN, OUTPUT);
+  pinMode(MOTOR1_PWM_PIN, OUTPUT);
+  pinMode(MOTOR2_DIR_PIN, OUTPUT);
+  pinMode(MOTOR2_PWM_PIN, OUTPUT);
+}
+
+void setMotors(int speed1, int speed2) {
+  speed1 = constrain(speed1, MIN_SPEED, MAX_SPEED);
+  speed2 = constrain(speed2, MIN_SPEED, MAX_SPEED);
+
+  digitalWrite(MOTOR1_DIR_PIN, speed1 > 0);
+  analogWrite(MOTOR1_PWM_PIN, abs(speed1));
+
+  digitalWrite(MOTOR2_DIR_PIN, speed2 > 0);
+  analogWrite(MOTOR2_PWM_PIN, abs(speed2));
+}
+
+void moveForward(int speed) {
+  setMotors(speed, speed);
+}
+
+void turnLeft(int speed) {
+  setMotors(-speed, speed);
+}
+
+void turnRight(int speed) {
+  setMotors(speed, -speed);
+}
+
+void stopMotors() {
+  setMotors(0, 0);
+}
+
+int readLineSensor(int pin) {
+  if (pin < A0 || pin > A3) {
+    return -1;
+  }
+  return analogRead(pin);
+}
+
+void setup() {
+  pinMode(BUTTON_PIN, INPUT_PULLUP);
+  initializeMotors();
+  Serial.begin(9600);
+}
+
+void loop() {
+  while (readButton(BUTTON_PIN)) {
+    do {
+      moveForward(100);
+
+      int leftValue = readLineSensor(LINE_SENSOR_LEFT);
+      int rightValue = readLineSensor(LINE_SENSOR_RIGHT);
+
+      if (leftValue > 900) {
+        turnRight(80);
+        delay(200);
+      } else if (rightValue > 900) {
+        turnLeft(80);
+        delay(200);
+      }
+
+    } while (readLineSensor(LINE_SENSOR_LEFT) < 900 &&
+             readLineSensor(LINE_SENSOR_RIGHT) < 900);
+
+    stopMotors();
+    delay(100);
+  }
+
+  Serial.print("message");
+  Serial.println(readLineSensor(LINE_SENSOR_LEFT));
+}
