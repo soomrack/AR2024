@@ -103,31 +103,3 @@ void loop()
 
   turn_left();
 }
-
-
-/*
-void loop() 
-{
-  int left_sensor = analogRead(PIN_L_SENSOR);
-  int right_sensor = analogRead(PIN_R_SENSOR);
-
-  if (500 <= left_sensor <= 700 and 500 <= right_sensor <= 700){
-    digitalWrite(PIN_BUZZER, 1);
-    delay(500);
-    digitalWrite(PIN_BUZZER, 0);
-    delay(500);
-  };
-
-  if (900 <= left_sensor <= 1000 and 900 <= right_sensor <= 1000){
-    forward(100);
-  };
-  
-  if (500 <= left_sensor <= 700){
-    right(100);
-  };
-  
-  if (500 <= right_sensor <= 700){
-    left(100);
-  };
-}
-*/
