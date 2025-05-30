@@ -22,9 +22,9 @@ int flag_temperature = 0;
 int flag_humidity = 0;
 int flag_pump = 0;
 unsigned long pump_time = 0;
-int pause_time = 1000;
-int pump_pause = 5*60*100;
-int pump_work = 3000;
+unsigned long pause_time = 1000;
+unsigned long pump_pause = 5*60*100;
+unsigned long pump_work = 3000;
 unsigned long start_time = 0;
 
 
@@ -93,7 +93,6 @@ void soil_humidity_regulation()
     digitalWrite(PIN_RELAY_PUMP, HIGH);
     pump_time = millis();
   } else {
-    Serial.println( millis());
     if (Parameters.soilhumidity < 200 || millis() - pump_time >= pump_work) {
       digitalWrite(PIN_RELAY_PUMP, LOW);
       flag_pump = 1;
