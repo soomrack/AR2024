@@ -1,192 +1,130 @@
-#include <DHT.h>
-#include <DHT_U.h>
-#include <LiquidCrystal_I2C.h>
-#include <Wire.h>
-#include <RTClib.h>
+#include "DHT.h"
+#define PIN_DHT 13
+#define PIN_SOILHUMIDITY A1
+#define PIN_PHOTO_SENSOR A0
+#define PIN_RELAY_HEATER 4
+#define PIN_RELAY_PUMP 5
+#define PIN_RELAY_LIGHT 6
+#define PIN_RELAY_FAN 7
 
-// Конфигурация пинов
-#define DHTPIN 2          // Пин для датчика DHT
-#define DHTTYPE DHT22     // Тип датчика DHT22
-#define SOIL_MOISTURE_PIN A0 // Пин для датчика влажности почвы
-#define WATER_PUMP_PIN 3  // Пин для насоса полива
-#define LIGHT_RELAY_PIN 4 // Пин для реле освещения
-#define FAN_PIN 5         // Пин для вентилятора
-#define HEATER_PIN 6      // Пин для обогревателя
-#define LIGHT_SENSOR_PIN A1 // Пин для датчика освещенности
 
-// Пороговые значения
-#define SOIL_MOISTURE_THRESHOLD 40   // Порог влажности почвы (%)
-#define TEMP_LOW_THRESHOLD 18        // Минимальная температура (°C)
-#define TEMP_HIGH_THRESHOLD 28       // Максимальная температура (°C)
-#define HUMIDITY_THRESHOLD 70        // Порог влажности воздуха (%)
-#define LIGHT_THRESHOLD 500          // Порог освещенности (люкс)
+DHT dht(PIN_DHT, DHT11);
+struct Data_parameters {
+  float humidity;
+  float temperature;
+  int soilhumidity;
+  int illumination;
+};
 
-// Инициализация объектов
-DHT dht(DHTPIN, DHTTYPE);
-LiquidCrystal_I2C lcd(0x27, 16, 2); // Адрес LCD 0x27, 16 символов, 2 строки
-RTC_DS3231 rtc;
 
-// Переменные для хранения данных
-float temperature = 0;
-float humidity = 0;
-int soilMoisture = 0;
-int lightLevel = 0;
-DateTime now;
+struct Data_parameters Parameters;
+int flag_temperature = 0;
+int flag_humidity = 0;
+int flag_pump = 0;
+unsigned long pump_time = 0;
+unsigned long pause_time = 1000;
+unsigned long pump_pause = 5*60*100;
+unsigned long pump_work = 3000;
+unsigned long start_time = 0;
 
-void setup() {
+
+void setup()
+{
   Serial.begin(9600);
-  
-  // Инициализация устройств
   dht.begin();
-  lcd.begin();
-  lcd.backlight();
-  
-  // Инициализация RTC
-  if (!rtc.begin()) {
-    Serial.println("Couldn't find RTC");
-    while (1);
-  }
-  
-  if (rtc.lostPower()) {
-    Serial.println("RTC lost power, let's set the time!");
-    rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
-  }
-  
-  // Настройка пинов
-  pinMode(WATER_PUMP_PIN, OUTPUT);
-  pinMode(LIGHT_RELAY_PIN, OUTPUT);
-  pinMode(FAN_PIN, OUTPUT);
-  pinMode(HEATER_PIN, OUTPUT);
-  
-  // Выключить все устройства при старте
-  digitalWrite(WATER_PUMP_PIN, LOW);
-  digitalWrite(LIGHT_RELAY_PIN, LOW);
-  digitalWrite(FAN_PIN, LOW);
-  digitalWrite(HEATER_PIN, LOW);
-  
-  lcd.print("OmegaGrow System");
-  lcd.setCursor(0, 1);
-  lcd.print("Initializing...");
-  delay(2000);
-  lcd.clear();
+  pinMode(PIN_RELAY_HEATER, OUTPUT);
+  pinMode(PIN_RELAY_PUMP, OUTPUT);
+  pinMode(PIN_RELAY_LIGHT, OUTPUT);
+  pinMode(PIN_RELAY_FAN, OUTPUT);
 }
 
-void loop() {
-  // Получение текущего времени
-  now = rtc.now();
-  
-  // Считывание данных с датчиков
-  readSensors();
-  
-  // Управление системами
-  controlSystems();
-  
-  // Отображение информации
-  displayData();
-  
-  // Логирование данных
-  logData();
-  
-  delay(5000); // Задержка между измерениями (5 секунд)
+
+void init_parameters()
+{
+  Parameters.humidity = dht.readHumidity();
+  Parameters.temperature = dht.readTemperature();
+  Parameters.soilhumidity = analogRead(PIN_SOILHUMIDITY);
+  Parameters.illumination = 1023 - analogRead(PIN_PHOTO_SENSOR);
 }
 
-void readSensors() {
-  // Чтение температуры и влажности воздуха
-  humidity = dht.readHumidity();
-  temperature = dht.readTemperature();
-  
-  // Чтение влажности почвы (0-1023, преобразуем в %)
-  soilMoisture = map(analogRead(SOIL_MOISTURE_PIN), 0, 1023, 100, 0);
-  
-  // Чтение уровня освещенности
-  lightLevel = analogRead(LIGHT_SENSOR_PIN);
-  
-  // Проверка на ошибки чтения
-  if (isnan(humidity) || isnan(temperature)) {
-    Serial.println("Failed to read from DHT sensor!");
-    return;
-  }
-}
 
-void controlSystems() {
-  // Управление поливом
-  if (soilMoisture < SOIL_MOISTURE_THRESHOLD) {
-    digitalWrite(WATER_PUMP_PIN, HIGH);
-    // delay(2000); // Полив в течение 2 секунд
-    digitalWrite(WATER_PUMP_PIN, LOW);
-  }
-  
-  // Управление температурой
-  if (temperature > TEMP_HIGH_THRESHOLD) {
-    digitalWrite(FAN_PIN, HIGH);
-    digitalWrite(HEATER_PIN, LOW);
-  } else if (temperature < TEMP_LOW_THRESHOLD) {
-    digitalWrite(FAN_PIN, LOW);
-    digitalWrite(HEATER_PIN, HIGH);
+void thermoregulation()
+{
+  if (Parameters.temperature >= 30.) {
+    digitalWrite(PIN_RELAY_HEATER, LOW);
+    digitalWrite(PIN_RELAY_FAN, HIGH);
+    flag_temperature = 1;
   } else {
-    digitalWrite(FAN_PIN, LOW);
-    digitalWrite(HEATER_PIN, LOW);
-  }
-  
-  // Управление освещением (по времени и уровню освещенности)
-  if ((now.hour() >= 18 || now.hour() < 6) || lightLevel < LIGHT_THRESHOLD) {
-    digitalWrite(LIGHT_RELAY_PIN, HIGH);
+    if (Parameters.temperature <= 15.) {
+      digitalWrite(PIN_RELAY_HEATER, HIGH);
+      digitalWrite(PIN_RELAY_FAN, HIGH);
+      flag_temperature = 1;
+    } else {
+      if (flag_humidity == 0) {
+        digitalWrite(PIN_RELAY_HEATER, LOW);
+        digitalWrite(PIN_RELAY_FAN, LOW);
+        flag_temperature = 0;
+      };
+    };
+  };
+}
+
+
+void humidity_regulation()
+{
+  if (Parameters.humidity >= 60.) {
+    digitalWrite(PIN_RELAY_FAN, HIGH);
+    flag_humidity = 1;
   } else {
-    digitalWrite(LIGHT_RELAY_PIN, LOW);
-  }
-  
-  // Дополнительное управление вентиляцией при высокой влажности
-  if (humidity > HUMIDITY_THRESHOLD) {
-    digitalWrite(FAN_PIN, HIGH);
-  }
+    if (flag_temperature == 0) {
+      digitalWrite(PIN_RELAY_FAN, LOW);
+      flag_humidity = 0;
+    };
+  };
 }
 
-void displayData() {
-  lcd.clear();
-  
-  // Первая строка: Температура и влажность воздуха
-  lcd.setCursor(0, 0);
-  lcd.print("T:");
-  lcd.print(temperature, 1);
-  lcd.print("C H:");
-  lcd.print(humidity, 0);
-  lcd.print("%");
-  
-  // Вторая строка: Влажность почвы и освещенность
-  lcd.setCursor(0, 1);
-  lcd.print("S:");
-  lcd.print(soilMoisture);
-  lcd.print("% L:");
-  lcd.print(lightLevel);
+
+void soil_humidity_regulation()
+{
+  if (millis() - pump_time >= pump_pause) {
+    flag_pump = 0;
+  };
+  if (flag_pump == 0 && Parameters.soilhumidity >= 200) {
+    digitalWrite(PIN_RELAY_PUMP, HIGH);
+    pump_time = millis();
+  } else {
+    if (Parameters.soilhumidity < 200 || millis() - pump_time >= pump_work) {
+      digitalWrite(PIN_RELAY_PUMP, LOW);
+      flag_pump = 1;
+      pump_time = millis();
+    };
+  };
 }
 
-void logData() {
-  // Вывод данных в Serial Monitor
-  Serial.print("Date: ");
-  Serial.print(now.year(), DEC);
-  Serial.print('/');
-  Serial.print(now.month(), DEC);
-  Serial.print('/');
-  Serial.print(now.day(), DEC);
-  Serial.print(" Time: ");
-  Serial.print(now.hour(), DEC);
-  Serial.print(':');
-  Serial.print(now.minute(), DEC);
-  Serial.print(':');
-  Serial.print(now.second(), DEC);
-  Serial.println();
-  
-  Serial.print("Temperature: ");
-  Serial.print(temperature);
-  Serial.print(" °C\t");
-  Serial.print("Humidity: ");
-  Serial.print(humidity);
-  Serial.print(" %\t");
-  Serial.print("Soil Moisture: ");
-  Serial.print(soilMoisture);
-  Serial.print(" %\t");
-  Serial.print("Light: ");
-  Serial.print(lightLevel);
-  Serial.println(" lx");
-  // Serial.println("----------------------------------");
+
+void illumination_regulation()
+{
+  if (Parameters.illumination <= 300) {
+    digitalWrite(PIN_RELAY_LIGHT, HIGH);
+  } else {
+    digitalWrite(PIN_RELAY_LIGHT, LOW);
+  };
+}
+
+
+void loop()
+{
+  if (millis() - start_time >= pause_time) {
+    init_parameters();
+
+    thermoregulation();
+
+    humidity_regulation();
+
+    soil_humidity_regulation();
+
+    illumination_regulation();
+
+    start_time = millis();
+  };
 }
