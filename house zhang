@@ -1,0 +1,209 @@
+// AdvancedGreenhouse 智能温室控制系统（带多传感器与状态机）
+#include <DHT.h>
+#include <Wire.h>
+#include <BH1750.h> // 高精度光照传感器
+
+// 硬件定义
+#define DHT_PIN         4    // DHT11温湿度传感器
+#define SOIL_PIN        A0   // 土壤湿度传感器
+#define CO2_PIN         A1   // CO2浓度传感器（模拟输出型）
+#define BUZZER_PIN      9    // 蜂鸣器报警
+#define RELAY_PUMP      5    // 水泵继电器（有源低）
+#define RELAY_HEATER    6    // 加热器继电器
+#define RELAY_FAN       7    // 风扇继电器
+#define LED_GROW        3    // 补光灯（PWM控制）
+#define BH1750_ADDR     0x23 // 光照传感器I2C地址
+
+// 环境参数
+struct Environment {
+  float temp;       // 温度 (℃)
+  float humidity;   // 湿度 (%)
+  float light;      // 光照强度 (lx)
+  float co2;        // CO2浓度 (ppm)
+  float moisture;   // 土壤湿度 (0-1023)
+} env;
+
+// 预设阈值
+const float OPT_TEMP = 25.0;    // 理想温度
+const float OPT_HUMID = 60.0;   // 理想湿度
+const float OPT_LIGHT = 3000.0; // 理想光照（lx）
+const float OPT_CO2 = 800.0;    // 理想CO2浓度
+const int OPT_MOIST = 500;      // 理想土壤湿度
+
+// 控制参数
+const int FAN_HYSTERESIS = 5;   // 风扇启停滞后值
+const int PUMP_DURATION = 10000;// 单次浇水时长（10秒）
+const int ALARM_DELAY = 3000;   // 报警延迟（避免误触发）
+
+// 状态机定义
+enum SystemState {
+  NORMAL,       // 正常运行
+  WATERING,     // 浇水状态
+  HEATING,      // 加热状态
+  COOLING,      // 降温状态
+  ALARM         // 报警状态
+};
+SystemState currentState = NORMAL;
+
+// 传感器对象
+DHT dht(DHT_PIN, DHT11);
+BH1750 lightMeter;
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(BUZZER_PIN, OUTPUT);
+  pinMode(RELAY_PUMP, OUTPUT);
+  pinMode(RELAY_HEATER, OUTPUT);
+  pinMode(RELAY_FAN, OUTPUT);
+  pinMode(LED_GROW, OUTPUT);
+  
+  digitalWrite(RELAY_PUMP, HIGH); // 关闭所有继电器（有源低）
+  digitalWrite(RELAY_HEATER, HIGH);
+  digitalWrite(RELAY_FAN, HIGH);
+  
+  dht.begin();
+  lightMeter.begin(BH1750::ONE_TIME_HIGH_RES_MODE); // 初始化光照传感器
+  delay(1000);
+}
+
+// 读取所有传感器数据
+void readAllSensors() {
+  // 温湿度
+  env.temp = dht.readTemperature();
+  env.humidity = dht.readHumidity();
+  
+  // 光照（BH1750）
+  env.light = lightMeter.readLightLevel();
+  
+  // 土壤湿度与CO2
+  env.moisture = analogRead(SOIL_PIN);
+  env.co2 = map(analogRead(CO2_PIN), 0, 1023, 400, 2000); // 映射实际范围
+}
+
+// 状态机处理函数
+void handleState() {
+  switch (currentState) {
+    case NORMAL:
+      handleNormal();
+      checkAlarms();
+      break;
+    
+    case WATERING:
+      handleWatering();
+      break;
+    
+    case HEATING:
+      handleHeating();
+      break;
+    
+    case COOLING:
+      handleCooling();
+      break;
+    
+    case ALARM:
+      triggerAlarm();
+      break;
+  }
+}
+
+// 正常状态逻辑
+void handleNormal() {
+  // 补光灯控制（PWM调节亮度）
+  if (env.light < OPT_LIGHT * 0.8) { // 低于80%时开启
+    analogWrite(LED_GROW, map(env.light, 0, OPT_LIGHT, 0, 255));
+  } else {
+    analogWrite(LED_GROW, 0);
+  }
+
+  // 水泵控制（土壤湿度低于阈值）
+  if (env.moisture < OPT_MOIST - 50) {
+    currentState = WATERING;
+    digitalWrite(RELAY_PUMP, LOW); // 开启水泵
+  }
+
+  // 温度调节
+  if (env.temp < OPT_TEMP - 2) {
+    currentState = HEATING;
+    digitalWrite(RELAY_HEATER, LOW); // 开启加热
+  } else if (env.temp > OPT_TEMP + 2) {
+    currentState = COOLING;
+    digitalWrite(RELAY_FAN, LOW); // 开启风扇
+  }
+
+  // CO2通风（浓度过高）
+  if (env.co2 > OPT_CO2 + 200) {
+    digitalWrite(RELAY_FAN, LOW);
+  }
+}
+
+// 浇水状态（限时10秒）
+void handleWatering() {
+  static unsigned long startTime = millis();
+  if (millis() - startTime < PUMP_DURATION) {
+    // 持续浇水
+  } else {
+    currentState = NORMAL;
+    digitalWrite(RELAY_PUMP, HIGH); // 关闭水泵
+  }
+}
+
+// 加热状态（带滞后控制）
+void handleHeating() {
+  if (env.temp > OPT_TEMP - FAN_HYSTERESIS) {
+    currentState = NORMAL;
+    digitalWrite(RELAY_HEATER, HIGH);
+  }
+}
+
+// 降温状态（风扇控制）
+void handleCooling() {
+  if (env.temp < OPT_TEMP + FAN_HYSTERESIS) {
+    currentState = NORMAL;
+    digitalWrite(RELAY_FAN, HIGH);
+  }
+}
+
+// 报警检测（温度过高/过低、湿度异常）
+void checkAlarms() {
+  if ((env.temp > 35 || env.temp < 10) || 
+      env.humidity > 90 || env.humidity < 20) {
+    currentState = ALARM;
+  }
+}
+
+// 声光报警
+void triggerAlarm() {
+  static unsigned long alarmStart = millis();
+  digitalWrite(BUZZER_PIN, HIGH);
+  analogWrite(LED_GROW, 255); // 补光灯闪烁报警
+  
+  if (millis() - alarmStart > ALARM_DELAY) {
+    currentState = NORMAL; // 延迟后自动恢复（可改为手动复位）
+  }
+}
+
+// 数据日志
+void logEnvironment() {
+  Serial.print("T: "); Serial.print(env.temp); Serial.print("℃ | ");
+  Serial.print("H: "); Serial.print(env.humidity); Serial.print("% | ");
+  Serial.print("L: "); Serial.print(env.light); Serial.print("lx | ");
+  Serial.print("CO2: "); Serial.print(env.co2); Serial.print("ppm | ");
+  Serial.print("M: "); Serial.print(env.moisture); Serial.print(" | ");
+  Serial.print("STATE: ");
+  
+  switch(currentState) {
+    case NORMAL: Serial.print("正常"); break;
+    case WATERING: Serial.print("浇水"); break;
+    case HEATING: Serial.print("加热"); break;
+    case COOLING: Serial.print("通风"); break;
+    case ALARM: Serial.print("报警"); break;
+  }
+  Serial.println();
+}
+
+void loop() {
+  readAllSensors();
+  handleState();
+  logEnvironment();
+  delay(2000); // 2秒更新一次
+}
