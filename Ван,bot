@@ -1,0 +1,110 @@
+// 智能循线机器人控制系统 - 
+// 基于双红外传感器实现路径追踪与转向控制
+
+#define LEFT_MOTOR_PIN  3       // 左电机PWM控制引脚
+#define RIGHT_MOTOR_PIN 6       // 右电机PWM控制引脚
+#define LEFT_DIR_PIN    2       // 左电机方向控制引脚
+#define RIGHT_DIR_PIN   5       // 右电机方向控制引脚
+#define LEFT_SENSOR_PIN A0      // 左红外传感器引脚
+#define RIGHT_SENSOR_PIN A1     // 右红外传感器引脚
+#define ALARM_PIN       8       // 蜂鸣器报警引脚
+
+// 传感器数据结构体，存储左右传感器读取值
+typedef struct {
+  int left_val;
+  int right_val;
+} SensorData;
+
+SensorData sensors;         // 传感器数据实例
+int motor_speed = 120;      // 电机基础速度（PWM值）
+
+
+void setup() {
+  // 初始化引脚模式
+  pinMode(LEFT_MOTOR_PIN, OUTPUT);
+  pinMode(RIGHT_MOTOR_PIN, OUTPUT);
+  pinMode(LEFT_DIR_PIN, OUTPUT);
+  pinMode(RIGHT_DIR_PIN, OUTPUT);
+  pinMode(LEFT_SENSOR_PIN, INPUT);
+  pinMode(RIGHT_SENSOR_PIN, INPUT);
+  pinMode(ALARM_PIN, OUTPUT);
+}
+
+
+// 读取并更新传感器数据
+void update_sensor_data() {
+  sensors.left_val = analogRead(LEFT_SENSOR_PIN);
+  sensors.right_val = analogRead(RIGHT_SENSOR_PIN);
+}
+
+
+// 电机控制函数，参数为左右电机速度（正值正转，负值反转）
+void control_motors(int left_spd, int right_spd) {
+  // 左电机控制
+  if (left_spd >= 0) {
+    digitalWrite(LEFT_DIR_PIN, HIGH);    // 正转方向
+    analogWrite(LEFT_MOTOR_PIN, left_spd);
+  } else {
+    digitalWrite(LEFT_DIR_PIN, LOW);     // 反转方向
+    analogWrite(LEFT_MOTOR_PIN, -left_spd);
+  }
+  
+  // 右电机控制
+  if (right_spd >= 0) {
+    digitalWrite(RIGHT_DIR_PIN, HIGH);   // 正转方向
+    analogWrite(RIGHT_MOTOR_PIN, right_spd);
+  } else {
+    digitalWrite(RIGHT_DIR_PIN, LOW);    // 反转方向
+    analogWrite(RIGHT_MOTOR_PIN, -right_spd);
+  }
+}
+
+
+// 直线行驶控制
+void move_straight() {
+  // 左右传感器均检测到白色区域（高值）时直行
+  if (sensors.left_val >= 850 && sensors.left_val <= 1023 && 
+      sensors.right_val >= 850 && sensors.right_val <= 1023) {
+    control_motors(motor_speed, motor_speed);
+  }
+}
+
+
+// 右转控制
+void turn_right_direction() {
+  // 左传感器检测到黑线（中值）时右转
+  if (sensors.left_val >= 450 && sensors.left_val <= 700) {
+    control_motors(motor_speed, -motor_speed);
+  }
+}
+
+
+// 左转控制
+void turn_left_direction() {
+  // 右传感器检测到黑线（中值）时左转
+  if (sensors.right_val >= 450 && sensors.right_val <= 700) {
+    control_motors(-motor_speed, motor_speed);
+  }
+}
+
+
+// 丢线报警功能
+void check_line_loss() {
+  // 左右传感器均检测到黑线时触发报警
+  if (sensors.left_val >= 450 && sensors.left_val <= 700 && 
+      sensors.right_val >= 450 && sensors.right_val <= 700) {
+    digitalWrite(ALARM_PIN, HIGH);
+    delay(500);
+    digitalWrite(ALARM_PIN, LOW);
+    delay(500);
+  }
+}
+
+
+void loop() {
+  update_sensor_data();       // 读取传感器数据
+  check_line_loss();          // 检测是否丢线
+  move_straight();            // 执行直行控制
+  turn_right_direction();     // 执行右转判断
+  turn_left_direction();      // 执行左转判断
+}
