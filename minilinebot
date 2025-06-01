@@ -1,0 +1,176 @@
+// MiniLineBot巡线机器人 - 基础版（带寻线与防卡死功能）
+
+// 电机控制引脚定义（右电机：速度PWM+方向；左电机同理）
+int rightMotorPin = 9;    // 右电机PWM速度控制（0-255）
+int rightDirPin = 8;      // 右电机方向（HIGH/LOW）
+int leftMotorPin = 10;    // 左电机PWM速度控制
+int leftDirPin = 11;      // 左电机方向
+
+// 传感器引脚定义（模拟输入，检测黑线反射值）
+int rightSensor = A0;     // 右侧红外传感器
+int leftSensor = A1;      // 左侧红外传感器
+int buttonPin = 2;        // 启动/停止按钮（外接下拉电阻）
+
+// 状态变量
+bool isActive = false;    // 运行状态标志
+bool isLost = false;      // 黑线丢失标志
+unsigned long lostTimer = 0; // 丢失黑线计时
+
+// 可调参数（需根据实际环境校准）
+int lineThresh = 600;     // 黑线阈值（值越小越容易检测到黑线）
+int baseSpeed = 180;      // 基础行驶速度（PWM值）
+int turnSpeed = 120;      // 转向时减速值
+int searchTime = 3000;    // 最大搜索时间（毫秒）
+
+void setup() {
+  // 初始化电机引脚为输出模式
+  pinMode(rightMotorPin, OUTPUT);
+  pinMode(rightDirPin, OUTPUT);
+  pinMode(leftMotorPin, OUTPUT);
+  pinMode(leftDirPin, OUTPUT);
+  
+  // 初始化传感器与按钮引脚
+  pinMode(rightSensor, INPUT);
+  pinMode(leftSensor, INPUT);
+  pinMode(buttonPin, INPUT); // 外接下拉电阻时使用INPUT模式
+  
+  // 串口调试
+  Serial.begin(9600);
+  Serial.println("MiniLineBot初始化完成！按下按钮启动。");
+}
+
+void loop() {
+  checkButton(); // 检测按钮状态
+  
+  if (isActive) {
+    if (isLost) {
+      handleLostLine(); // 处理黑线丢失情况
+    } else {
+      followTheLine();  // 正常巡线逻辑
+    }
+  } else {
+    stopMotors(); // 停止时关闭电机
+  }
+  
+  delay(20); // 控制循环频率
+}
+
+// 按钮检测函数（带去抖）
+void checkButton() {
+  static bool lastState = HIGH;
+  static unsigned long debounceTime = 0;
+  
+  int currState = digitalRead(buttonPin);
+  
+  if (currState != lastState) {
+    debounceTime = millis();
+    lastState = currState;
+  }
+  
+  if ((millis() - debounceTime) > 50) {
+    if (currState == LOW && !isActive) { // 按下启动（下拉电阻配置）
+      isActive = true;
+      Serial.println("机器人启动！");
+    } else if (currState == HIGH && isActive) { // 松开停止
+      isActive = false;
+      Serial.println("机器人停止！");
+    }
+  }
+}
+
+// 核心巡线逻辑
+void followTheLine() {
+  int rightVal = analogRead(rightSensor);
+  int leftVal = analogRead(leftSensor);
+  
+  // 转换为黑线检测状态（低于阈值为检测到黑线）
+  bool rightOn = rightVal < lineThresh;
+  bool leftOn = leftVal < lineThresh;
+  
+  Serial.print("右:" + String(rightVal) + " 左:" + String(leftVal) + " | ");
+  
+  if (rightOn && leftOn) {
+    // 双传感器检测到黑线 -> 直线行驶
+    Serial.println("直行");
+    moveForward(baseSpeed);
+  } else if (rightOn) {
+    // 仅右侧检测到 -> 向左调整（左电机加速）
+    Serial.println("左偏调整");
+    turnLeft(baseSpeed, turnSpeed);
+  } else if (leftOn) {
+    // 仅左侧检测到 -> 向右调整（右电机加速）
+    Serial.println("右偏调整");
+    turnRight(baseSpeed, turnSpeed);
+  } else {
+    // 丢失黑线 -> 进入搜索模式
+    Serial.println("丢失黑线，开始搜索...");
+    startSearch();
+  }
+}
+
+// 黑线丢失搜索逻辑
+void startSearch() {
+  isLost = true;
+  lostTimer = millis();
+  moveBackward(baseSpeed/2); // 先轻微后退
+  delay(300); // 后退持续时间
+}
+
+void handleLostLine() {
+  unsigned long elapsed = millis() - lostTimer;
+  
+  if (elapsed < searchTime) {
+    // 顺时针旋转搜索（右电机正转，左电机反转）
+    digitalWrite(rightDirPin, HIGH);
+    digitalWrite(leftDirPin, LOW);
+    analogWrite(rightMotorPin, baseSpeed);
+    analogWrite(leftMotorPin, baseSpeed/2);
+    
+    // 实时检测是否重新找到线
+    if (analogRead(rightSensor) < lineThresh || analogRead(leftSensor) < lineThresh) {
+      isLost = false;
+      Serial.println("重新检测到黑线！");
+    }
+  } else {
+    // 超时处理：停止并报警
+    isActive = false;
+    stopMotors();
+    Serial.println("搜索超时，停止运行！");
+  }
+}
+
+// 电机控制函数
+void moveForward(int speed) {
+  digitalWrite(rightDirPin, HIGH);
+  digitalWrite(leftDirPin, HIGH);
+  analogWrite(rightMotorPin, speed);
+  analogWrite(leftMotorPin, speed);
+}
+
+void moveBackward(int speed) {
+  digitalWrite(rightDirPin, LOW);
+  digitalWrite(leftDirPin, LOW);
+  analogWrite(rightMotorPin, speed);
+  analogWrite(leftMotorPin, speed);
+}
+
+void turnLeft(int mainSpeed, int adjustSpeed) {
+  // 左电机加速转向（右轮全速，左轮减速）
+  analogWrite(rightMotorPin, mainSpeed);
+  analogWrite(leftMotorPin, mainSpeed - adjustSpeed);
+  digitalWrite(rightDirPin, HIGH);
+  digitalWrite(leftDirPin, HIGH);
+}
+
+void turnRight(int mainSpeed, int adjustSpeed) {
+  // 右电机加速转向（左轮全速，右轮减速）
+  analogWrite(leftMotorPin, mainSpeed);
+  analogWrite(rightMotorPin, mainSpeed - adjustSpeed);
+  digitalWrite(rightDirPin, HIGH);
+  digitalWrite(leftDirPin, HIGH);
+}
+
+void stopMotors() {
+  analogWrite(rightMotorPin, 0);
+  analogWrite(leftMotorPin, 0);
+}
