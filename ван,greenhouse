@@ -1,0 +1,165 @@
+// 智能温室环境调控系统 - 作业版
+// 基于传感器数据自动控制温室内的光照、灌溉、温度和通风
+
+#include <dht.h>
+
+dht envSensor;
+
+// 传感器引脚定义
+const int DHT_SENSOR_PIN    = 7;
+const int LIGHT_SENSOR      = A1;
+const int SOIL_MOISTURE     = A2;
+
+// 执行设备引脚定义
+const int GROW_LIGHT_PIN    = 5;
+const int WATER_PUMP_PIN    = 4;
+const int HEATING_ELEMENT   = 2;
+const int VENTILATION_FAN   = 6;
+
+// 环境参数最佳值
+const int IDEAL_TEMP        = 26;
+const int IDEAL_HUMIDITY    = 55;
+const int IDEAL_SOIL_MOIST  = 380;
+const int IDEAL_LIGHT_LEVEL = 550;
+
+// 环境参数容差范围
+const int TEMP_HYSTERESIS   = 3;
+const int HUMID_HYSTERESIS  = 3;
+const int MOIST_HYSTERESIS  = 5;
+const int LIGHT_HYSTERESIS  = 5;
+
+// 水泵控制时间参数（毫秒）
+const long PUMP_WORK_TIME    = 4000;
+const long PUMP_PAUSE_TIME   = 25000;
+
+// 设备状态标志
+bool pumpStatus = false;
+unsigned long pumpStartTick = 0;
+unsigned long pumpPauseTick = 0;
+
+// 传感器数据均值滤波处理（读取多次取平均）
+int averageRead(int pin, int sampleCount = 3) {
+  long sumValue = 0;
+  for (int i = 0; i < sampleCount; i++) {
+    sumValue += analogRead(pin);
+    delay(3);
+  }
+  return sumValue / sampleCount;
+}
+
+void setup() {
+  Serial.begin(115200);
+  
+  // 初始化设备引脚为输出模式
+  pinMode(GROW_LIGHT_PIN, OUTPUT);
+  pinMode(WATER_PUMP_PIN, OUTPUT);
+  pinMode(HEATING_ELEMENT, OUTPUT);
+  pinMode(VENTILATION_FAN, OUTPUT);
+  
+  // 初始状态下关闭所有设备
+  digitalWrite(GROW_LIGHT_PIN, LOW);
+  digitalWrite(WATER_PUMP_PIN, HIGH);
+  digitalWrite(HEATING_ELEMENT, LOW);
+  digitalWrite(VENTILATION_FAN, LOW);
+}
+
+// 读取所有传感器数据并更新
+void fetchSensorData(int* temp, int* humidity, int* light, int* moisture) {
+  int error = envSensor.read11(DHT_SENSOR_PIN);
+  if (error != DHTLIB_OK) {
+    *temp = -1;
+    *humidity = -1;
+  } else {
+    *temp = envSensor.temperature;
+    *humidity = envSensor.humidity;
+  }
+  
+  *light = averageRead(LIGHT_SENSOR);
+  *moisture = averageRead(SOIL_MOISTURE);
+}
+
+// 光照系统控制逻辑
+void manageLighting(int lightLevel) {
+  if (lightLevel < IDEAL_LIGHT_LEVEL - LIGHT_HYSTERESIS) {
+    digitalWrite(GROW_LIGHT_PIN, HIGH);
+  } else if (lightLevel > IDEAL_LIGHT_LEVEL + LIGHT_HYSTERESIS) {
+    digitalWrite(GROW_LIGHT_PIN, LOW);
+  }
+}
+
+// 灌溉系统控制逻辑
+void manageIrrigation(int soilMoisture) {
+  // 土壤过干且水泵未运行，且已过暂停时间
+  if (soilMoisture < IDEAL_SOIL_MOIST - MOIST_HYSTERESIS) {
+    if (!pumpStatus && (millis() - pumpPauseTick >= PUMP_PAUSE_TIME)) {
+      digitalWrite(WATER_PUMP_PIN, LOW);
+      pumpStatus = true;
+      pumpStartTick = millis();
+      Serial.println("水泵启动");
+    }
+  }
+  
+  // 水泵运行超时或土壤湿度达标时关闭
+  if (pumpStatus && (millis() - pumpStartTick >= PUMP_WORK_TIME)) {
+    digitalWrite(WATER_PUMP_PIN, HIGH);
+    pumpStatus = false;
+    pumpPauseTick = millis();
+    Serial.println("水泵关闭");
+  }
+  
+  if (soilMoisture >= IDEAL_SOIL_MOIST) {
+    digitalWrite(WATER_PUMP_PIN, HIGH);
+    pumpStatus = false;
+    pumpStartTick = 0;
+    pumpPauseTick = 0;
+  }
+}
+
+// 温度控制系统逻辑
+void manageTemperature(int currentTemp) {
+  if (currentTemp < IDEAL_TEMP - TEMP_HYSTERESIS) {
+    digitalWrite(HEATING_ELEMENT, HIGH);
+  } else if (currentTemp >= IDEAL_TEMP) {
+    digitalWrite(HEATING_ELEMENT, LOW);
+  }
+}
+
+// 通风系统控制逻辑
+void manageVentilation(int currentTemp, int currentHumidity) {
+  if (currentHumidity > IDEAL_HUMIDITY + HUMID_HYSTERESIS || currentTemp > IDEAL_TEMP + TEMP_HYSTERESIS) {
+    digitalWrite(VENTILATION_FAN, HIGH);
+  } else {
+    digitalWrite(VENTILATION_FAN, LOW);
+  }
+}
+
+// 环境数据日志输出
+void printEnvironmentData(int temp, int humidity, int light, int moisture) {
+  Serial.print("温度: ");
+  Serial.print(temp);
+  Serial.print("°C, 湿度: ");
+  Serial.print(humidity);
+  Serial.print("%, 光照: ");
+  Serial.print(light);
+  Serial.print(", 土壤湿度: ");
+  Serial.println(moisture);
+}
+
+void loop() {
+  static unsigned long lastUpdateTime = 0;
+  const long UPDATE_INTERVAL = 1000;  // 数据更新间隔1秒
+  
+  if (millis() - lastUpdateTime >= UPDATE_INTERVAL) {
+    lastUpdateTime = millis();
+    
+    int tempValue, humidityValue, lightValue, moistureValue;
+    fetchSensorData(&tempValue, &humidityValue, &lightValue, &moistureValue);
+    
+    manageLighting(lightValue);
+    manageIrrigation(moistureValue);
+    manageTemperature(tempValue);
+    manageVentilation(tempValue, humidityValue);
+    
+    printEnvironmentData(tempValue, humidityValue, lightValue, moistureValue);
+  }
+}
