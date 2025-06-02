@@ -1,0 +1,196 @@
+// OmegaBot巡线机器人 - 增强版（带PID控制与智能校准）
+
+// 电机控制引脚定义
+int rightSpeedPin = 5;    // 右电机PWM速度控制
+int leftSpeedPin = 6;     // 左电机PWM速度控制
+int rightDirPin = 4;      // 右电机方向控制（LOW=正转，HIGH=反转）
+int leftDirPin = 7;       // 左电机方向控制
+
+// 传感器与按钮引脚
+int rightSensorPin = A0;  // 右红外传感器
+int leftSensorPin = A1;   // 左红外传感器
+int buttonPin = A2;       // 启动/停止按钮（INPUT_PULLUP）
+
+// 状态与参数
+bool isRunning = false;
+bool isCalibrating = false;    // 阈值校准状态
+unsigned long calibrationStart = 0;
+float kp = 0.8, ki = 0.02, kd = 0.5; // PID参数
+float integral = 0, lastError = 0;
+int threshold = 500;          // 动态阈值
+int baseSpeed = 150;          // 基础速度（PWM）
+int searchSpeed = 120;        // 搜索速度
+int searchTimeout = 3000;     // 搜索超时时间（ms）
+int calibrationTime = 2000;   // 校准时间（ms）
+
+void setup() {
+  // 引脚初始化
+  pinMode(rightSpeedPin, OUTPUT);
+  pinMode(leftSpeedPin, OUTPUT);
+  pinMode(rightDirPin, OUTPUT);
+  pinMode(leftDirPin, OUTPUT);
+  pinMode(buttonPin, INPUT_PULLUP);
+  Serial.begin(9600);
+  Serial.println("OmegaBot V2.0 初始化完成！");
+  Serial.println("长按按钮开始阈值校准（2秒）");
+}
+
+void loop() {
+  handleButton(); // 处理按钮事件（启动/校准/停止）
+  
+  if (isRunning) {
+    if (isCalibrating) {
+      performCalibration(); // 执行阈值校准
+    } else {
+      pidControl(); // PID巡线控制
+    }
+  } else {
+    stopMotors(); // 停止电机
+  }
+  
+  delay(10);
+}
+
+// 按钮处理（长按校准，短按启停）
+void handleButton() {
+  static bool lastState = HIGH;
+  static unsigned long pressStart = 0;
+  int currState = digitalRead(buttonPin);
+
+  // 检测按钮按下
+  if (currState == LOW && lastState == HIGH) {
+    pressStart = millis();
+  }
+
+  // 检测按钮释放
+  if (currState == HIGH && lastState == LOW) {
+    unsigned long pressDuration = millis() - pressStart;
+    if (pressDuration >= 2000) { // 长按2秒进入校准
+      isCalibrating = true;
+      calibrationStart = millis();
+      Serial.println("开始校准...请保持机器人在白纸上");
+    } else { // 短按切换启停
+      isRunning = !isRunning;
+      isCalibrating = false;
+      Serial.print(isRunning ? "启动成功！" : "已停止");
+      Serial.println(" | 按按钮开始校准（长按2秒）");
+    }
+  }
+
+  lastState = currState;
+}
+
+// 自动阈值校准（检测白纸与黑线的平均值）
+void performCalibration() {
+  if (millis() - calibrationStart < calibrationTime) {
+    int whiteLeft = analogRead(leftSensorPin);
+    int whiteRight = analogRead(rightSensorPin);
+    threshold = (whiteLeft + whiteRight) / 2; // 初始阈值设为白纸平均值
+    Serial.print("校准中...当前阈值：");
+    Serial.println(threshold);
+  } else {
+    isCalibrating = false;
+    Serial.println("校准完成！阈值已更新");
+    Serial.println("将机器人放置在黑线上，短按按钮启动");
+  }
+}
+
+// PID巡线控制核心逻辑
+void pidControl() {
+  int rightVal = analogRead(rightSensorPin);
+  int leftVal = analogRead(leftSensorPin);
+  bool rightOn = rightVal < threshold; // 检测到黑线时值更低（根据传感器特性调整）
+  bool leftOn = leftVal < threshold;
+
+  // 计算偏差（-100到100，左偏负，右偏正）
+  float error = 0;
+  if (rightOn && leftOn) {
+    error = 0;          // 居中
+  } else if (rightOn) {
+    error = -50;        // 左偏（仅右侧检测到线）
+  } else if (leftOn) {
+    error = 50;         // 右偏（仅左侧检测到线）
+  } else {
+    startSearch();      // 丢失轨迹，进入搜索
+    return;
+  }
+
+  // PID计算
+  integral += error * 0.01; // 积分项（与循环频率相关）
+  float derivative = (error - lastError) * 10;
+  float steer = kp * error + ki * integral + kd * derivative;
+  lastError = error;
+
+  // 电机速度控制（基础速度 ± 转向量）
+  int leftSpeed = baseSpeed + steer;
+  int rightSpeed = baseSpeed - steer;
+  leftSpeed = constrain(leftSpeed, 50, 200); // 速度限制
+  rightSpeed = constrain(rightSpeed, 50, 200);
+  
+  moveWithSpeed(leftSpeed, rightSpeed);
+}
+
+// 智能搜索模式（螺旋扩展搜索）
+void startSearch() {
+  static int searchStep = 0;
+  unsigned long currentTime = millis();
+  isRunning = true; // 保持运行状态但暂停巡线逻辑
+  
+  // 搜索阶段：后退 → 低速旋转 → 高速旋转（螺旋扩展）
+  switch (searchStep) {
+    case 0: // 后退阶段（500ms）
+      moveBackward(searchSpeed);
+      if (currentTime - searchStartTime > 500) searchStep++;
+      break;
+    case 1: // 低速旋转（1000ms）
+      turnLeft(searchSpeed * 0.6); // 左旋转扩大范围
+      if (currentTime - searchStartTime > 1500) searchStep++;
+      break;
+    case 2: // 高速旋转（剩余时间）
+      turnLeft(searchSpeed); // 快速旋转
+      break;
+  }
+
+  // 检测到线则恢复
+  if (analogRead(rightSensorPin) < threshold || analogRead(leftSensorPin) < threshold) {
+    searchStep = 0;
+    isRunning = true; // 恢复巡线
+  }
+
+  // 超时处理
+  if (currentTime - searchStartTime > searchTimeout) {
+    searchStep = 0;
+    Serial.println("搜索超时！请检查轨迹");
+    isRunning = false;
+  }
+}
+
+// 电机控制函数（带速度独立控制）
+void moveWithSpeed(int leftSpeed, int rightSpeed) {
+  // 方向控制（LOW=正转，需根据硬件调整）
+  digitalWrite(leftDirPin, LOW);
+  digitalWrite(rightDirPin, LOW);
+  
+  // 速度输出
+  analogWrite(leftSpeedPin, leftSpeed);
+  analogWrite(rightSpeedPin, rightSpeed);
+}
+
+void moveBackward(int speed) {
+  digitalWrite(leftDirPin, HIGH);
+  digitalWrite(rightDirPin, HIGH);
+  analogWrite(leftSpeedPin, speed);
+  analogWrite(rightSpeedPin, speed);
+}
+
+void turnLeft(int speed) {
+  // 左电机减速，右电机全速（差速转向）
+  analogWrite(leftSpeedPin, speed * 0.5);
+  analogWrite(rightSpeedPin, speed);
+  digitalWrite(leftDirPin, LOW);
+  digitalWrite(rightDirPin, LOW);
+}
+
+void stopMotors() {
+  analogWrite(leftSpeedPin, 0);
+  analogWrite(rightS
