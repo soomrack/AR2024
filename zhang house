@@ -1,0 +1,198 @@
+#include "DHT.h"
+
+// 引脚定义
+#define PIN_DHT 13
+#define PIN_RELAY_HEATER 4
+#define PIN_SOILHUMIDITY A1
+#define PIN_PHOTO_SENSOR A0
+#define PIN_RELAY_LIGHT 6
+#define PIN_RELAY_PUMP 5
+#define PIN_RELAY_FAN 7
+
+// 设备枚举
+enum Device {
+  HEATER = PIN_RELAY_HEATER,
+  LIGHT = PIN_RELAY_LIGHT,
+  PUMP = PIN_RELAY_PUMP,
+  FAN = PIN_RELAY_FAN
+};
+
+// 传感器类型枚举
+enum SensorType {
+  DHT_TEMP,
+  DHT_HUMID
+};
+
+// 阈值配置
+struct ControlThreshold {
+  float tempHigh = 30.0;    // 高温阈值（℃）
+  float tempLow = 15.0;     // 低温阈值（℃）
+  int lightThreshold = 300; // 光照阈值（0-1023）
+  int soilThreshold = 200;  // 土壤湿度阈值（0-1023）
+  float humiHigh = 60.0;    // 高湿度阈值（%）
+} threshold;
+
+// 数据结构体
+struct Data_parameters {
+  float humidity;         // 空气湿度（%）
+  float temperature;      // 温度（℃）
+  int soilhumidity;       // 土壤湿度（0-1023）
+  int illumination;       // 光照强度（0-1023，值越大越强）
+} Parameters;
+
+// 设备状态
+bool deviceStatus[4] = {LOW, LOW, LOW, LOW}; // 加热器、补光灯、水泵、风扇的状态
+
+// DHT传感器对象
+DHT dht(PIN_DHT, DHT11);
+
+// 定时变量
+unsigned long pumpLastRun = 0;    // 水泵上次运行时间
+const unsigned long PUMP_WORK_DURATION = 3000; // 水泵工作时长（3秒）
+const unsigned long PUMP_INTERVAL = 5 * 60 * 1000; // 浇水间隔（5分钟）
+const unsigned long DATA_UPDATE_INTERVAL = 1000; // 数据更新间隔（1秒）
+
+void setup() {
+  Serial.begin(9600);
+  dht.begin();
+  
+  // 初始化继电器引脚为输出
+  pinMode(HEATER, OUTPUT);
+  pinMode(LIGHT, OUTPUT);
+  pinMode(PUMP, OUTPUT);
+  pinMode(FAN, OUTPUT);
+  
+  // 初始状态：所有设备关闭
+  digitalWrite(HEATER, LOW);
+  digitalWrite(LIGHT, LOW);
+  digitalWrite(PUMP, LOW);
+  digitalWrite(FAN, LOW);
+  
+  Serial.println("环境控制系统初始化完成");
+}
+
+// 读取DHT传感器（带错误处理）
+float readDHT(SensorType type) {
+  float value;
+  switch(type) {
+    case DHT_TEMP:
+      value = dht.readTemperature();
+      break;
+    case DHT_HUMID:
+      value = dht.readHumidity();
+      break;
+    default:
+      return NAN;
+  }
+  
+  if (isnan(value)) {
+    Serial.print("DHT读取失败（类型：");
+    Serial.print(type == DHT_TEMP ? "温度" : "湿度");
+    Serial.println("），正在重试...");
+    delay(200); // 重试前短暂延迟
+    return readDHT(type); // 递归重试
+  }
+  return value;
+}
+
+// 更新传感器数据
+void updateSensorData() {
+  Parameters.humidity = readDHT(DHT_HUMID);
+  Parameters.temperature = readDHT(DHT_TEMP);
+  Parameters.soilhumidity = analogRead(PIN_SOILHUMIDITY);
+  Parameters.illumination = 1023 - analogRead(PIN_PHOTO_SENSOR); // 光敏电阻反向计算
+}
+
+// 控制补光灯
+void controlLight() {
+  bool needLight = Parameters.illumination <= threshold.lightThreshold;
+  deviceStatus[LIGHT] = needLight;
+  digitalWrite(LIGHT, needLight);
+  
+  if (needLight) {
+    Serial.println("补光灯开启（光照不足）");
+  } else {
+    Serial.println("补光灯关闭（光照充足）");
+  }
+}
+
+// 控制温度调节（加热/风扇）
+void controlTemperature() {
+  float temp = Parameters.temperature;
+  
+  // 高温处理：关加热器，开风扇
+  if (temp >= threshold.tempHigh) {
+    deviceStatus[HEATER] = LOW;
+    deviceStatus[FAN] = HIGH;
+    digitalWrite(HEATER, LOW);
+    digitalWrite(FAN, HIGH);
+    Serial.printf("高温警报（%0.1f℃），风扇开启\n", temp);
+    
+  // 低温处理：开加热器，关风扇
+  } else if (temp <= threshold.tempLow) {
+    deviceStatus[HEATER] = HIGH;
+    deviceStatus[FAN] = LOW;
+    digitalWrite(HEATER, HIGH);
+    digitalWrite(FAN, LOW);
+    Serial.printf("低温警报（%0.1f℃），加热器开启\n", temp);
+    
+  // 常温处理：关加热器和风扇
+  } else {
+    deviceStatus[HEATER] = LOW;
+    deviceStatus[FAN] = LOW;
+    digitalWrite(HEATER, LOW);
+    digitalWrite(FAN, LOW);
+    Serial.printf("温度正常（%0.1f℃）\n", temp);
+  }
+}
+
+// 控制土壤湿度（水泵）
+void controlSoilHumidity() {
+  bool isDry = Parameters.soilhumidity <= threshold.soilThreshold;
+  unsigned long currentTime = millis();
+
+  // 土壤干燥且达到浇水间隔，启动水泵
+  if (isDry && (currentTime - pumpLastRun >= PUMP_INTERVAL)) {
+    deviceStatus[PUMP] = HIGH;
+    digitalWrite(PUMP, HIGH);
+    pumpLastRun = currentTime;
+    Serial.println("土壤干燥，开始浇水");
+    
+  // 水泵工作超时后关闭
+  } else if (deviceStatus[PUMP] && (currentTime - pumpLastRun >= PUMP_WORK_DURATION)) {
+    deviceStatus[PUMP] = LOW;
+    digitalWrite(PUMP, LOW);
+    Serial.println("浇水结束");
+  }
+}
+
+// 控制空气湿度（风扇辅助降湿）
+void controlHumidity() {
+  if (Parameters.humidity >= threshold.humiHigh && deviceStatus[HEATER] == LOW) {
+    deviceStatus[FAN] = HIGH;
+    digitalWrite(FAN, HIGH);
+    Serial.printf("高湿度警报（%0.1f%），风扇开启降湿\n", Parameters.humidity);
+  } else if (deviceStatus[FAN] && Parameters.humidity < threshold.humiHigh) {
+    deviceStatus[FAN] = LOW;
+    digitalWrite(FAN, LOW);
+    Serial.println("湿度正常，风扇关闭");
+  }
+}
+
+// 打印实时状态
+void printStatus() {
+  Serial.println("\n=== 实时状态 ===");
+  Serial.printf("温度：%0.1f℃ | 湿度：%0.1f%%\n", Parameters.temperature, Parameters.humidity);
+  Serial.printf("土壤湿度：%d | 光照强度：%d\n", Parameters.soilhumidity, Parameters.illumination);
+  Serial.print("设备状态：");
+  Serial.print("加热器="); Serial.print(deviceStatus[HEATER] ? "开" : "关");
+  Serial.print(" | 补光灯="); Serial.print(deviceStatus[LIGHT] ? "开" : "关");
+  Serial.print(" | 水泵="); Serial.print(deviceStatus[PUMP] ? "开" : "关");
+  Serial.print(" | 风扇="); Serial.println(deviceStatus[FAN] ? "开" : "关");
+}
+
+void loop() {
+  static unsigned long lastUpdate = 0;
+  unsigned long currentTime = millis();
+
+  // 定时更新传感器数据和控制
