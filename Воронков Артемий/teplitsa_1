@@ -1,0 +1,87 @@
+#include <DHT.h> // библиотека для работы с DHT
+
+// Пины подключения
+#define DHTPIN 2       // Пин подключения датчика DHT
+#define DHTTYPE DHT22  // Или DHT11
+
+#define LIGHT_SENSOR_PIN A0 // Пин фоторезистора
+#define FAN_PIN 3           // Вентилятор
+#define HUMIDIFIER_PIN 4    // Увлажнитель
+#define LAMP_PIN 5          // Лампа
+
+// Настройки порогов (можно изменить)
+float temperatureThreshold = 28.0;  // °C
+float humidityThreshold = 40.0;     // %
+int lightThreshold = 400;           // 0-1023 (для фоторезистора)
+
+// Инициализация датчика
+DHT dht(DHTPIN, DHTTYPE);
+
+void setup() {
+  Serial.begin(9600);
+  dht.begin();
+
+  // Настройка пинов на выход
+  pinMode(FAN_PIN, OUTPUT);
+  pinMode(HUMIDIFIER_PIN, OUTPUT);
+  pinMode(LAMP_PIN, OUTPUT);
+
+  // Выключаем все реле при старте
+  digitalWrite(FAN_PIN, LOW);
+  digitalWrite(HUMIDIFIER_PIN, LOW);
+  digitalWrite(LAMP_PIN, LOW);
+}
+
+void loop() {
+  float temperature = dht.readTemperature(); // чтение температуры
+  float humidity = dht.readHumidity();       // чтение влажности
+  int lightLevel = analogRead(LIGHT_SENSOR_PIN); // чтение освещенности
+
+  // Отображение текущих значений
+  Serial.print("Температура: ");
+  Serial.print(temperature);
+  Serial.print(" *C | Влажность: ");
+  Serial.print(humidity);
+  Serial.print(" % | Освещенность: ");
+  Serial.println(lightLevel);
+
+  // Управление параметрами
+  controlTemperature(temperature);
+  controlHumidity(humidity);
+  controlLight(lightLevel);
+
+  delay(2000); // Пауза между измерениями
+}
+
+// ====== Управление температурой ======
+void controlTemperature(float currentTemp) {
+  if (currentTemp > temperatureThreshold) {
+    digitalWrite(FAN_PIN, HIGH); // Включить вентилятор
+    Serial.println("Вентилятор ВКЛ.");
+  } else {
+    digitalWrite(FAN_PIN, LOW); // Выключить вентилятор
+    Serial.println("Вентилятор ВЫКЛ.");
+  }
+}
+
+// ====== Управление влажностью ======
+void controlHumidity(float currentHumidity) {
+  if (currentHumidity < humidityThreshold) {
+    digitalWrite(HUMIDIFIER_PIN, HIGH); // Включить увлажнитель
+    Serial.println("Увлажнитель ВКЛ.");
+  } else {
+    digitalWrite(HUMIDIFIER_PIN, LOW); // Выключить увлажнитель
+    Serial.println("Увлажнитель ВЫКЛ.");
+  }
+}
+
+// ====== Управление освещенностью ======
+void controlLight(int currentLight) {
+  if (currentLight < lightThreshold) {
+    digitalWrite(LAMP_PIN, HIGH); // Включить лампу
+    Serial.println("Лампа ВКЛ.");
+  } else {
+    digitalWrite(LAMP_PIN, LOW); // Выключить лампу
+    Serial.println("Лампа ВЫКЛ.");
+  }
+}
